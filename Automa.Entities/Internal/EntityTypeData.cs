@@ -2,19 +2,19 @@
 
 namespace Automa.Entities.Internal
 {
-    internal class ArchetypeData
+    internal class EntityTypeData
     {
-        public readonly Archetype Archetype;
+        public readonly EntityType EntityType;
         private IComponentArray[] componentArrays;
         private int[] componentTypeIndices;
         private int count;
 
         private ComponentArray<Entity> entityArray;
 
-        public ArchetypeData(Archetype archetype)
+        public EntityTypeData(EntityType entityType)
         {
-            Archetype = archetype;
-            InitializeArrays(archetype.Types);
+            EntityType = entityType;
+            InitializeArrays(entityType.Types);
         }
 
         public IComponentArray GetComponentArrayUnchecked(ComponentType type)

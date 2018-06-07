@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Automa.Entities.Tests.Model;
+﻿using Automa.Entities.Behaviours;
 using NUnit.Framework;
+
 #pragma warning disable 649
 
 namespace Automa.Entities.Tests
@@ -11,13 +9,12 @@ namespace Automa.Entities.Tests
     [Category("Context")]
     public class ContextTests
     {
-
         [Test]
         public void ContextCreate()
         {
-            Context context = new Context();
-            Assert.NotNull(context.EntityManager);
-            Assert.AreEqual(0, context.EntityManager.EntityCount);
+            var context = ContextFactory.CreateEntitiesContext();
+            Assert.NotNull(context.GetManager<EntityManager>());
+            Assert.NotNull(context.GetManager<BehaviourManager>());
         }
     }
 }

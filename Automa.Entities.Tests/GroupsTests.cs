@@ -13,7 +13,7 @@ namespace Automa.Entities.Tests
     public class GroupsTests
     {
         [Test]
-        public void IsArchetypeMatching()
+        public void IsEntityTypeMatching()
         {
             ComponentType[] types1 = new []
             {
@@ -21,17 +21,17 @@ namespace Automa.Entities.Tests
                 ComponentType.Create<StructComponent>(),
             };
 
-            var archetype = new Archetype(
+            var entityType = new EntityType(
                 ComponentType.Create<StructComponent>(),
                 ComponentType.Create<ClassComponent>());
 
             var testGroup = new EntityGroup();
             testGroup.includedTypes = types1;
-            Assert.IsTrue(testGroup.IsArchetypeMatching(ref archetype));
+            Assert.IsTrue(testGroup.IsEntityTypeMatching(ref entityType));
         }
 
         [Test]
-        public void IsArchetypeMatchingExclude()
+        public void IsEntityTypeMatchingExclude()
         {
             ComponentType[] types1 = new[]
             {
@@ -42,18 +42,18 @@ namespace Automa.Entities.Tests
                 ComponentType.Create<StructComponent>(),
             };
 
-            var archetype = new Archetype(
+            var entityType = new EntityType(
                 ComponentType.Create<StructComponent>(),
                 ComponentType.Create<ClassComponent>());
 
             var testGroup = new EntityGroup();
             testGroup.includedTypes = types1;
             testGroup.excludedTypes = types2;
-            Assert.IsFalse(testGroup.IsArchetypeMatching(ref archetype));
+            Assert.IsFalse(testGroup.IsEntityTypeMatching(ref entityType));
         }
 
         [Test]
-        public void IsArchetypeMatchingNotMatching()
+        public void IsEntityTypeMatchingNotMatching()
         {
             ComponentType[] types1 = new[]
             {
@@ -61,29 +61,29 @@ namespace Automa.Entities.Tests
                 ComponentType.Create<ClassComponent>()
             };
 
-            var archetype = new Archetype(
+            var entityType = new EntityType(
                 ComponentType.Create<StructComponent>());
 
             var testGroup = new EntityGroup();
             testGroup.includedTypes = types1;
-            Assert.IsFalse(testGroup.IsArchetypeMatching(ref archetype));
+            Assert.IsFalse(testGroup.IsEntityTypeMatching(ref entityType));
         }
 
         [Test]
-        public void IsArchetypeMatchingPartlyMatching()
+        public void IsEntityTypeMatchingPartlyMatching()
         {
             ComponentType[] types1 = new[]
             {
                 ComponentType.Create<StructComponent>()
             };
 
-            var archetype = new Archetype(
+            var entityType = new EntityType(
                 ComponentType.Create<StructComponent>(),
                 ComponentType.Create<ClassComponent>());
 
             var testGroup = new EntityGroup();
             testGroup.includedTypes = types1;
-            Assert.IsTrue(testGroup.IsArchetypeMatching(ref archetype));
+            Assert.IsTrue(testGroup.IsEntityTypeMatching(ref entityType));
         }
 
         [Test]

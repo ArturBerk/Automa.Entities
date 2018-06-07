@@ -57,8 +57,8 @@ namespace Automa.Entities
 
             foreach (var entityManagerChunk in entityManager.Datas)
             {
-                var archetype = entityManagerChunk.Archetype;
-                if (IsArchetypeMatching(ref archetype))
+                var entityType = entityManagerChunk.EntityType;
+                if (IsEntityTypeMatching(ref entityType))
                 {
                     foreach (var componentArray in componentArrays)
                     {
@@ -68,10 +68,10 @@ namespace Automa.Entities
             }
         }
 
-        internal void OnArchetypeAdd(ArchetypeData data)
+        internal void OnEntityTypeAdd(EntityTypeData data)
         {
-            var archetype = data.Archetype;
-            if (IsArchetypeMatching(ref archetype))
+            var entityType = data.EntityType;
+            if (IsEntityTypeMatching(ref entityType))
             {
                 foreach (var componentArray in componentArrays)
                 {
@@ -80,10 +80,10 @@ namespace Automa.Entities
             }
         }
 
-        internal void OnArchetypeRemoved(ArchetypeData data)
+        internal void OnEntityTypeRemoved(EntityTypeData data)
         {
-            var archetype = data.Archetype;
-            if (IsArchetypeMatching(ref archetype))
+            var entityType = data.EntityType;
+            if (IsEntityTypeMatching(ref entityType))
             {
                 foreach (var componentArray in componentArrays)
                 {
@@ -110,16 +110,16 @@ namespace Automa.Entities
             }
         }
 
-        internal bool IsArchetypeMatching(ref Archetype archetype)
+        internal bool IsEntityTypeMatching(ref EntityType entityType)
         {
-            var archetypeTypes = archetype.Types;
+            var entityComponentTypes = entityType.Types;
             var all = true;
             for (var i = 0; i < includedTypes.Length; i++)
             {
                 var found = false;
-                for (var j = 0; j < archetypeTypes.Length; j++)
+                for (var j = 0; j < entityComponentTypes.Length; j++)
                 {
-                    if (archetypeTypes[j] == includedTypes[i])
+                    if (entityComponentTypes[j] == includedTypes[i])
                     {
                         found = true;
                         break;
@@ -133,12 +133,12 @@ namespace Automa.Entities
             }
             if (!all) return false;
 
-            for (var j = 0; j < archetypeTypes.Length; j++)
+            for (var j = 0; j < entityComponentTypes.Length; j++)
             {
                 if (excludedTypes == null) continue;
                 for (var i = 0; i < excludedTypes.Length; i++)
                 {
-                    if (archetypeTypes[j] == excludedTypes[i])
+                    if (entityComponentTypes[j] == excludedTypes[i])
                     {
                         return false;
                     }

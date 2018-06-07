@@ -25,16 +25,16 @@ namespace Automa.Entities.PerformanceTests
         private void Prepare()
         {
             var entityManager = new EntityManager();
-            var archetype1 = new ComponentType[]
+            var entityType1 = new ComponentType[]
             {
                 typeof(StructComponent),
                 typeof(ClassComponent),
             };
-            var archetype2 = new ComponentType[]
+            var entityType2 = new ComponentType[]
             {
                 typeof(ClassComponent),
             };
-            var archetype3 = new ComponentType[]
+            var entityType3 = new ComponentType[]
             {
                 typeof(StructComponent)
             };
@@ -47,17 +47,17 @@ namespace Automa.Entities.PerformanceTests
             {
                 if (i % 3 == 0)
                 {
-                    var e = entityManager.CreateEntity(archetype1);
+                    var e = entityManager.CreateEntity(entityType1);
                     entityManager.SetComponent(e, classObjects[i]);
                 }
                 else if (i % 3 == 1)
                 {
-                    var e = entityManager.CreateEntity(archetype2);
+                    var e = entityManager.CreateEntity(entityType2);
                     entityManager.SetComponent(e, classObjects[i]);
                 }
                 else
                 {
-                    entityManager.CreateEntity(archetype3);
+                    entityManager.CreateEntity(entityType3);
                 }
             }
             classGroup = entityManager.RegisterGroup(new ClassGroup());

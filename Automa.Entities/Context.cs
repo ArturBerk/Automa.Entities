@@ -1,63 +1,54 @@
 ﻿using System;
-using Automa.Entities.Internal;
-using System.Reflection;
-using Automa.Entities.Attributes;
+using System.Collections.Generic;
 
 namespace Automa.Entities
 {
-    public class Context
+    public class Context : IContext
     {
-        internal static int DefaultOrder = 0;
+        private Dictionary<Type, IManager> managers = new Dictionary<Type, IManager>();
 
-        private readonly ArrayList<BehaviourSlot> behaviours = new ArrayList<BehaviourSlot>();
-        private readonly EntityManager entityManager = new EntityManager();
-
-        public EntityManager EntityManager => entityManager;
-
-        public void AddBehaviour(IBehaviour behaviour)
+        public T GetManager<T>() where T : IManager
         {
-            var orderAttribute = behaviour.GetType().GetCustomAttribute<OrderAttribute>();
-            var newSlot = new BehaviourSlot(orderAttribute?.Order ?? Context.DefaultOrder, behaviour);
-            var inserted = false;
-            for (int i = 0; i < behaviours.Count; i++)
+            if (!managers.TryGetValue(typeof(T), out var manager))
             {
-                if (behaviours[i].Order < newSlot.Order)
-                {
-                    behaviours.Insert(i, newSlot);
-                    inserted = true;
-                    break;
-                }
+                throw new ApplicationException($"Manager of type {typeof(T)} not found");
             }
-            if (!inserted)
-            {
-                behaviours.Add(newSlot);
-            }
-            newSlot.Behaviour.OnAddToContext(this);
+            return (T) manager;
         }
 
-        public void RemoveBehaviour(IBehaviour behaviour)
+        public T SetManager<T>(T manager) where T : IManager
         {
-            for (int i = 0; i < behaviours.Count; i++)
+            if (managers.ContainsKey(typeof(T)))
             {
-                var slot = behaviours[i];
-                if (ReferenceEquals(slot.Behaviour, behaviour))
-                {
-                    slot.Behaviour.OnRemoveFromContext(this);
-                    behaviours.RemoveAt(i);
-                    break;
-                }
+                managers[typeof(T)].OnDetachFromContext(this);
             }
+            managers[typeof(T)] = manager;
+            manager.OnAttachToContext(this);
+            return manager;
         }
 
-        public void Update()
+        public void RemoveManager<T>() where T : IManager
         {
-            //entityManager.Update();
-            var rawArray = behaviours.ToArrayFast();
-            for (var i = 0; i < behaviours.Count; i++)
+            if (managers.TryGetValue(typeof(T), out var manager))
             {
-                rawArray[i].Behaviour.OnUpdate();
+                managers.Remove(typeof(T));
+                manager.OnDetachFromContext(this);
             }
         }
+    }
+
+    public interface IContext
+    {
+        T GetManager<T>() where T : IManager;
+        T SetManager<T>(T manager) where T : IManager;
+        void RemoveManager<T>() where T : IManager;
+    }
+
+    public interface IManager
+    {
+        void OnAttachToContext(IContext context);
+        void OnDetachFromContext(IContext context);
+        void OnUpdate();
     }
 
 }

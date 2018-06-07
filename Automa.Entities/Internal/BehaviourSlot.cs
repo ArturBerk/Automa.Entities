@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Automa.Entities.Behaviours;
 
 namespace Automa.Entities.Internal
 {

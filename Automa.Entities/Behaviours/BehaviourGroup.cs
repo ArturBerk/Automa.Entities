@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Automa.Entities.Attributes;
+using Automa.Entities.Behaviours;
 using Automa.Entities.Internal;
 
 namespace Automa.Entities
@@ -8,24 +9,24 @@ namespace Automa.Entities
     {
         private readonly ArrayList<BehaviourSlot> behaviours = new ArrayList<BehaviourSlot>();
 
-        private Context context;
+        private IContext context;
 
         public bool IsEnabled { get; set; }
 
-        public void OnAddToContext(Context context)
+        public void OnAttachToContext(IContext context)
         {
             this.context = context;
             foreach (var behaviour in behaviours)
             {
-                behaviour.Behaviour.OnAddToContext(context);
+                behaviour.Behaviour.OnAttachToContext(context);
             }
         }
 
-        public void OnRemoveFromContext(Context context)
+        public void OnDetachFromContext(IContext context)
         {
             foreach (var behaviour in behaviours)
             {
-                behaviour.Behaviour.OnRemoveFromContext(context);
+                behaviour.Behaviour.OnDetachFromContext(context);
             }
             this.context = null;
         }
@@ -41,7 +42,7 @@ namespace Automa.Entities
         public void AddBehaviour(IBehaviour behaviour)
         {
             var orderAttribute = behaviour.GetType().GetCustomAttribute<OrderAttribute>();
-            var newSlot = new BehaviourSlot(orderAttribute?.Order ?? Context.DefaultOrder, behaviour);
+            var newSlot = new BehaviourSlot(orderAttribute?.Order ?? BehaviourManager.DefaultOrder, behaviour);
             var inserted = false;
             for (var i = 0; i < behaviours.Count; i++)
             {
@@ -58,7 +59,7 @@ namespace Automa.Entities
             }
             if (context != null)
             {
-                newSlot.Behaviour.OnAddToContext(context);
+                newSlot.Behaviour.OnAttachToContext(context);
             }
         }
 
@@ -71,7 +72,7 @@ namespace Automa.Entities
                 {
                     if (context != null)
                     {
-                        slot.Behaviour.OnRemoveFromContext(context);
+                        slot.Behaviour.OnDetachFromContext(context);
                     }
                     behaviours.RemoveAt(i);
                     break;

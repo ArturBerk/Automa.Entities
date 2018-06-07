@@ -4,9 +4,9 @@ using Automa.Entities.Internal;
 
 namespace Automa.Entities
 {
-    public sealed class EntityManager
+    public sealed class EntityManager : IManager
     {
-        private readonly Dictionary<uint, ArchetypeData> archetypeDatas = new Dictionary<uint, ArchetypeData>();
+        private readonly Dictionary<uint, EntityTypeData> entityTypeDatas = new Dictionary<uint, EntityTypeData>();
         private readonly Queue<int> availableIndices = new Queue<int>();
 
         private readonly EntitiesGroup entitiesGroup;
@@ -23,14 +23,29 @@ namespace Automa.Entities
 
         public Collections.Entities Entities => entitiesGroup.Entities;
 
-        internal IEnumerable<ArchetypeData> Datas => archetypeDatas.Values;
+        internal IEnumerable<EntityTypeData> Datas => entityTypeDatas.Values;
 
         public int EntityCount => entityLinks.Count - availableIndices.Count;
 
+        public void OnAttachToContext(IContext context)
+        {
+            //
+        }
+
+        public void OnDetachFromContext(IContext context)
+        {
+            //
+        }
+
+        public void OnUpdate()
+        {
+            //
+        }
+
         public Entity CreateEntity(params ComponentType[] types)
         {
-            var archetype = new Archetype(types);
-            var chunk = GetOrCreateData(archetype.Index, types, types.Length);
+            var entityType = new EntityType(types);
+            var chunk = GetOrCreateData(entityType.Hash, types, types.Length);
             var entityId = availableIndices.Count > 0 ? availableIndices.Dequeue() : entityLinks.Count;
             var version = 0;
             if (entityLinks.Count > entityId)
@@ -91,23 +106,23 @@ namespace Automa.Entities
             ref var entityLink = ref entityLinks[entity.Id];
             if (entityLink.Entity != entity)
                 throw new ArgumentException("Entity not found");
-            var archetype = entityLink.Data.Archetype;
+            var entityType = entityLink.Data.EntityType;
 
 
-            if (componentTypeCache.Length < archetype.Types.Length + 1)
+            if (componentTypeCache.Length < entityType.Types.Length + 1)
             {
-                Array.Resize(ref componentTypeCache, archetype.Types.Length + 1);
+                Array.Resize(ref componentTypeCache, entityType.Types.Length + 1);
             }
             ComponentType newComponentType = typeof(T);
             var index = 0;
-            for (var i = 0; i < archetype.Types.Length; i++)
+            for (var i = 0; i < entityType.Types.Length; i++)
             {
-                var archetypeType = archetype.Types[i];
-                if (archetypeType.TypeId < newComponentType.TypeId)
+                var entityComponentType = entityType.Types[i];
+                if (entityComponentType.TypeId < newComponentType.TypeId)
                 {
-                    componentTypeCache[index++] = archetypeType;
+                    componentTypeCache[index++] = entityComponentType;
                 }
-                else if (archetypeType.TypeId == newComponentType.TypeId)
+                else if (entityComponentType.TypeId == newComponentType.TypeId)
                 {
                     throw new ArgumentException("Entity already contains component of type " + typeof(T));
                 }
@@ -117,24 +132,24 @@ namespace Automa.Entities
                 }
             }
             componentTypeCache[index++] = newComponentType;
-            for (var i = index - 1; i < archetype.Types.Length; i++)
+            for (var i = index - 1; i < entityType.Types.Length; i++)
             {
-                componentTypeCache[index++] = archetype.Types[i];
+                componentTypeCache[index++] = entityType.Types[i];
             }
-            var archetypeIndex = Archetype.CalculateIndex(componentTypeCache, index);
-            var data = GetOrCreateData(archetypeIndex, componentTypeCache, index);
+            var entityTypeHash = EntityType.CalculateHash(componentTypeCache, index);
+            var data = GetOrCreateData(entityTypeHash, componentTypeCache, index);
 
-            MoveEntity(ref entityLink, data, ref archetype);
+            MoveEntity(ref entityLink, data, ref entityType);
             data.SetComponent(entityLink.IndexInData, component);
         }
 
-        private ArchetypeData GetOrCreateData(uint index, ComponentType[] components, int count)
+        private EntityTypeData GetOrCreateData(uint index, ComponentType[] components, int count)
         {
-            if (!archetypeDatas.TryGetValue(index, out var data))
+            if (!entityTypeDatas.TryGetValue(index, out var data))
             {
-                data = new ArchetypeData(new Archetype(index, components, count));
-                archetypeDatas.Add(index, data);
-                OnArchetypeAdd(ref data);
+                data = new EntityTypeData(new EntityType(index, components, count));
+                entityTypeDatas.Add(index, data);
+                OnEntityTypeAdd(ref data);
             }
             return data;
         }
@@ -144,34 +159,34 @@ namespace Automa.Entities
             ref var entityLink = ref entityLinks[entity.Id];
             if (entityLink.Entity != entity)
                 throw new ArgumentException("Entity not found");
-            var archetype = entityLink.Data.Archetype;
+            var entityType = entityLink.Data.EntityType;
 
-            if (componentTypeCache.Length < archetype.Types.Length - 1)
+            if (componentTypeCache.Length < entityType.Types.Length - 1)
             {
-                Array.Resize(ref componentTypeCache, archetype.Types.Length - 1);
+                Array.Resize(ref componentTypeCache, entityType.Types.Length - 1);
             }
             ComponentType newComponentType = typeof(T);
             var index = 0;
-            for (var i = 0; i < archetype.Types.Length; i++)
+            for (var i = 0; i < entityType.Types.Length; i++)
             {
-                var archetypeType = archetype.Types[i];
-                if (archetypeType.TypeId != newComponentType.TypeId)
+                var entityComponentType = entityType.Types[i];
+                if (entityComponentType.TypeId != newComponentType.TypeId)
                 {
-                    componentTypeCache[index++] = archetypeType;
+                    componentTypeCache[index++] = entityComponentType;
                 }
             }
-            var archetypeIndex = Archetype.CalculateIndex(componentTypeCache, index);
-            var data = GetOrCreateData(archetypeIndex, componentTypeCache, index);
+            var entityTypeHash = EntityType.CalculateHash(componentTypeCache, index);
+            var data = GetOrCreateData(entityTypeHash, componentTypeCache, index);
 
-            var newArchetype = data.Archetype;
-            MoveEntity(ref entityLink, data, ref newArchetype);
+            var newEntityType = data.EntityType;
+            MoveEntity(ref entityLink, data, ref newEntityType);
         }
 
-        private void MoveEntity(ref EntityLink entityLink, ArchetypeData data, ref Archetype copyTypesBasedOn)
+        private void MoveEntity(ref EntityLink entityLink, EntityTypeData data, ref EntityType copyTypesBasedOn)
         {
-            // Add new entity to new archetypeData
+            // Add new entity to new entity type data
             var newEntityIndexInData = data.AddEntity(entityLink.Entity);
-            // Copy component data from old to new archetypeData
+            // Copy component data from old to new entity type data
             for (var i = 0; i < copyTypesBasedOn.Types.Length; i++)
             {
                 var type = copyTypesBasedOn.Types[i];
@@ -180,7 +195,7 @@ namespace Automa.Entities
                         entityLink.IndexInData,
                         newEntityIndexInData);
             }
-            // Remove entity from old archetypeData
+            // Remove entity from old entity type data
             HandleEntityRemoving(entityLink.Data.RemoveEntity(entityLink.IndexInData));
             // Update new entity link
             entityLink.Data = data;
@@ -210,28 +225,28 @@ namespace Automa.Entities
             }
         }
 
-        private void OnArchetypeAdd(ref ArchetypeData data)
+        private void OnEntityTypeAdd(ref EntityTypeData data)
         {
             for (var index = 0; index < groups.Count; index++)
             {
                 var group = groups[index];
-                group.OnArchetypeAdd(data);
+                group.OnEntityTypeAdd(data);
             }
         }
 
-        private void OnArchetypeRemove(ref ArchetypeData data)
+        private void OnEntityTypeRemove(ref EntityTypeData data)
         {
             for (var index = 0; index < groups.Count; index++)
             {
                 var group = groups[index];
-                group.OnArchetypeRemoved(data);
+                group.OnEntityTypeRemoved(data);
             }
         }
 
         private struct EntityLink
         {
             public Entity Entity;
-            public ArchetypeData Data;
+            public EntityTypeData Data;
             public int IndexInData;
         }
 

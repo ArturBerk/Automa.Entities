@@ -6,8 +6,8 @@ namespace Automa.Entities.Collections
     public abstract class CollectionBase
     {
         public abstract int CalculatedCount { get; }
-        internal abstract void AddArray(ArchetypeData data);
-        internal abstract void RemoveArray(ArchetypeData data);
+        internal abstract void AddArray(EntityTypeData data);
+        internal abstract void RemoveArray(EntityTypeData data);
     }
 
     public abstract class CollectionBase<T> : CollectionBase
@@ -46,7 +46,7 @@ namespace Automa.Entities.Collections
             }
         }
 
-        internal override void AddArray(ArchetypeData data)
+        internal override void AddArray(EntityTypeData data)
         {
             var componentArray = data.GetComponentArray<T>();
             if (arrays.Contains(componentArray))
@@ -56,7 +56,7 @@ namespace Automa.Entities.Collections
             arrays.Add(componentArray);
         }
 
-        internal override void RemoveArray(ArchetypeData data)
+        internal override void RemoveArray(EntityTypeData data)
         {
             arrays.Remove(data.GetComponentArray<T>());
         }
