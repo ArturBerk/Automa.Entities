@@ -1,20 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Automa.Collections;
+using Automa.Entities.Internal;
 
 namespace Automa.Entities
 {
-    public class EntityManager
+    public sealed class EntityManager
     {
-        private FastList<EntityLink> entityLinks;
-        private readonly Dictionary<uint, EntityChunk> archetypeChunks = new Dictionary<uint, EntityChunk>();
+        private readonly Dictionary<uint, ArchetypeData> archetypeDatas = new Dictionary<uint, ArchetypeData>();
         private readonly Queue<int> availableIndices = new Queue<int>();
 
-        public Entity CreateEntity(ComponentType[] types)
+        private readonly EntitiesGroup entitiesGroup;
+        private readonly ArrayList<EntityLink> entityLinks = new ArrayList<EntityLink>();
+
+        private readonly ArrayList<Group> groups = new ArrayList<Group>();
+
+        private ComponentType[] componentTypeCache = new ComponentType[10];
+
+        public EntityManager()
         {
-            var archetype = new EntityArchetype(types);
-            var chunk = GetOrCreateChunk(archetype.Index, types, types.Length);
+            entitiesGroup = RegisterGroup(new EntitiesGroup());
+        }
+
+        public Collections.Entities Entities => entitiesGroup.Entities;
+
+        internal IEnumerable<ArchetypeData> Datas => archetypeDatas.Values;
+
+        public int EntityCount => entityLinks.Count - availableIndices.Count;
+
+        public Entity CreateEntity(params ComponentType[] types)
+        {
+            var archetype = new Archetype(types);
+            var chunk = GetOrCreateData(archetype.Index, types, types.Length);
             var entityId = availableIndices.Count > 0 ? availableIndices.Dequeue() : entityLinks.Count;
             var version = 0;
             if (entityLinks.Count > entityId)
@@ -23,14 +39,14 @@ namespace Automa.Entities
             }
             else
             {
-                entityLinks.Insert(entityId, new EntityLink());
+                entityLinks.SetWithExpand(entityId, new EntityLink());
             }
-            Entity entity = new Entity(entityId, version);
+            var entity = new Entity(entityId, version);
             var chunkIndex = chunk.AddEntity(entity);
             entityLinks[entityId] = new EntityLink
             {
-                Chunk = chunk,
-                IndexInChunk = chunkIndex,
+                Data = chunk,
+                IndexInData = chunkIndex,
                 Entity = entity
             };
             return entity;
@@ -41,17 +57,41 @@ namespace Automa.Entities
             var entityLink = entityLinks[entity.Id];
             if (entityLink.Entity != entity)
                 throw new ArgumentException("Entity not found");
-            entityLink.Chunk.SetComponent(entityLink.IndexInChunk, component);
+            entityLink.Data.SetComponent(entityLink.IndexInData, component);
         }
 
-        private ComponentType[] componentTypeCache = new ComponentType[10];
-
-        public void AddComponent<T>(Entity entity, T component) where T : IComponent
+        public bool HasComponent<T>(Entity entity) where T : IComponent
         {
             var entityLink = entityLinks[entity.Id];
             if (entityLink.Entity != entity)
                 throw new ArgumentException("Entity not found");
-            var archetype = entityLink.Chunk.Archetype;
+            return entityLink.Data.HasComponent<T>();
+        }
+
+        public void RemoveEntity(Entity entity)
+        {
+            var entityLink = entityLinks[entity.Id];
+            if (entityLink.Entity != entity)
+                throw new ArgumentException("Entity not found");
+            HandleEntityRemoving(entityLink.Data.RemoveEntity(entityLink.IndexInData));
+            entityLinks[entity.Id] = new EntityLink
+            {
+                Entity = Entity.Null
+            };
+            availableIndices.Enqueue(entity.Id);
+        }
+
+        private void HandleEntityRemoving((int entityId, int newIndexInChunk) removeData)
+        {
+            entityLinks[removeData.entityId].IndexInData = removeData.newIndexInChunk;
+        }
+
+        public void AddComponent<T>(Entity entity, T component) where T : IComponent
+        {
+            ref var entityLink = ref entityLinks[entity.Id];
+            if (entityLink.Entity != entity)
+                throw new ArgumentException("Entity not found");
+            var archetype = entityLink.Data.Archetype;
 
 
             if (componentTypeCache.Length < archetype.Types.Length + 1)
@@ -60,48 +100,51 @@ namespace Automa.Entities
             }
             ComponentType newComponentType = typeof(T);
             var index = 0;
-            for (int i = 0; i < archetype.Types.Length; i++)
+            for (var i = 0; i < archetype.Types.Length; i++)
             {
                 var archetypeType = archetype.Types[i];
                 if (archetypeType.TypeId < newComponentType.TypeId)
                 {
                     componentTypeCache[index++] = archetypeType;
                 }
+                else if (archetypeType.TypeId == newComponentType.TypeId)
+                {
+                    throw new ArgumentException("Entity already contains component of type " + typeof(T));
+                }
+                else
+                {
+                    break;
+                }
             }
             componentTypeCache[index++] = newComponentType;
-            for (int i = 0; i < archetype.Types.Length; i++)
+            for (var i = index - 1; i < archetype.Types.Length; i++)
             {
                 componentTypeCache[index++] = archetype.Types[i];
             }
-            var archetypeIndex = EntityArchetype.CalculateIndex(componentTypeCache, index);
-            var chunk = GetOrCreateChunk(archetypeIndex, componentTypeCache, index);
+            var archetypeIndex = Archetype.CalculateIndex(componentTypeCache, index);
+            var data = GetOrCreateData(archetypeIndex, componentTypeCache, index);
 
-            entityLink.Chunk.RemoveEntity(entityLink.IndexInChunk);
-            chunk.SetComponent(entityLink.IndexInChunk, component);
-            entityLinks[entity.Id] = new EntityLink
-            {
-                Entity = entity,
-                Chunk = chunk,
-                IndexInChunk = chunk.AddEntity(entity)
-            };
+            MoveEntity(ref entityLink, data, ref archetype);
+            data.SetComponent(entityLink.IndexInData, component);
         }
 
-        private EntityChunk GetOrCreateChunk(uint index, ComponentType[] components, int count)
+        private ArchetypeData GetOrCreateData(uint index, ComponentType[] components, int count)
         {
-            if (archetypeChunks.TryGetValue(index, out var chunk))
+            if (!archetypeDatas.TryGetValue(index, out var data))
             {
-                chunk = new EntityChunk(new EntityArchetype(index, components, count));
-                archetypeChunks.Add(index, chunk);
+                data = new ArchetypeData(new Archetype(index, components, count));
+                archetypeDatas.Add(index, data);
+                OnArchetypeAdd(ref data);
             }
-            return chunk;
+            return data;
         }
 
         public void RemoveComponent<T>(Entity entity)
         {
-            var entityLink = entityLinks[entity.Id];
+            ref var entityLink = ref entityLinks[entity.Id];
             if (entityLink.Entity != entity)
                 throw new ArgumentException("Entity not found");
-            var archetype = entityLink.Chunk.Archetype;
+            var archetype = entityLink.Data.Archetype;
 
             if (componentTypeCache.Length < archetype.Types.Length - 1)
             {
@@ -109,7 +152,7 @@ namespace Automa.Entities
             }
             ComponentType newComponentType = typeof(T);
             var index = 0;
-            for (int i = 0; i < archetype.Types.Length; i++)
+            for (var i = 0; i < archetype.Types.Length; i++)
             {
                 var archetypeType = archetype.Types[i];
                 if (archetypeType.TypeId != newComponentType.TypeId)
@@ -117,131 +160,84 @@ namespace Automa.Entities
                     componentTypeCache[index++] = archetypeType;
                 }
             }
-            var archetypeIndex = EntityArchetype.CalculateIndex(componentTypeCache, index);
-            var chunk = GetOrCreateChunk(archetypeIndex, componentTypeCache, index);
+            var archetypeIndex = Archetype.CalculateIndex(componentTypeCache, index);
+            var data = GetOrCreateData(archetypeIndex, componentTypeCache, index);
 
-            entityLink.Chunk.RemoveEntity(entityLink.IndexInChunk);
-            entityLinks[entity.Id] = new EntityLink
+            var newArchetype = data.Archetype;
+            MoveEntity(ref entityLink, data, ref newArchetype);
+        }
+
+        private void MoveEntity(ref EntityLink entityLink, ArchetypeData data, ref Archetype copyTypesBasedOn)
+        {
+            // Add new entity to new archetypeData
+            var newEntityIndexInData = data.AddEntity(entityLink.Entity);
+            // Copy component data from old to new archetypeData
+            for (var i = 0; i < copyTypesBasedOn.Types.Length; i++)
             {
-                Entity = entity,
-                Chunk = chunk,
-                IndexInChunk = chunk.AddEntity(entity)
-            };
-        }
-    }
-
-    struct EntityArchetype
-    {
-        public readonly ComponentType[] Types;
-        internal readonly uint Index;
-
-        public EntityArchetype(ComponentType[] types)
-        {
-            Types = types;
-            Array.Sort(Types, (c1, c2) => c2.TypeId - c1.TypeId);
-            Index = CalculateIndex(types, types.Length);
+                var type = copyTypesBasedOn.Types[i];
+                data.GetComponentArrayUnchecked(type)
+                    .CopyFrom(entityLink.Data.GetComponentArrayUnchecked(type),
+                        entityLink.IndexInData,
+                        newEntityIndexInData);
+            }
+            // Remove entity from old archetypeData
+            HandleEntityRemoving(entityLink.Data.RemoveEntity(entityLink.IndexInData));
+            // Update new entity link
+            entityLink.Data = data;
+            entityLink.IndexInData = newEntityIndexInData;
         }
 
-        public EntityArchetype(uint index, ComponentType[] types, int typeCount)
+        public ref T GetComponent<T>(Entity entity)
         {
-            Types = new ComponentType[typeCount];
-            Array.Copy(types, Types, typeCount);
-            Array.Sort(Types, (c1, c2) => c2.TypeId - c1.TypeId);
-            Index = index;
+            var entityLink = entityLinks[entity.Id];
+            if (entityLink.Entity != entity)
+                throw new ArgumentException("Entity not found");
+            return ref entityLink.Data.GetComponentArray<T>()[entityLink.IndexInData];
         }
 
-        public static uint CalculateIndex(ComponentType[] types, int count)
+        public T RegisterGroup<T>(T group) where T : Group
         {
-            return HashUtility.Fletcher32(types, count);
-        }
-    }
-
-    struct EntityLink
-    {
-        public Entity Entity;
-        public EntityChunk Chunk;
-        public int IndexInChunk;
-    }
-
-    class EntityChunk
-    {
-        public readonly EntityArchetype Archetype;
-        private int count;
-
-        private readonly ChunkArray<Entity> entityArray;
-        private IChunkArray[] componentArrays;
-        private readonly Queue<int> availableIndices = new Queue<int>();
-
-        public ChunkArray<T> GetComponentArray<T>()
-        {
-            var r = componentArrays[((ComponentType)typeof(T)).TypeId];
-            if (r == null) throw new ArgumentException($"Chunk not contains component of type {typeof(T)}");
-            return (ChunkArray<T>)r;
+            groups.Add(group);
+            group.Register(this);
+            return group;
         }
 
-        public EntityChunk(EntityArchetype archetype)
+        public void UnregisterGroup<T>(T group) where T : Group
         {
-            this.Archetype = archetype;
-            entityArray = new ChunkArray<Entity>();
-            InitializeArrays(archetype.Types);
-        }
-
-        private void InitializeArrays(ComponentType[] types)
-        {
-            componentArrays = new IChunkArray[ComponentTypeManager.TypeCount];
-            Type t = typeof(ChunkArray<>);
-            for (int i = 0; i < types.Length; i++)
+            if (groups.Remove(group))
             {
-                var componentType = types[i];
-                componentArrays[componentType.TypeId] = (IChunkArray)Activator.CreateInstance(
-                    t.MakeGenericType(componentType));
+                group.Unregister(this);
             }
         }
 
-        public int AddEntity(Entity entity)
+        private void OnArchetypeAdd(ref ArchetypeData data)
         {
-            var index = availableIndices.Count > 0 ? availableIndices.Dequeue() : count;
-            entityArray.Insert(index, entity);
-            foreach (var componentArray in componentArrays)
+            for (var index = 0; index < groups.Count; index++)
             {
-                componentArray.InsertDefault(index);
-            }
-            count += 1;
-            return index;
-        }
-
-        public void RemoveEntity(int index)
-        {
-            availableIndices.Enqueue(index);
-            entityArray.InsertDefault(index);
-            for (int i = 0; i < componentArrays.Length; i++)
-            {
-                componentArrays[i].InsertDefault(index);
+                var group = groups[index];
+                group.OnArchetypeAdd(data);
             }
         }
 
-        public void SetComponent<T>(int index, T component)
+        private void OnArchetypeRemove(ref ArchetypeData data)
         {
-            GetComponentArray<T>().Insert(index, component);
+            for (var index = 0; index < groups.Count; index++)
+            {
+                var group = groups[index];
+                group.OnArchetypeRemoved(data);
+            }
         }
 
-        public bool HasComponent<T>()
+        private struct EntityLink
         {
-            return componentArrays[((ComponentType)typeof(T)).TypeId] != null;
+            public Entity Entity;
+            public ArchetypeData Data;
+            public int IndexInData;
+        }
+
+        public class EntitiesGroup : Group
+        {
+            public Collections.Entities Entities;
         }
     }
-
-    interface IChunkArray
-    {
-        void InsertDefault(int index);
-    }
-
-    class ChunkArray<T> : FastList<T>, IChunkArray
-    {
-        public void InsertDefault(int index)
-        {
-            base.Insert(index, default(T));
-        }
-    }
-
 }

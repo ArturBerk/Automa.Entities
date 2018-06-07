@@ -21,7 +21,7 @@ namespace Automa.Entities
             }
         }
 
-        public static readonly Entity Null = new Entity(0,0);
+        public static readonly Entity Null = new Entity(-1, 0);
 
         public readonly int Id;
         public readonly int Version;
@@ -40,6 +40,11 @@ namespace Automa.Entities
         public static bool operator !=(Entity e1, Entity e2)
         {
             return e1.Version != e2.Version || e1.Id != e2.Id;
+        }
+
+        public override string ToString()
+        {
+            return $"{Id} ({Version})";
         }
     }
 }

@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2018
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automa.Entities", "Automa.Entities\Automa.Entities.csproj", "{ED47BF13-5C29-4A50-A654-BAD1CD5939BB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Automa.Entities", "Automa.Entities\Automa.Entities.csproj", "{ED47BF13-5C29-4A50-A654-BAD1CD5939BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automa.Entities.Tests", "Automa.Entities.Tests\Automa.Entities.Tests.csproj", "{6FD73E36-D48A-4A9B-BA15-722548A7E07E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Automa.Entities.Tests", "Automa.Entities.Tests\Automa.Entities.Tests.csproj", "{6FD73E36-D48A-4A9B-BA15-722548A7E07E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automa.Entities.PerformanceTests", "Automa.Entities.PerformanceTests\Automa.Entities.PerformanceTests.csproj", "{9D53EC8D-DECC-44A8-93AD-572C742CC3CA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{6FD73E36-D48A-4A9B-BA15-722548A7E07E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6FD73E36-D48A-4A9B-BA15-722548A7E07E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6FD73E36-D48A-4A9B-BA15-722548A7E07E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D53EC8D-DECC-44A8-93AD-572C742CC3CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D53EC8D-DECC-44A8-93AD-572C742CC3CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D53EC8D-DECC-44A8-93AD-572C742CC3CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D53EC8D-DECC-44A8-93AD-572C742CC3CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

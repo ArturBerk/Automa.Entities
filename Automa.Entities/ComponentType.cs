@@ -1,16 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
-using Automa.Collections;
+using Automa.Entities.Internal;
 
 namespace Automa.Entities
 {
     public struct ComponentType
     {
+        public bool Equals(ComponentType other)
+        {
+            return TypeId == other.TypeId;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            return obj is ComponentType && Equals((ComponentType) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return TypeId.GetHashCode();
+        }
+
         public ushort TypeId;
 
         private ComponentType(Type type)
         {
             TypeId = ComponentTypeManager.GetTypeIndex(type);
+        }
+
+        public static ComponentType Create<T>()
+        {
+            return new ComponentType(typeof(T));
         }
 
         public static implicit operator ComponentType(Type type)
@@ -23,12 +44,31 @@ namespace Automa.Entities
             return ComponentTypeManager.GetTypeFromIndex(type.TypeId);
         }
 
+        public static bool operator ==(ComponentType c1, ComponentType c2)
+        {
+            return c1.TypeId == c2.TypeId;
+        }
+
+        public static bool operator !=(ComponentType c1, ComponentType c2)
+        {
+            return c1.TypeId != c2.TypeId;
+        }
+
+        public override string ToString()
+        {
+            return $"{TypeId} ({ComponentTypeManager.GetTypeFromIndex(TypeId)})";
+        }
     }
 
     internal static class ComponentTypeManager
     {
         private static readonly Dictionary<Type, ushort> indicesByTypes = new Dictionary<Type, ushort>();
-        private static readonly FastList<Type> types = new FastList<Type>();
+        private static readonly ArrayList<Type> types = new ArrayList<Type>();
+
+        static ComponentTypeManager()
+        {
+            RegisterType(typeof(Entity));
+        }
 
         public static int TypeCount => types.Count;
 
@@ -43,7 +83,6 @@ namespace Automa.Entities
 
         public static ushort GetTypeIndex(Type type)
         {
-
             if (indicesByTypes.TryGetValue(type, out var p))
             {
                 return p;
@@ -53,9 +92,9 @@ namespace Automa.Entities
 
         private static ushort RegisterType(Type type)
         {
-            var newId = (ushort)(indicesByTypes.Count + 1);
+            var newId = (ushort) indicesByTypes.Count;
             indicesByTypes.Add(type, newId);
-            types.Insert(newId, type);
+            types.SetWithExpand(newId, type);
             return newId;
         }
 

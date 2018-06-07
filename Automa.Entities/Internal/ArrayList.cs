@@ -2,29 +2,29 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Automa.Collections
+namespace Automa.Entities.Internal
 {
-    public class FastList<T> : IList<T>, IReadOnlyList<T>
+    internal class ArrayList<T> : IEnumerable<T>
     {
         private const int MIN_SIZE = 4;
 
         private T[] _buffer;
 
-        public FastList()
+        public ArrayList()
         {
             Count = 0;
 
             _buffer = new T[MIN_SIZE];
         }
 
-        public FastList(int initialSize)
+        public ArrayList(int initialSize)
         {
             Count = 0;
 
             _buffer = new T[initialSize];
         }
 
-        public FastList(ICollection<T> collection)
+        public ArrayList(ICollection<T> collection)
         {
             _buffer = new T[collection.Count];
 
@@ -33,7 +33,7 @@ namespace Automa.Collections
             Count = _buffer.Length;
         }
 
-        public FastList(IList<T> listCopy)
+        public ArrayList(IList<T> listCopy)
         {
             _buffer = new T[listCopy.Count];
 
@@ -46,16 +46,28 @@ namespace Automa.Collections
 
         public bool IsReadOnly => false;
 
-        public T this[int i]
+        public ref T this[int i] => ref _buffer[i];
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
-            get
-            {
-                return _buffer[i];
-            }
-            set
-            {
-                _buffer[i] = value;
-            }
+            throw new NotImplementedException();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        public ref T Get(int index)
+        {
+            return ref _buffer[index];
+        }
+
+        public void SetWithExpand(int index, T value)
+        {
+            if (_buffer.Length <= index) AllocateMore(index + 1);
+            if (Count <= index) Count = index + 1;
+            _buffer[index] = value;
         }
 
         public void Add(T item)
@@ -128,17 +140,6 @@ namespace Automa.Collections
             _buffer[Count] = default(T);
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        IEnumerator<T> IEnumerable<T>.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-
         public void AddRange(IEnumerable<T> items, int count)
         {
             AddRange(items.GetEnumerator(), count);
@@ -158,7 +159,7 @@ namespace Automa.Collections
             AddRange(items.GetEnumerator(), items.Count);
         }
 
-        public void AddRange(FastList<T> items)
+        public void AddRange(ArrayList<T> items)
         {
             AddRange(items.ToArrayFast(), items.Count);
         }
