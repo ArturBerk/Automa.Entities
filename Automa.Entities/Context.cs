@@ -1,36 +1,51 @@
 ﻿using System;
 using Automa.Entities.Internal;
+using System.Reflection;
+using Automa.Entities.Attributes;
 
 namespace Automa.Entities
 {
     public class Context
     {
-        private readonly ArrayList<IBehaviour> behaviours = new ArrayList<IBehaviour>();
+        internal static int DefaultOrder = 0;
+
+        private readonly ArrayList<BehaviourSlot> behaviours = new ArrayList<BehaviourSlot>();
         private readonly EntityManager entityManager = new EntityManager();
 
         public EntityManager EntityManager => entityManager;
 
         public void AddBehaviour(IBehaviour behaviour)
         {
-            if (behaviours.Contains(behaviour))
+            var orderAttribute = behaviour.GetType().GetCustomAttribute<OrderAttribute>();
+            var newSlot = new BehaviourSlot(orderAttribute?.Order ?? Context.DefaultOrder, behaviour);
+            var inserted = false;
+            for (int i = 0; i < behaviours.Count; i++)
             {
-                return;
+                if (behaviours[i].Order < newSlot.Order)
+                {
+                    behaviours.Insert(i, newSlot);
+                    inserted = true;
+                    break;
+                }
             }
-            if (behaviour.EntityManager != null)
+            if (!inserted)
             {
-                throw new ArgumentException("Behaviour already in context");
+                behaviours.Add(newSlot);
             }
-            behaviours.Add(behaviour);
-            behaviour.EntityManager = entityManager;
-            behaviour.OnAddToContext(this);
+            newSlot.Behaviour.OnAddToContext(this);
         }
 
         public void RemoveBehaviour(IBehaviour behaviour)
         {
-            if (behaviours.Remove(behaviour))
+            for (int i = 0; i < behaviours.Count; i++)
             {
-                behaviour.EntityManager = null;
-                behaviour.OnRemoveFromContext(this);
+                var slot = behaviours[i];
+                if (ReferenceEquals(slot.Behaviour, behaviour))
+                {
+                    slot.Behaviour.OnRemoveFromContext(this);
+                    behaviours.RemoveAt(i);
+                    break;
+                }
             }
         }
 
@@ -40,8 +55,9 @@ namespace Automa.Entities
             var rawArray = behaviours.ToArrayFast();
             for (var i = 0; i < behaviours.Count; i++)
             {
-                rawArray[i].OnUpdate();
+                rawArray[i].Behaviour.OnUpdate();
             }
         }
     }
+
 }

@@ -2,7 +2,6 @@
 {
     public interface IBehaviour
     {
-        EntityManager EntityManager { get; set; }
         bool IsEnabled { get; set; }
 
         void OnAddToContext(Context context);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Automa.Entities.Attributes;
 using Automa.Entities.Collections;
 using Automa.Entities.Internal;
 
@@ -155,17 +156,6 @@ namespace Automa.Entities
         {
             if (componentArrays.Length == 0) Length = 0;
             Length = componentArrays[0].CalculatedCount;
-        }
-    }
-
-    [AttributeUsage(AttributeTargets.Class)]
-    public sealed class ExcludeComponentAttribute : Attribute
-    {
-        public readonly Type ComponentType;
-
-        public ExcludeComponentAttribute(Type componentType)
-        {
-            ComponentType = componentType;
         }
     }
 }
