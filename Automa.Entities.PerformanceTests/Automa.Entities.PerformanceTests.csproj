@@ -6,10 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Benchmark.It" Version="1.2.0" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\Automa.Benchmarks\Automa.Benchmarks.csproj" />
     <ProjectReference Include="..\Automa.Entities\Automa.Entities.csproj" />
   </ItemGroup>
 

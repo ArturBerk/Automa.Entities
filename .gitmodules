@@ -1,0 +1,3 @@
+[submodule "Automa.Benchmarks"]
+	path = Automa.Benchmarks
+	url = https://github.com/ArturBerk/Automa.Benchmarks.git

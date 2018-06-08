@@ -1,10 +1,10 @@
-﻿using Automa.Entities.Collections;
+﻿using Automa.Benchmarks;
+using Automa.Entities.Collections;
 using Automa.Entities.PerformanceTests.Model;
-using BenchmarkIt;
 
 namespace Automa.Entities.PerformanceTests
 {
-    internal class StructVsClassBenchmark : IBenchmark
+    internal class StructVsClassBenchmark : Benchmark
     {
         private static readonly int entityCount = 24000;
 
@@ -12,18 +12,9 @@ namespace Automa.Entities.PerformanceTests
         private StructGroup structGroup;
         private ClassGroup classGroup;
 
-        public Result[] Execute()
+        protected override void Prepare()
         {
-            Prepare();
-
-            return Benchmark.This("Classes", TestClass)
-                .Against.This("Structs", TestStructs)
-                .WithWarmup(1000)
-                .For(1000).Iterations();
-        }
-
-        private void Prepare()
-        {
+            IterationCount = 1000;
             var entityManager = new EntityManager();
             var entityType1 = new ComponentType[]
             {
@@ -64,6 +55,7 @@ namespace Automa.Entities.PerformanceTests
             structGroup = entityManager.RegisterGroup(new StructGroup());
         }
 
+        [Case("Structs")]
         private void TestStructs()
         {
             var count = structGroup.Data.CalculatedCount;
@@ -74,6 +66,7 @@ namespace Automa.Entities.PerformanceTests
             }
         }
 
+        [Case("Classes")]
         private void TestClass()
         {
             var count = classGroup.Data.CalculatedCount;

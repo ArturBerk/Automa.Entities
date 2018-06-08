@@ -55,7 +55,7 @@ namespace Automa.Entities.Behaviours
         {
             for (var i = 0; i < behaviours.Count; i++)
             {
-                behaviours.Buffer[i].Behaviour.OnUpdate();
+                behaviours[i].Behaviour.OnUpdate();
             }
         }
 

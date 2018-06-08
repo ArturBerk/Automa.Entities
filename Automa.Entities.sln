@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Automa.Entities", "Automa.E
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Automa.Entities.Tests", "Automa.Entities.Tests\Automa.Entities.Tests.csproj", "{6FD73E36-D48A-4A9B-BA15-722548A7E07E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automa.Entities.PerformanceTests", "Automa.Entities.PerformanceTests\Automa.Entities.PerformanceTests.csproj", "{9D53EC8D-DECC-44A8-93AD-572C742CC3CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Automa.Entities.PerformanceTests", "Automa.Entities.PerformanceTests\Automa.Entities.PerformanceTests.csproj", "{9D53EC8D-DECC-44A8-93AD-572C742CC3CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automa.Benchmarks", "Automa.Benchmarks\Automa.Benchmarks.csproj", "{99AB5B71-0C33-47D5-AA2E-428715177B44}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{9D53EC8D-DECC-44A8-93AD-572C742CC3CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D53EC8D-DECC-44A8-93AD-572C742CC3CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D53EC8D-DECC-44A8-93AD-572C742CC3CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99AB5B71-0C33-47D5-AA2E-428715177B44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99AB5B71-0C33-47D5-AA2E-428715177B44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99AB5B71-0C33-47D5-AA2E-428715177B44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99AB5B71-0C33-47D5-AA2E-428715177B44}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

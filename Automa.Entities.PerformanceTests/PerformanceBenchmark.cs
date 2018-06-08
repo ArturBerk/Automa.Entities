@@ -1,18 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Automa.Benchmarks;
 using Automa.Entities.Collections;
 using Automa.Entities.PerformanceTests.Model;
-using BenchmarkIt;
 
 namespace Automa.Entities.PerformanceTests
 {
-    class PerformanceBenchmark : IBenchmark
+    class PerformanceBenchmark : Benchmark
     {
         private BenchmarkGroup group;
 
-        private void Prepare()
+        protected override void Prepare()
         {
+            IterationCount = 1000;
             EntityManager entityManager = new EntityManager();
             var v1 = new ComponentType[]
             {
@@ -56,12 +54,7 @@ namespace Automa.Entities.PerformanceTests
             public Collection<Struct2Component> Data2;
         }
 
-        public Result[] Execute()
-        {
-            Prepare();
-            return Benchmark.This("Performance", Test).WithWarmup(1000).For(10).Seconds();
-        }
-
+        [Case("Performance")]
         private void Test()
         {
             @group.UpdateLength();
