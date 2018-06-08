@@ -5,7 +5,7 @@ namespace Automa.Entities
 {
     public class Context : IContext
     {
-        private Dictionary<Type, IManager> managers = new Dictionary<Type, IManager>();
+        private readonly Dictionary<Type, IManager> managers = new Dictionary<Type, IManager>();
 
         public T GetManager<T>() where T : IManager
         {
@@ -35,6 +35,14 @@ namespace Automa.Entities
                 manager.OnDetachFromContext(this);
             }
         }
+
+        public void Update()
+        {
+            foreach (var manager in managers)
+            {
+                manager.Value.OnUpdate();
+            }
+        }
     }
 
     public interface IContext
@@ -42,6 +50,7 @@ namespace Automa.Entities
         T GetManager<T>() where T : IManager;
         T SetManager<T>(T manager) where T : IManager;
         void RemoveManager<T>() where T : IManager;
+        void Update();
     }
 
     public interface IManager

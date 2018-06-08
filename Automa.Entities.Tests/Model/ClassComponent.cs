@@ -1,6 +1,6 @@
 ﻿namespace Automa.Entities.Tests.Model
 {
-    public class ClassComponent : IComponent
+    public class ClassComponent
     {
         public int Value;
 

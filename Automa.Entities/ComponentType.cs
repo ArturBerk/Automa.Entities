@@ -72,12 +72,12 @@ namespace Automa.Entities
 
         public static int TypeCount => types.Count;
 
-        public static ushort GetTypeIndex<T>() where T : IComponent
+        public static ushort GetTypeIndex<T>()
         {
-            var result = StaticIndex<T>.typeIndex;
+            var result = StaticTypeIndex<T>.typeIndex;
             if (result != 0) return result;
             result = GetTypeIndex(typeof(T));
-            StaticIndex<T>.typeIndex = result;
+            StaticTypeIndex<T>.typeIndex = result;
             return result;
         }
 
@@ -108,7 +108,7 @@ namespace Automa.Entities
         }
     }
 
-    internal static class StaticIndex<T> where T : IComponent
+    internal static class StaticTypeIndex<T>
     {
         public static ushort typeIndex;
     }

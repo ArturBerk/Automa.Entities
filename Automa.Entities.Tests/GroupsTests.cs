@@ -148,7 +148,7 @@ namespace Automa.Entities.Tests
             public Collection<StructComponent> Structures;
         }
 
-        private class EntityGroup : GroupWithLength
+        private class EntityGroup : Group
         {
             public Collections.Entities Entities;
             public Collection<ClassComponent> Classes;

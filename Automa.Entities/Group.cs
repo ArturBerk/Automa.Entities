@@ -14,6 +14,13 @@ namespace Automa.Entities
         internal ComponentType[] includedTypes;
 
         public EntityManager EntityManager { get; private set; }
+        public int Length;
+
+        public void UpdateLength()
+        {
+            if (componentArrays.Length == 0) Length = 0;
+            Length = componentArrays[0].CalculatedCount;
+        }
 
         internal void Register(EntityManager entityManager)
         {
@@ -148,14 +155,4 @@ namespace Automa.Entities
         }
     }
 
-    public class GroupWithLength : Group
-    {
-        public int Length;
-
-        public void UpdateLength()
-        {
-            if (componentArrays.Length == 0) Length = 0;
-            Length = componentArrays[0].CalculatedCount;
-        }
-    }
 }

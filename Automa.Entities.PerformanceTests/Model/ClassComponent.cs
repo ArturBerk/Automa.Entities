@@ -1,7 +1,7 @@
 ﻿
 namespace Automa.Entities.PerformanceTests.Model
 {
-    public class ClassComponent : IComponent
+    public class ClassComponent
     {
         public int Value;
 

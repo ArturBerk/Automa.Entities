@@ -1,7 +1,7 @@
 ﻿
 namespace Automa.Entities.PerformanceTests.Model
 {
-    public struct Struct3Component : IComponent
+    public struct Struct3Component
     {
         public int Value;
 

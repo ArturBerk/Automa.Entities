@@ -6,47 +6,38 @@ namespace Automa.Entities.Internal
 {
     internal class ArrayList<T> : IEnumerable<T>
     {
-        private const int MIN_SIZE = 4;
+        private const int MinSize = 4;
 
-        private T[] _buffer;
+        private T[] buffer;
 
-        public ArrayList()
+        public ArrayList(int initialSize = MinSize)
         {
             Count = 0;
-
-            _buffer = new T[MIN_SIZE];
-        }
-
-        public ArrayList(int initialSize)
-        {
-            Count = 0;
-
-            _buffer = new T[initialSize];
+            buffer = new T[initialSize];
         }
 
         public ArrayList(ICollection<T> collection)
         {
-            _buffer = new T[collection.Count];
+            buffer = new T[collection.Count];
 
-            collection.CopyTo(_buffer, 0);
+            collection.CopyTo(buffer, 0);
 
-            Count = _buffer.Length;
+            Count = buffer.Length;
         }
 
         public ArrayList(IList<T> listCopy)
         {
-            _buffer = new T[listCopy.Count];
+            buffer = new T[listCopy.Count];
 
-            listCopy.CopyTo(_buffer, 0);
+            listCopy.CopyTo(buffer, 0);
 
             Count = listCopy.Count;
         }
 
-        public int Count { get; private set; }
+        // Remove property to faster!
+        public int Count;
 
-        public bool IsReadOnly => false;
-
-        public ref T this[int i] => ref _buffer[i];
+        public ref T this[int i] => ref buffer[i];
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
@@ -60,27 +51,27 @@ namespace Automa.Entities.Internal
 
         public ref T Get(int index)
         {
-            return ref _buffer[index];
+            return ref buffer[index];
         }
 
         public void SetWithExpand(int index, T value)
         {
-            if (_buffer.Length <= index) AllocateMore(index + 1);
+            if (buffer.Length <= index) AllocateMore(index + 1);
             if (Count <= index) Count = index + 1;
-            _buffer[index] = value;
+            buffer[index] = value;
         }
 
         public void Add(T item)
         {
-            if (Count == _buffer.Length)
+            if (Count == buffer.Length)
                 AllocateMore();
 
-            _buffer[Count++] = item;
+            buffer[Count++] = item;
         }
 
         public void Clear()
         {
-            Array.Clear(_buffer, 0, _buffer.Length);
+            Array.Clear(buffer, 0, buffer.Length);
 
             Count = 0;
         }
@@ -94,7 +85,7 @@ namespace Automa.Entities.Internal
 
         public void CopyTo(T[] array, int arrayIndex)
         {
-            Array.Copy(_buffer, 0, array, arrayIndex, Count);
+            Array.Copy(buffer, 0, array, arrayIndex, Count);
         }
 
         public int IndexOf(T item)
@@ -102,7 +93,7 @@ namespace Automa.Entities.Internal
             var comp = EqualityComparer<T>.Default;
 
             for (var index = Count - 1; index >= 0; --index)
-                if (comp.Equals(_buffer[index], item))
+                if (comp.Equals(buffer[index], item))
                     return index;
 
             return -1;
@@ -110,11 +101,11 @@ namespace Automa.Entities.Internal
 
         public void Insert(int index, T item)
         {
-            if (Count == _buffer.Length) AllocateMore();
+            if (Count == buffer.Length) AllocateMore();
 
-            Array.Copy(_buffer, index, _buffer, index + 1, Count - index);
+            Array.Copy(buffer, index, buffer, index + 1, Count - index);
 
-            _buffer[index] = item;
+            buffer[index] = item;
             ++Count;
         }
 
@@ -135,9 +126,9 @@ namespace Automa.Entities.Internal
             if (index == --Count)
                 return;
 
-            Array.Copy(_buffer, index + 1, _buffer, index, Count - index);
+            Array.Copy(buffer, index + 1, buffer, index, Count - index);
 
-            _buffer[Count] = default(T);
+            buffer[Count] = default(T);
         }
 
         public void AddRange(IEnumerable<T> items, int count)
@@ -147,11 +138,11 @@ namespace Automa.Entities.Internal
 
         public void AddRange(IEnumerator<T> items, int count)
         {
-            if (Count + count >= _buffer.Length)
+            if (Count + count >= buffer.Length)
                 AllocateMore(Count + count);
 
             while (items.MoveNext())
-                _buffer[Count++] = items.Current;
+                buffer[Count++] = items.Current;
         }
 
         public void AddRange(ICollection<T> items)
@@ -168,10 +159,10 @@ namespace Automa.Entities.Internal
         {
             if (count == 0) return;
 
-            if (Count + count >= _buffer.Length)
+            if (Count + count >= buffer.Length)
                 AllocateMore(Count + count);
 
-            Array.Copy(items, 0, _buffer, Count, count);
+            Array.Copy(items, 0, buffer, Count, count);
             Count += count;
         }
 
@@ -191,28 +182,28 @@ namespace Automa.Entities.Internal
 
         public EcsListEnumerator<T> GetEnumerator()
         {
-            return new EcsListEnumerator<T>(_buffer, Count);
+            return new EcsListEnumerator<T>(buffer, Count);
         }
 
         public void Release()
         {
             Count = 0;
-            _buffer = null;
+            buffer = null;
         }
 
         public void Resize(int newSize)
         {
-            if (newSize < MIN_SIZE)
-                newSize = MIN_SIZE;
+            if (newSize < MinSize)
+                newSize = MinSize;
 
-            Array.Resize(ref _buffer, newSize);
+            Array.Resize(ref buffer, newSize);
 
             Count = newSize;
         }
 
         public void SetAt(int index, T value)
         {
-            if (index >= _buffer.Length)
+            if (index >= buffer.Length)
                 AllocateMore(index + 1);
 
             if (Count <= index)
@@ -223,14 +214,14 @@ namespace Automa.Entities.Internal
 
         public void Sort(IComparer<T> comparer)
         {
-            Array.Sort(_buffer, 0, Count, comparer);
+            Array.Sort(buffer, 0, Count, comparer);
         }
 
         public T[] ToArray()
         {
             var destinationArray = new T[Count];
 
-            Array.Copy(_buffer, 0, destinationArray, 0, Count);
+            Array.Copy(buffer, 0, destinationArray, 0, Count);
 
             return destinationArray;
         }
@@ -242,7 +233,7 @@ namespace Automa.Entities.Internal
         /// <returns></returns>
         public T[] ToArrayFast()
         {
-            return _buffer;
+            return buffer;
         }
 
         public bool UnorderedRemove(T item)
@@ -261,38 +252,38 @@ namespace Automa.Entities.Internal
         {
             if (index == --Count)
             {
-                _buffer[Count] = default(T);
+                buffer[Count] = default(T);
                 return false;
             }
 
-            _buffer[index] = _buffer[Count];
-            _buffer[Count] = default(T);
+            buffer[index] = buffer[Count];
+            buffer[Count] = default(T);
 
             return true;
         }
 
         private void AllocateMore()
         {
-            var newList = new T[Math.Max(_buffer.Length << 1, MIN_SIZE)];
-            if (Count > 0) _buffer.CopyTo(newList, 0);
-            _buffer = newList;
+            var newList = new T[Math.Max(buffer.Length << 1, MinSize)];
+            if (Count > 0) buffer.CopyTo(newList, 0);
+            buffer = newList;
         }
 
         private void AllocateMore(int newSize)
         {
-            var oldLength = Math.Max(_buffer.Length, MIN_SIZE);
+            var oldLength = Math.Max(buffer.Length, MinSize);
 
             while (oldLength < newSize)
                 oldLength <<= 1;
 
             var newList = new T[oldLength];
-            if (Count > 0) Array.Copy(_buffer, newList, Count);
-            _buffer = newList;
+            if (Count > 0) Array.Copy(buffer, newList, Count);
+            buffer = newList;
         }
 
         public void Trim()
         {
-            if (Count < _buffer.Length)
+            if (Count < buffer.Length)
                 Resize(Count);
         }
 
@@ -301,10 +292,10 @@ namespace Automa.Entities.Internal
         {
             result = default(U);
 
-            if (index >= _buffer.Length)
+            if (index >= buffer.Length)
                 return false;
 
-            result = (U) _buffer[index];
+            result = (U) buffer[index];
 
             return result != null;
         }

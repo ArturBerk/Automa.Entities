@@ -1,6 +1,6 @@
 ﻿namespace Automa.Entities.PerformanceTests.Model
 {
-    public struct StructComponent : IComponent
+    public struct StructComponent
     {
         public int Value;
 

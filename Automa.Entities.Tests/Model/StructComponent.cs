@@ -1,6 +1,6 @@
 ﻿namespace Automa.Entities.Tests.Model
 {
-    public struct StructComponent : IComponent
+    public struct StructComponent
     {
         public int Value;
 
@@ -11,7 +11,7 @@
 
     }
 
-    public struct Struct2Component : IComponent
+    public struct Struct2Component
     {
         public int Value;
 
@@ -22,7 +22,7 @@
 
     }
 
-    public struct Struct3Component : IComponent
+    public struct Struct3Component
     {
         public int Value;
 

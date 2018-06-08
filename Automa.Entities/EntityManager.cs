@@ -39,7 +39,10 @@ namespace Automa.Entities
 
         public void OnUpdate()
         {
-            //
+            foreach (var @group in groups)
+            {
+                group.UpdateLength();
+            }
         }
 
         public Entity CreateEntity(params ComponentType[] types)
@@ -67,7 +70,7 @@ namespace Automa.Entities
             return entity;
         }
 
-        public void SetComponent<T>(Entity entity, T component) where T : IComponent
+        public void SetComponent<T>(Entity entity, T component)
         {
             var entityLink = entityLinks[entity.Id];
             if (entityLink.Entity != entity)
@@ -75,7 +78,7 @@ namespace Automa.Entities
             entityLink.Data.SetComponent(entityLink.IndexInData, component);
         }
 
-        public bool HasComponent<T>(Entity entity) where T : IComponent
+        public bool HasComponent<T>(Entity entity)
         {
             var entityLink = entityLinks[entity.Id];
             if (entityLink.Entity != entity)
@@ -101,7 +104,7 @@ namespace Automa.Entities
             entityLinks[removeData.entityId].IndexInData = removeData.newIndexInChunk;
         }
 
-        public void AddComponent<T>(Entity entity, T component) where T : IComponent
+        public void AddComponent<T>(Entity entity, T component)
         {
             ref var entityLink = ref entityLinks[entity.Id];
             if (entityLink.Entity != entity)
@@ -214,6 +217,7 @@ namespace Automa.Entities
         {
             groups.Add(group);
             group.Register(this);
+            group.UpdateLength();
             return group;
         }
 
