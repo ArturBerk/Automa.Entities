@@ -12,7 +12,7 @@ namespace Automa.Entities
 
         public void SetDefault(int index)
         {
-            SetWithExpand(index, default(T));
+            SetAt(index, default(T));
         }
     }
 

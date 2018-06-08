@@ -48,7 +48,7 @@ namespace Automa.Entities.Internal
         public int AddEntity(Entity entity)
         {
             var index = count;
-            entityArray.SetWithExpand(index, entity);
+            entityArray.SetAt(index, entity);
             for (var i = 0; i < componentTypeIndices.Length; i++)
             {
                 componentArrays[componentTypeIndices[i]].SetDefault(index);
@@ -71,7 +71,7 @@ namespace Automa.Entities.Internal
 
         public void SetComponent<T>(int index, T component)
         {
-            GetComponentArray<T>().SetWithExpand(index, component);
+            GetComponentArray<T>().SetAt(index, component);
         }
 
         public bool HasComponent<T>()

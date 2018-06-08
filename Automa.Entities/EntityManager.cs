@@ -57,7 +57,7 @@ namespace Automa.Entities
             }
             else
             {
-                entityLinks.SetWithExpand(entityId, new EntityLink());
+                entityLinks.SetAt(entityId, new EntityLink());
             }
             var entity = new Entity(entityId, version);
             var chunkIndex = chunk.AddEntity(entity);

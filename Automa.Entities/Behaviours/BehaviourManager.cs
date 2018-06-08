@@ -53,11 +53,9 @@ namespace Automa.Entities.Behaviours
 
         public void OnUpdate()
         {
-            //entityManager.Update();
-            var rawArray = behaviours.ToArrayFast();
             for (var i = 0; i < behaviours.Count; i++)
             {
-                rawArray[i].Behaviour.OnUpdate();
+                behaviours.Buffer[i].Behaviour.OnUpdate();
             }
         }
 

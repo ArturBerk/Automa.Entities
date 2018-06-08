@@ -94,7 +94,7 @@ namespace Automa.Entities
         {
             var newId = (ushort) indicesByTypes.Count;
             indicesByTypes.Add(type, newId);
-            types.SetWithExpand(newId, type);
+            types.SetAt(newId, type);
             return newId;
         }
 
