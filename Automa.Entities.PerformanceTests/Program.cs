@@ -7,7 +7,8 @@ namespace Automa.Entities.PerformanceTests
     {
         private static readonly IBenchmark[] benchmarks =
         {
-            new StructVsClassBenchmark()
+            //new StructVsClassBenchmark(),
+            new PerformanceBenchmark(), 
         };
 
         private static void Main()
