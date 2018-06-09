@@ -1,4 +1,4 @@
-﻿using Automa.Entities.Behaviours;
+﻿using Automa.Entities.Systems;
 
 namespace Automa.Entities
 {
@@ -8,7 +8,7 @@ namespace Automa.Entities
         {
             var context = new Context();
             context.SetManager(new EntityManager());
-            context.SetManager(new BehaviourManager());
+            context.SetManager(new SystemManager());
             return context;
         }
     }

@@ -1,6 +1,6 @@
-﻿namespace Automa.Entities.Behaviours
+﻿namespace Automa.Entities.Systems
 {
-    public interface IBehaviour
+    public interface ISystem
     {
         bool IsEnabled { get; set; }
 

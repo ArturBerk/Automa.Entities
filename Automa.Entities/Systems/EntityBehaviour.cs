@@ -1,6 +1,6 @@
-﻿namespace Automa.Entities.Behaviours
+﻿namespace Automa.Entities.Systems
 {
-    public abstract class EntityBehaviour : IBehaviour
+    public abstract class EntitySystem : ISystem
     {
         public EntityManager EntityManager { get; set; }
 

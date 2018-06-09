@@ -1,4 +1,4 @@
-﻿using Automa.Entities.Behaviours;
+﻿using Automa.Entities.Systems;
 using NUnit.Framework;
 
 #pragma warning disable 649
@@ -14,7 +14,7 @@ namespace Automa.Entities.Tests
         {
             var context = ContextFactory.CreateEntitiesContext();
             Assert.NotNull(context.GetManager<EntityManager>());
-            Assert.NotNull(context.GetManager<BehaviourManager>());
+            Assert.NotNull(context.GetManager<SystemManager>());
         }
     }
 }

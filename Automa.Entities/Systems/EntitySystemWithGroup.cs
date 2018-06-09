@@ -1,6 +1,6 @@
-﻿namespace Automa.Entities.Behaviours
+﻿namespace Automa.Entities.Systems
 {
-    public abstract class EntityBehaviorWithGroup<T> : EntityBehaviour where T : Group, new()
+    public abstract class EntitySystemWithGroup<T> : EntitySystem where T : Group, new()
     {
         protected T EntityGroup;
 
