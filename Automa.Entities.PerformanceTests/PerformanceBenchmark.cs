@@ -58,7 +58,7 @@ namespace Automa.Entities.PerformanceTests
         private void Test()
         {
             @group.UpdateLength();
-            for (int i = 0; i < @group.Length; i++)
+            for (int i = 0; i < @group.Count; i++)
             {
                 @group.Data1[i].Value += @group.Data1[i].Value;
                 @group.Data2[i].Value += @group.Data2[i].Value;

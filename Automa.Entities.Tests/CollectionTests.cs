@@ -37,7 +37,7 @@ namespace Automa.Entities.Tests
             var group = contextEntityManager.RegisterGroup(new EntityGroup());
             group.UpdateLength();
 
-            for (int i = 0; i < group.Length; i++)
+            for (int i = 0; i < group.Count; i++)
             {
                 var t = group.Structures[i];
             }

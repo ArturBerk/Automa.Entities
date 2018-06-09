@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Automa.Entities.Systems;
+using Automa.Entities.Systems.Debugging;
 
 namespace Automa.Entities.Internal
 {
@@ -9,11 +10,13 @@ namespace Automa.Entities.Internal
         public static readonly IComparer<SystemSlot> DefaultComparer = new Comparer();
         public readonly int Order;
         public readonly ISystem System;
+        public readonly SystemDebugInfo DebugInfo;
 
         public SystemSlot(int order, ISystem system)
         {
             Order = order;
             System = system;
+            DebugInfo = new SystemDebugInfo(system);
         }
 
         public int CompareTo(SystemSlot other)

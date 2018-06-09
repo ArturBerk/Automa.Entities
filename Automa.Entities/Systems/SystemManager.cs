@@ -1,6 +1,9 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 using Automa.Entities.Attributes;
 using Automa.Entities.Internal;
+using Automa.Entities.Systems.Debugging;
 
 namespace Automa.Entities.Systems
 {
@@ -8,7 +11,27 @@ namespace Automa.Entities.Systems
     {
         internal static int DefaultOrder = 0;
 
-        private readonly ArrayList<SystemSlot> systems = new ArrayList<SystemSlot>();
+        internal readonly ArrayList<SystemSlot> systems = new ArrayList<SystemSlot>();
+        
+        #region Debugging
+        private readonly bool debug;
+        private readonly Stopwatch stopwatch;
+        private SystemManagerDebugInfo debugInfo;
+        public SystemManagerDebugInfo DebugInfo => debugInfo;
+        #endregion
+
+        public SystemManager() : this(false)
+        {
+        }
+
+        public SystemManager(bool debug)
+        {
+            this.debug = debug;
+            if (debug)
+            {
+                stopwatch = new Stopwatch();
+            }
+        }
 
         public void AddSystem(ISystem system)
         {
@@ -32,6 +55,10 @@ namespace Automa.Entities.Systems
             {
                 newSlot.System.OnAttachToContext(context);
             }
+            if (debug)
+            {
+                debugInfo = new SystemManagerDebugInfo(systems.Select(slot => slot.DebugInfo).ToArray());
+            }
         }
 
         public void RemoveSystem(ISystem system)
@@ -49,13 +76,31 @@ namespace Automa.Entities.Systems
                     break;
                 }
             }
+            if (debug)
+            {
+                debugInfo = new SystemManagerDebugInfo(systems.Select(slot => slot.DebugInfo).ToArray());
+            }
         }
 
         public void OnUpdate()
         {
-            for (var i = 0; i < systems.Count; i++)
+            if (debug)
             {
-                systems[i].System.OnUpdate();
+                for (var i = 0; i < systems.Count; i++)
+                {
+                    var systemSlot = systems[i];
+                    stopwatch.Restart();
+                    systemSlot.System.OnUpdate();
+                    stopwatch.Stop();
+                    systemSlot.DebugInfo.UpdateTime = stopwatch.Elapsed;
+                }
+            }
+            else
+            {
+                for (var i = 0; i < systems.Count; i++)
+                {
+                    systems[i].System.OnUpdate();
+                }
             }
         }
 

@@ -14,12 +14,12 @@ namespace Automa.Entities
         internal ComponentType[] includedTypes;
 
         public EntityManager EntityManager { get; private set; }
-        public int Length;
+        public int Count;
 
         public void UpdateLength()
         {
-            if (componentArrays.Length == 0) Length = 0;
-            Length = componentArrays[0].CalculatedCount;
+            if (componentArrays.Length == 0) Count = 0;
+            Count = componentArrays[0].CalculatedCount;
         }
 
         internal void Register(EntityManager entityManager)

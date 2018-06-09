@@ -1,27 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Automa.Entities.Debugging;
 using Automa.Entities.Internal;
 
 namespace Automa.Entities
 {
     public sealed class EntityManager : IManager
     {
-        private readonly Dictionary<uint, EntityTypeData> entityTypeDatas = new Dictionary<uint, EntityTypeData>();
         private readonly Queue<int> availableIndices = new Queue<int>();
 
-        private readonly EntitiesGroup entitiesGroup;
+        private readonly AllEntities allEntities;
         private readonly ArrayList<EntityLink> entityLinks = new ArrayList<EntityLink>();
+        private readonly Dictionary<uint, EntityTypeData> entityTypeDatas = new Dictionary<uint, EntityTypeData>();
 
-        private readonly ArrayList<Group> groups = new ArrayList<Group>();
+        private readonly ArrayList<GroupSlot> groups = new ArrayList<GroupSlot>();
 
         private ComponentType[] componentTypeCache = new ComponentType[10];
 
-        public EntityManager()
+        #region Debugging
+        private bool debug;
+        private EntityManagerDebugInfo debugInfo;
+        public EntityManagerDebugInfo DebugInfo => debugInfo;
+        #endregion
+
+        public EntityManager() : this(false)
         {
-            entitiesGroup = RegisterGroup(new EntitiesGroup());
         }
 
-        public Collections.Entities Entities => entitiesGroup.Entities;
+        public EntityManager(bool debug)
+        {
+            allEntities = RegisterGroup(new AllEntities());
+            this.debug = debug;
+            if (debug)
+            {
+                debugInfo = new EntityManagerDebugInfo(groups.Select(slot => slot.DebugInfo).ToArray());
+            }
+        }
+        /// <summary>
+        /// 27716
+        /// </summary>
+
+        public Collections.Entities Entities => allEntities.Entities;
 
         internal IEnumerable<EntityTypeData> Datas => entityTypeDatas.Values;
 
@@ -39,9 +59,9 @@ namespace Automa.Entities
 
         public void OnUpdate()
         {
-            foreach (var @group in groups)
+            foreach (var group in groups)
             {
-                group.UpdateLength();
+                group.Group.UpdateLength();
             }
         }
 
@@ -215,17 +235,30 @@ namespace Automa.Entities
 
         public T RegisterGroup<T>(T group) where T : Group
         {
-            groups.Add(group);
+            var newSlot = new GroupSlot(group);
+            groups.Add(newSlot);
             group.Register(this);
             group.UpdateLength();
+            if (debug)
+            {
+                debugInfo = new EntityManagerDebugInfo(groups.Select(slot => slot.DebugInfo).ToArray());
+            }
             return group;
         }
 
         public void UnregisterGroup<T>(T group) where T : Group
         {
-            if (groups.Remove(group))
+            for (int i = 0; i < groups.Count; i++)
             {
-                group.Unregister(this);
+                if (Equals(groups[i].Group, group))
+                {
+                    groups.RemoveAt(i);
+                    if (debug)
+                    {
+                        debugInfo = new EntityManagerDebugInfo(groups.Select(slot => slot.DebugInfo).ToArray());
+                    }
+                    return;
+                }
             }
         }
 
@@ -234,7 +267,7 @@ namespace Automa.Entities
             for (var index = 0; index < groups.Count; index++)
             {
                 var group = groups[index];
-                group.OnEntityTypeAdd(data);
+                group.Group.OnEntityTypeAdd(data);
             }
         }
 
@@ -243,7 +276,7 @@ namespace Automa.Entities
             for (var index = 0; index < groups.Count; index++)
             {
                 var group = groups[index];
-                group.OnEntityTypeRemoved(data);
+                group.Group.OnEntityTypeRemoved(data);
             }
         }
 
@@ -254,9 +287,21 @@ namespace Automa.Entities
             public int IndexInData;
         }
 
-        public class EntitiesGroup : Group
+        private class AllEntities : Group
         {
             public Collections.Entities Entities;
+        }
+
+        private struct GroupSlot
+        {
+            public readonly Group Group;
+            public readonly GroupDebugInfo DebugInfo;
+
+            public GroupSlot(Group @group) : this()
+            {
+                Group = @group;
+                DebugInfo = new GroupDebugInfo(group);
+            }
         }
     }
 }
