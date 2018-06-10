@@ -42,6 +42,14 @@ namespace Automa.Entities
                         componentArraysTmp.Add(componentsArray);
                         fieldInfo.SetValue(this, componentsArray);
                     }
+                    else if (genericType == typeof(AsyncCollection<>))
+                    {
+                        ComponentType componentType = fieldType.GetGenericArguments()[0];
+                        includedTypesTmp.Add(componentType);
+                        var componentsArray = (CollectionBase)Activator.CreateInstance(fieldType);
+                        componentArraysTmp.Add(componentsArray);
+                        fieldInfo.SetValue(this, componentsArray);
+                    }
                 }
                 else if (fieldType == typeof(Collections.Entities))
                 {

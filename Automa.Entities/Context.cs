@@ -43,9 +43,18 @@ namespace Automa.Entities
                 manager.Value.OnUpdate();
             }
         }
+
+        public void Dispose()
+        {
+            foreach (var manager in managers.Values)
+            {
+                manager.OnDetachFromContext(this);
+            }
+            managers.Clear();
+        }
     }
 
-    public interface IContext
+    public interface IContext : IDisposable
     {
         T GetManager<T>() where T : IManager;
         T SetManager<T>(T manager) where T : IManager;

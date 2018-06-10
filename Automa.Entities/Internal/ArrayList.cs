@@ -8,34 +8,34 @@ namespace Automa.Entities.Internal
     {
         private const int MinSize = 4;
 
-        private T[] buffer;
+        public T[] Buffer;
         public int Count;
 
         public ArrayList(int initialSize = MinSize)
         {
             Count = 0;
-            buffer = new T[initialSize];
+            Buffer = new T[initialSize];
         }
 
         public ArrayList(ICollection<T> collection)
         {
-            buffer = new T[collection.Count];
+            Buffer = new T[collection.Count];
 
-            collection.CopyTo(buffer, 0);
+            collection.CopyTo(Buffer, 0);
 
-            Count = buffer.Length;
+            Count = Buffer.Length;
         }
 
         public ArrayList(IList<T> listCopy)
         {
-            buffer = new T[listCopy.Count];
+            Buffer = new T[listCopy.Count];
 
-            listCopy.CopyTo(buffer, 0);
+            listCopy.CopyTo(Buffer, 0);
 
             Count = listCopy.Count;
         }
 
-        public ref T this[int i] => ref buffer[i];
+        public ref T this[int i] => ref Buffer[i];
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
@@ -49,27 +49,27 @@ namespace Automa.Entities.Internal
 
         public ref T Get(int index)
         {
-            return ref buffer[index];
+            return ref Buffer[index];
         }
 
         public void SetAt(int index, T value)
         {
-            if (buffer.Length <= index) AllocateMore(index + 1);
+            if (Buffer.Length <= index) AllocateMore(index + 1);
             if (Count <= index) Count = index + 1;
-            buffer[index] = value;
+            Buffer[index] = value;
         }
 
         public void Add(T item)
         {
-            if (Count == buffer.Length)
+            if (Count == Buffer.Length)
                 AllocateMore();
 
-            buffer[Count++] = item;
+            Buffer[Count++] = item;
         }
 
         public void Clear()
         {
-            Array.Clear(buffer, 0, buffer.Length);
+            Array.Clear(Buffer, 0, Buffer.Length);
 
             Count = 0;
         }
@@ -83,7 +83,7 @@ namespace Automa.Entities.Internal
 
         public void CopyTo(T[] array, int arrayIndex)
         {
-            Array.Copy(buffer, 0, array, arrayIndex, Count);
+            Array.Copy(Buffer, 0, array, arrayIndex, Count);
         }
 
         public int IndexOf(T item)
@@ -91,7 +91,7 @@ namespace Automa.Entities.Internal
             var comp = EqualityComparer<T>.Default;
 
             for (var index = Count - 1; index >= 0; --index)
-                if (comp.Equals(buffer[index], item))
+                if (comp.Equals(Buffer[index], item))
                     return index;
 
             return -1;
@@ -99,11 +99,11 @@ namespace Automa.Entities.Internal
 
         public void Insert(int index, T item)
         {
-            if (Count == buffer.Length) AllocateMore();
+            if (Count == Buffer.Length) AllocateMore();
 
-            Array.Copy(buffer, index, buffer, index + 1, Count - index);
+            Array.Copy(Buffer, index, Buffer, index + 1, Count - index);
 
-            buffer[index] = item;
+            Buffer[index] = item;
             ++Count;
         }
 
@@ -124,9 +124,9 @@ namespace Automa.Entities.Internal
             if (index == --Count)
                 return;
 
-            Array.Copy(buffer, index + 1, buffer, index, Count - index);
+            Array.Copy(Buffer, index + 1, Buffer, index, Count - index);
 
-            buffer[Count] = default(T);
+            Buffer[Count] = default(T);
         }
 
         public void AddRange(IEnumerable<T> items, int count)
@@ -136,11 +136,11 @@ namespace Automa.Entities.Internal
 
         public void AddRange(IEnumerator<T> items, int count)
         {
-            if (Count + count >= buffer.Length)
+            if (Count + count >= Buffer.Length)
                 AllocateMore(Count + count);
 
             while (items.MoveNext())
-                buffer[Count++] = items.Current;
+                Buffer[Count++] = items.Current;
         }
 
         public void AddRange(ICollection<T> items)
@@ -150,17 +150,17 @@ namespace Automa.Entities.Internal
 
         public void AddRange(ArrayList<T> items)
         {
-            AddRange(items.buffer, items.Count);
+            AddRange(items.Buffer, items.Count);
         }
 
         public void AddRange(T[] items, int count)
         {
             if (count == 0) return;
 
-            if (Count + count >= buffer.Length)
+            if (Count + count >= Buffer.Length)
                 AllocateMore(Count + count);
 
-            Array.Copy(items, 0, buffer, Count, count);
+            Array.Copy(items, 0, Buffer, Count, count);
             Count += count;
         }
 
@@ -180,13 +180,13 @@ namespace Automa.Entities.Internal
 
         public EcsListEnumerator<T> GetEnumerator()
         {
-            return new EcsListEnumerator<T>(buffer, Count);
+            return new EcsListEnumerator<T>(Buffer, Count);
         }
 
         public void Release()
         {
             Count = 0;
-            buffer = null;
+            Buffer = null;
         }
 
         public void Resize(int newSize)
@@ -194,14 +194,14 @@ namespace Automa.Entities.Internal
             if (newSize < MinSize)
                 newSize = MinSize;
 
-            Array.Resize(ref buffer, newSize);
+            Array.Resize(ref Buffer, newSize);
 
             Count = newSize;
         }
 
         public void Sort(IComparer<T> comparer)
         {
-            Array.Sort(buffer, 0, Count, comparer);
+            Array.Sort(Buffer, 0, Count, comparer);
         }
 
         public bool UnorderedRemove(T item)
@@ -220,38 +220,38 @@ namespace Automa.Entities.Internal
         {
             if (index == --Count)
             {
-                buffer[Count] = default(T);
+                Buffer[Count] = default(T);
                 return false;
             }
 
-            buffer[index] = buffer[Count];
-            buffer[Count] = default(T);
+            Buffer[index] = Buffer[Count];
+            Buffer[Count] = default(T);
 
             return true;
         }
 
         private void AllocateMore()
         {
-            var newList = new T[Math.Max(buffer.Length << 1, MinSize)];
-            if (Count > 0) buffer.CopyTo(newList, 0);
-            buffer = newList;
+            var newList = new T[Math.Max(Buffer.Length << 1, MinSize)];
+            if (Count > 0) Buffer.CopyTo(newList, 0);
+            Buffer = newList;
         }
 
         private void AllocateMore(int newSize)
         {
-            var oldLength = Math.Max(buffer.Length, MinSize);
+            var oldLength = Math.Max(Buffer.Length, MinSize);
 
             while (oldLength < newSize)
                 oldLength <<= 1;
 
             var newList = new T[oldLength];
-            if (Count > 0) Array.Copy(buffer, newList, Count);
-            buffer = newList;
+            if (Count > 0) Array.Copy(Buffer, newList, Count);
+            Buffer = newList;
         }
 
         public void Trim()
         {
-            if (Count < buffer.Length)
+            if (Count < Buffer.Length)
                 Resize(Count);
         }
     }
