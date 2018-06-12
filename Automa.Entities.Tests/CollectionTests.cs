@@ -35,7 +35,7 @@ namespace Automa.Entities.Tests
             }
 
             var group = contextEntityManager.RegisterGroup(new EntityGroup());
-            group.UpdateLength();
+            group.UpdateCount();
 
             for (int i = 0; i < group.Count; i++)
             {

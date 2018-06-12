@@ -61,7 +61,7 @@ namespace Automa.Entities
         {
             foreach (var group in groups)
             {
-                group.Group.UpdateLength();
+                group.Group.UpdateCount();
             }
         }
 
@@ -238,7 +238,7 @@ namespace Automa.Entities
             var newSlot = new GroupSlot(group);
             groups.Add(newSlot);
             group.Register(this);
-            group.UpdateLength();
+            group.UpdateCount();
             if (debug)
             {
                 debugInfo = new EntityManagerDebugInfo(groups.Select(slot => slot.DebugInfo).ToArray());

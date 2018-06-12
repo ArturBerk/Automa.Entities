@@ -137,7 +137,7 @@ namespace Automa.Entities.Tests
             contextEntityManager.AddComponent(entity, new ClassComponent(1));
 
             var group = contextEntityManager.RegisterGroup(new EntityGroup());
-            group.UpdateLength();
+            group.UpdateCount();
             Assert.AreEqual(1, group.Count);
         }
 

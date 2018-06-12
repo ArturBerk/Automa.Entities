@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Automa.Entities.Tests", "Au
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Automa.Entities.PerformanceTests", "Automa.Entities.PerformanceTests\Automa.Entities.PerformanceTests.csproj", "{9D53EC8D-DECC-44A8-93AD-572C742CC3CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automa.Benchmarks", "Automa.Benchmarks\Automa.Benchmarks.csproj", "{99AB5B71-0C33-47D5-AA2E-428715177B44}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Automa.Benchmarks", "Automa.Benchmarks\Automa.Benchmarks.csproj", "{99AB5B71-0C33-47D5-AA2E-428715177B44}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
