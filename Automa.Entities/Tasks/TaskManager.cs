@@ -52,18 +52,6 @@ namespace Automa.Entities.Tasks
             }
         }
 
-        public void Schedule(ITaskFor taskFor, int length, int batch)
-        {
-            var startIndex = 0;
-            while (startIndex < length)
-            {
-                var endIndex = startIndex + batch;
-                if (endIndex >= length) endIndex = length;
-                startIndex = endIndex;
-                Schedule(new TaskForItem(taskFor, startIndex, endIndex));
-            }
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void AdvanceWorkerIndex()
         {
@@ -85,29 +73,7 @@ namespace Automa.Entities.Tasks
                 }
             }
         }
-
-        internal struct TaskForItem : ITask
-        {
-            private readonly ITaskFor taskFor;
-            private readonly int StartIndex;
-            private readonly int EndIndex;
-
-            public TaskForItem(ITaskFor taskFor, int startIndex, int endIndex)
-            {
-                this.taskFor = taskFor;
-                StartIndex = startIndex;
-                EndIndex = endIndex;
-            }
-
-            public void Execute()
-            {
-                for (int i = StartIndex; i < EndIndex; i++)
-                {
-                    taskFor.Execute(i);
-                }
-            }
-        }
-
+        
         private bool IsCompleted()
         {
             for (var i = 0; i < workers.Length; i++)

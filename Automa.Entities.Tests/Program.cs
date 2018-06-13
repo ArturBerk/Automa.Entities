@@ -22,21 +22,11 @@ namespace Automa.Entities.Tests
 //                }
 //                taskManager.Wait();
 //            }
-            taskManager.Schedule(new TaskFor(), 10000, 64);
-            taskManager.Wait();
+//            taskManager.Schedule(new TaskFor(), 10000, 64);
+//            taskManager.Wait();
             Console.WriteLine("Completed");
             Console.ReadKey();
             context.Dispose();
-        }
-
-        private class TaskFor : ITaskFor
-        {
-            public float sum;
-
-            public void Execute(int i)
-            {
-                sum = (float)Math.Sin(i);
-            }
         }
 
         private class Task1 : ITask

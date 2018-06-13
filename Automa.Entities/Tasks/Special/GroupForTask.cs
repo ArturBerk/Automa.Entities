@@ -2,13 +2,13 @@
 
 namespace Automa.Entities.Tasks.Special
 {
-    public abstract class GroupIteratorTask<TGroup> : ITaskSource where TGroup: Group
+    public abstract class GroupForTask<TGroup> : ITaskSource where TGroup: Group
     {
         protected readonly TGroup Group;
         private readonly int batch;
         private readonly ArrayList<ITask> subTasks = new ArrayList<ITask>();
 
-        protected GroupIteratorTask(TGroup @group, int batch)
+        protected GroupForTask(TGroup @group, int batch)
         {
             this.Group = @group;
             this.batch = batch;
@@ -24,7 +24,8 @@ namespace Automa.Entities.Tasks.Special
                 var endIndex = startIndex + batch;
                 if (endIndex >= Group.Count) endIndex = Group.Count;
                 var task = (SubTask)subTasks[batchIndex++];
-                task.Iterator = Group.GetIterator(startIndex, endIndex);
+                task.startIndex = startIndex;
+                task.endIndex = endIndex;
                 startIndex = endIndex;
             }
             return subTasks.Buffer;
@@ -42,23 +43,24 @@ namespace Automa.Entities.Tasks.Special
             }
         }
 
-        public abstract void Execute(Group.EntityIndex index);
+        public abstract void Execute(int index);
 
         private class SubTask : ITask
         {
-            private readonly GroupIteratorTask<TGroup> task;
-            public Group.Iterator Iterator;
+            private readonly GroupForTask<TGroup> task;
+            public int startIndex;
+            public int endIndex;
 
-            public SubTask(GroupIteratorTask<TGroup> task)
+            public SubTask(GroupForTask<TGroup> task)
             {
                 this.task = task;
             }
 
             public void Execute()
             {
-                while (Iterator.MoveNext())
+                for (int i = startIndex; i < endIndex; i++)
                 {
-                    task.Execute(Iterator.CurrentIndex);
+                    task.Execute(i);
                 }
             }
         }
