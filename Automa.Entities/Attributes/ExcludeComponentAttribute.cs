@@ -2,7 +2,7 @@
 
 namespace Automa.Entities.Attributes
 {
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public sealed class ExcludeComponentAttribute : Attribute
     {
         public readonly Type ComponentType;

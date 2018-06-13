@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Automa.Entities.Attributes;
@@ -35,7 +36,7 @@ namespace Automa.Entities.Systems
             {
                 for (var i = 0; i < updateSystems.Count; i++)
                 {
-                    var systemSlot = systems[i];
+                    var systemSlot = updateSystems[i];
                     stopwatch.Restart();
                     systemSlot.UpdateSystem.OnUpdate();
                     stopwatch.Stop();
@@ -46,7 +47,7 @@ namespace Automa.Entities.Systems
             {
                 for (var i = 0; i < updateSystems.Count; i++)
                 {
-                    systems[i].UpdateSystem.OnUpdate();
+                    updateSystems[i].UpdateSystem.OnUpdate();
                 }
             }
         }
@@ -103,6 +104,8 @@ namespace Automa.Entities.Systems
             }
             else
             {
+                ref var slot = ref systems[FindSystemInGroup(systems, system)];
+                if (slot.DebugInfo != null) slot.DebugInfo.UpdateTime = TimeSpan.Zero;
                 if (system is IUpdateSystem)
                 {
                     RemoveSystemFromGroup(updateSystems, system);
