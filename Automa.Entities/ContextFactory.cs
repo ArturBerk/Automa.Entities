@@ -1,5 +1,6 @@
 ﻿using Automa.Entities.Events;
 using Automa.Entities.Systems;
+using Automa.Entities.Tasks;
 
 namespace Automa.Entities
 {
@@ -10,6 +11,7 @@ namespace Automa.Entities
             var context = new Context();
             context.SetManager(new EntityManager(debug));
             context.SetManager(new SystemManager(debug));
+            context.SetManager(new TaskManager());
             context.SetManager(new EntityEventManager());
             return context;
         }
