@@ -235,6 +235,12 @@ namespace Automa.Entities
 
         public T RegisterGroup<T>(T group) where T : Group
         {
+            RegisterGroup((Group)group);
+            return group;
+        }
+
+        internal void RegisterGroup(Group group)
+        {
             var newSlot = new GroupSlot(group);
             groups.Add(newSlot);
             group.Register(this);
@@ -243,10 +249,9 @@ namespace Automa.Entities
             {
                 debugInfo = new EntityManagerDebugInfo(groups.Select(slot => slot.DebugInfo).ToArray());
             }
-            return group;
         }
 
-        public void UnregisterGroup<T>(T group) where T : Group
+        public void UnregisterGroup(Group group)
         {
             for (int i = 0; i < groups.Count; i++)
             {

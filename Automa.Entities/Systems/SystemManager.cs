@@ -12,13 +12,9 @@ namespace Automa.Entities.Systems
         internal static int DefaultOrder = 0;
 
         internal readonly ArrayList<SystemSlot> systems = new ArrayList<SystemSlot>();
-        
-        #region Debugging
-        private readonly bool debug;
-        private readonly Stopwatch stopwatch;
-        private SystemManagerDebugInfo debugInfo;
-        public SystemManagerDebugInfo DebugInfo => debugInfo;
-        #endregion
+        internal readonly ArrayList<SystemSlot> updateSystems = new ArrayList<SystemSlot>();
+
+        private IContext context;
 
         public SystemManager() : this(false)
         {
@@ -33,78 +29,27 @@ namespace Automa.Entities.Systems
             }
         }
 
-        public void AddSystem(ISystem system)
-        {
-            var orderAttribute = system.GetType().GetCustomAttribute<OrderAttribute>();
-            var newSlot = new SystemSlot(orderAttribute?.Order ?? DefaultOrder, system);
-            var inserted = false;
-            for (var i = 0; i < systems.Count; i++)
-            {
-                if (systems[i].Order < newSlot.Order)
-                {
-                    systems.Insert(i, newSlot);
-                    inserted = true;
-                    break;
-                }
-            }
-            if (!inserted)
-            {
-                systems.Add(newSlot);
-            }
-            if (context != null)
-            {
-                newSlot.System.OnAttachToContext(context);
-            }
-            if (debug)
-            {
-                debugInfo = new SystemManagerDebugInfo(systems.Select(slot => slot.DebugInfo).ToArray());
-            }
-        }
-
-        public void RemoveSystem(ISystem system)
-        {
-            for (var i = 0; i < systems.Count; i++)
-            {
-                var slot = systems[i];
-                if (ReferenceEquals(slot.System, system))
-                {
-                    if (context != null)
-                    {
-                        slot.System.OnDetachFromContext(context);
-                    }
-                    systems.RemoveAt(i);
-                    break;
-                }
-            }
-            if (debug)
-            {
-                debugInfo = new SystemManagerDebugInfo(systems.Select(slot => slot.DebugInfo).ToArray());
-            }
-        }
-
         public void OnUpdate()
         {
             if (debug)
             {
-                for (var i = 0; i < systems.Count; i++)
+                for (var i = 0; i < updateSystems.Count; i++)
                 {
                     var systemSlot = systems[i];
                     stopwatch.Restart();
-                    systemSlot.System.OnUpdate();
+                    systemSlot.UpdateSystem.OnUpdate();
                     stopwatch.Stop();
                     systemSlot.DebugInfo.UpdateTime = stopwatch.Elapsed;
                 }
             }
             else
             {
-                for (var i = 0; i < systems.Count; i++)
+                for (var i = 0; i < updateSystems.Count; i++)
                 {
-                    systems[i].System.OnUpdate();
+                    systems[i].UpdateSystem.OnUpdate();
                 }
             }
         }
-
-        private IContext context;
 
         public void OnAttachToContext(IContext context)
         {
@@ -123,5 +68,113 @@ namespace Automa.Entities.Systems
                 systemSlot.System.OnDetachFromContext(context);
             }
         }
+
+        public void AddSystem(ISystem system)
+        {
+            var orderAttribute = system.GetType().GetCustomAttribute<OrderAttribute>();
+            var newSlot = new SystemSlot(orderAttribute?.Order ?? DefaultOrder, system);
+            AddSystemToGroup(systems, ref newSlot);
+            if (context != null)
+            {
+                newSlot.System.OnAttachToContext(context);
+            }
+
+            if (newSlot.System.IsEnabled && newSlot.UpdateSystem != null)
+            {
+                AddSystemToGroup(updateSystems, ref newSlot);
+            }
+            system.EnabledChanged += SystemOnEnabledChanged;
+
+            if (debug)
+            {
+                debugInfo = new SystemManagerDebugInfo(systems.Select(slot => slot.DebugInfo).ToArray());
+            }
+        }
+
+        private void SystemOnEnabledChanged(ISystem system, bool state)
+        {
+            if (state)
+            {
+                ref var slot = ref systems[FindSystemInGroup(systems, system)];
+                if (slot.UpdateSystem != null)
+                {
+                    AddSystemToGroup(updateSystems, ref slot);
+                }
+            }
+            else
+            {
+                if (system is IUpdateSystem)
+                {
+                    RemoveSystemFromGroup(updateSystems, system);
+                }
+            }
+        }
+
+        private int FindSystemInGroup(ArrayList<SystemSlot> array, ISystem system)
+        {
+            for (var i = 0; i < array.Count; i++)
+            {
+                ref var slot = ref array.Buffer[i];
+                if (ReferenceEquals(slot.System, system))
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        private void AddSystemToGroup(ArrayList<SystemSlot> array, ref SystemSlot newSlot)
+        {
+            var inserted = false;
+            for (var i = 0; i < array.Count; i++)
+            {
+                if (array[i].Order < newSlot.Order)
+                {
+                    array.Insert(i, newSlot);
+                    inserted = true;
+                    break;
+                }
+            }
+            if (!inserted)
+            {
+                array.Add(newSlot);
+            }
+        }
+
+        public void RemoveSystem(ISystem system)
+        {
+            if (RemoveSystemFromGroup(systems, system))
+            {
+                if (context != null)
+                {
+                    system.OnDetachFromContext(context);
+                }
+                RemoveSystemFromGroup(updateSystems, system);
+            }
+            if (debug)
+            {
+                debugInfo = new SystemManagerDebugInfo(systems.Select(slot => slot.DebugInfo).ToArray());
+            }
+        }
+
+        private bool RemoveSystemFromGroup(ArrayList<SystemSlot> array, ISystem system)
+        {
+            var index = FindSystemInGroup(array, system);
+            if (index >= 0)
+            {
+                array.RemoveAt(index);
+                return true;
+            }
+            return false;
+        }
+
+        #region Debugging
+
+        private readonly bool debug;
+        private readonly Stopwatch stopwatch;
+        private SystemManagerDebugInfo debugInfo;
+        public SystemManagerDebugInfo DebugInfo => debugInfo;
+
+        #endregion
     }
 }

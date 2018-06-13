@@ -10,12 +10,14 @@ namespace Automa.Entities.Internal
         public static readonly IComparer<SystemSlot> DefaultComparer = new Comparer();
         public readonly int Order;
         public readonly ISystem System;
+        public readonly IUpdateSystem UpdateSystem;
         public readonly SystemDebugInfo DebugInfo;
 
         public SystemSlot(int order, ISystem system)
         {
             Order = order;
             System = system;
+            UpdateSystem = system is IUpdateSystem ? (IUpdateSystem) system : null;
             DebugInfo = new SystemDebugInfo(system);
         }
 

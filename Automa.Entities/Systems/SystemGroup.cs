@@ -1,17 +1,19 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using Automa.Entities.Attributes;
 using Automa.Entities.Systems;
 using Automa.Entities.Internal;
 
 namespace Automa.Entities
 {
-    public sealed class SystemGroup : ISystem
+    public sealed class SystemGroup : ISystem, IUpdateSystem
     {
         private readonly ArrayList<SystemSlot> systems = new ArrayList<SystemSlot>();
 
         private IContext context;
 
         public bool IsEnabled { get; set; }
+        public event Action<ISystem, bool> EnabledChanged;
 
         public void OnAttachToContext(IContext context)
         {
@@ -35,7 +37,11 @@ namespace Automa.Entities
         {
             for (var i = 0; i < systems.Count; i++)
             {
-                systems[i].System.OnUpdate();
+                ref var systemSlot = ref systems[i];
+                if (systemSlot.UpdateSystem != null && systemSlot.System.IsEnabled)
+                {
+                    systemSlot.UpdateSystem.OnUpdate();
+                }
             }
         }
 

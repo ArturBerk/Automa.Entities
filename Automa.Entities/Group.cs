@@ -21,7 +21,11 @@ namespace Automa.Entities
         public void UpdateCount()
         {
             componentArrayLengths.FastClear();
-            if (componentCollections.Length == 0) Count = 0;
+            if (componentCollections.Length == 0)
+            {
+                Count = 0;
+                return;
+            }
             Count = componentCollections[0].CalculatedCount;
             componentCollections[0].GetArrayLengths(componentArrayLengths, out Count);
         }
