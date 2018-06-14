@@ -15,7 +15,7 @@ namespace Automa.Entities.Tests
         [Test]
         public void IsEntityTypeMatching()
         {
-            ComponentType[] types1 = new []
+            ComponentType[] types1 = new[]
             {
                 ComponentType.Create<ClassComponent>(),
                 ComponentType.Create<StructComponent>(),
@@ -123,7 +123,7 @@ namespace Automa.Entities.Tests
 
             var entity = contextEntityManager.CreateEntity(typeof(StructComponent));
             contextEntityManager.AddComponent(entity, new ClassComponent(1));
-            
+
             var group = contextEntityManager.RegisterGroup(new ExcludeGroup());
             Assert.AreEqual(0, group.Entities.CalculatedCount);
         }
@@ -141,16 +141,38 @@ namespace Automa.Entities.Tests
             Assert.AreEqual(1, group.Count);
         }
 
+        [Test]
+        public void GroupRemoveComponent()
+        {
+            var context = ContextFactory.CreateEntitiesContext();
+            var contextEntityManager = context.GetManager<EntityManager>();
+
+            var entity = contextEntityManager.CreateEntity(typeof(StructComponent));
+            var group = contextEntityManager.RegisterGroup(new ExcludeGroup());
+
+            contextEntityManager.AddComponent(entity, new ClassComponent(1));
+            context.Update();
+            Assert.AreEqual(0, group.Count);
+
+            contextEntityManager.RemoveComponent<ClassComponent>(entity);
+            context.Update();
+            Assert.AreEqual(1, group.Count);
+
+            contextEntityManager.AddComponent(entity, new ClassComponent(1));
+            context.Update();
+            Assert.AreEqual(0, group.Count);
+        }
+
         [ExcludeComponent(typeof(ClassComponent))]
         private class ExcludeGroup : Group
         {
-            public Collections.Entities Entities;
+            public Collections.EntityCollection Entities;
             public Collection<StructComponent> Structures;
         }
 
         private class EntityGroup : Group
         {
-            public Collections.Entities Entities;
+            public Collections.EntityCollection Entities;
             public Collection<ClassComponent> Classes;
             public Collection<StructComponent> Structures;
         }

@@ -56,7 +56,7 @@ namespace Automa.Entities
 
         public override string ToString()
         {
-            return $"{TypeId} ({ComponentTypeManager.GetTypeFromIndex(TypeId)})";
+            return $"{TypeId} ({ComponentTypeManager.GetTypeFromIndex(TypeId).Name})";
         }
     }
 

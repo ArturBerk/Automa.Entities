@@ -17,9 +17,9 @@ namespace Automa.Entities.Internal
             InitializeArrays(entityType.Types);
         }
 
-        public IComponentArray GetComponentArrayUnchecked(ComponentType type)
+        public IComponentArray GetComponentArray(ComponentType type)
         {
-            return componentArrays[type.TypeId];
+            return type.TypeId < componentArrays.Length ? componentArrays[type.TypeId] : null;
         }
 
         public ComponentArray<T> GetComponentArray<T>()
@@ -59,13 +59,13 @@ namespace Automa.Entities.Internal
 
         public (int entityId, int newIndexInChunk) RemoveEntity(int index)
         {
+            --count;
             entityArray.UnorderedRemoveAt(index);
             for (var i = 0; i < componentTypeIndices.Length; i++)
             {
                 componentArrays[componentTypeIndices[i]].UnorderedRemoveAt(index);
             }
-            --count;
-            return (entityArray[index].Id, index);
+            return (index != count ? entityArray[index].Id : -1, index);
         }
 
 
@@ -78,6 +78,11 @@ namespace Automa.Entities.Internal
         {
             var typeId = ((ComponentType) typeof(T)).TypeId;
             return componentArrays.Length > typeId && componentArrays[typeId] != null;
+        }
+
+        public override string ToString()
+        {
+            return $"{nameof(EntityType)}: {EntityType}";
         }
     }
 }

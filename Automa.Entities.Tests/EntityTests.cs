@@ -127,10 +127,22 @@ namespace Automa.Entities.Tests
                 entityManager.SetComponent(e, new Struct2Component(20 + e.Id));
                 entityManager.SetComponent(e, new ClassComponent(40 + e.Id));
             }
+            for (int i = 0; i < 10; i++)
+            {
+                var e = entityManager.CreateEntity(typeof(StructComponent), typeof(ClassComponent), 
+                    typeof(Struct2Component), typeof(Struct3Component));
+                entityManager.SetComponent(e, new StructComponent(10 + e.Id));
+                entityManager.SetComponent(e, new Struct2Component(20 + e.Id));
+                entityManager.SetComponent(e, new ClassComponent(40 + e.Id));
+                entityManager.SetComponent(e, new Struct3Component(30 + e.Id));
+            }
             var entities = entityManager.Entities.ToArray();
             foreach (var entity in entities)
             {
-                entityManager.AddComponent(entity, new Struct3Component(30 + entity.Id));
+                if (!entityManager.HasComponent<Struct3Component>(entity))
+                {
+                    entityManager.AddComponent(entity, new Struct3Component(30 + entity.Id));
+                }
             }
 
             foreach (var entity in entities)
@@ -173,6 +185,37 @@ namespace Automa.Entities.Tests
             EntityManager entityManager = new EntityManager();
             var entity = entityManager.CreateEntity();
             Assert.AreEqual(1, entityManager.EntityCount);
+        }
+
+
+
+        [Test]
+        public void ChangeComponentsTest()
+        {
+            var contextEntityManager = new EntityManager();
+
+            var entity = contextEntityManager.CreateEntity(typeof(StructComponent), typeof(Struct2Component));
+            contextEntityManager.SetComponent(entity, new StructComponent(1));
+            contextEntityManager.SetComponent(entity, new Struct2Component(2));
+
+            Assert.IsTrue(contextEntityManager.HasComponent<StructComponent>(entity));
+            Assert.IsTrue(contextEntityManager.HasComponent<Struct2Component>(entity));
+
+            contextEntityManager.ChangeComponents(entity, new ComponentType[]
+            {
+                typeof(ClassComponent),
+                typeof(Struct3Component)
+            }, new ComponentType[]
+            {
+                typeof(StructComponent)
+            });
+
+
+            Assert.IsFalse(contextEntityManager.HasComponent<StructComponent>(entity));
+            Assert.IsTrue(contextEntityManager.HasComponent<Struct2Component>(entity));
+            Assert.IsTrue(contextEntityManager.HasComponent<Struct3Component>(entity));
+            Assert.IsTrue(contextEntityManager.HasComponent<ClassComponent>(entity));
+            Assert.AreEqual(2, contextEntityManager.GetComponent<Struct2Component>(entity).Value);
         }
 
     }

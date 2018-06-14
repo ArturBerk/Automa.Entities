@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Automa.Entities.Internal;
 
 namespace Automa.Entities
@@ -26,6 +27,11 @@ namespace Automa.Entities
         public static uint CalculateHash(ComponentType[] types, int count)
         {
             return HashUtility.Fletcher32(types, count);
+        }
+
+        public override string ToString()
+        {
+            return string.Join(", ", Types.Select(type => type.ToString()));
         }
     }
 }

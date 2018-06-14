@@ -45,7 +45,7 @@ namespace Automa.Entities.Tests
 
         private class EntityGroup : Group
         {
-            public Collections.Entities Entities;
+            public Collections.EntityCollection Entities;
             public Collection<StructComponent> Structures;
         }
 

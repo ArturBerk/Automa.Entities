@@ -61,9 +61,9 @@ namespace Automa.Entities
                         fieldInfo.SetValue(this, componentsArray);
                     }
                 }
-                else if (fieldType == typeof(Collections.Entities))
+                else if (fieldType == typeof(Collections.EntityCollection))
                 {
-                    var entitiesArray = new Collections.Entities();
+                    var entitiesArray = new Collections.EntityCollection();
                     componentArraysTmp.Add(entitiesArray);
                     fieldInfo.SetValue(this, entitiesArray);
                 }

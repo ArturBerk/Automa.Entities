@@ -19,6 +19,7 @@ namespace Automa.Entities.Tests
             {
                 task1.sum = 0;
                 taskManager.Schedule(task1);
+                taskManager.Wait();
                 Assert.AreEqual(1000, task1.sum);
             }
         }

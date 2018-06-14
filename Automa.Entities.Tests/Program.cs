@@ -11,22 +11,26 @@ namespace Automa.Entities.Tests
     {
         public static void Main()
         {
-            var context = ContextFactory.CreateEntitiesContext();
-            var taskManager = context.GetManager<TaskManager>();
-//            var tasks = new ITask[] { new Task1(), new Task1(), new Task1(), new Task1() };
-//            for (int i = 0; i < 1000; i++)
-//            {
-//                for (int j = 0; j < tasks.Length; j++)
-//                {
-//                    taskManager.Schedule(tasks[j]);
-//                }
-//                taskManager.Wait();
-//            }
-//            taskManager.Schedule(new TaskFor(), 10000, 64);
-//            taskManager.Wait();
-            Console.WriteLine("Completed");
-            Console.ReadKey();
-            context.Dispose();
+            EntityTests e = new EntityTests();
+            e.AddComponentTest();
+
+
+//            var context = ContextFactory.CreateEntitiesContext();
+//            var taskManager = context.GetManager<TaskManager>();
+////            var tasks = new ITask[] { new Task1(), new Task1(), new Task1(), new Task1() };
+////            for (int i = 0; i < 1000; i++)
+////            {
+////                for (int j = 0; j < tasks.Length; j++)
+////                {
+////                    taskManager.Schedule(tasks[j]);
+////                }
+////                taskManager.Wait();
+////            }
+////            taskManager.Schedule(new TaskFor(), 10000, 64);
+////            taskManager.Wait();
+//            Console.WriteLine("Completed");
+//            Console.ReadKey();
+//            context.Dispose();
         }
 
         private class Task1 : ITask

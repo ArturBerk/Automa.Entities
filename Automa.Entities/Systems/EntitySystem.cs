@@ -8,7 +8,7 @@ namespace Automa.Entities.Systems
     public abstract class EntitySystem : ISystem
     {
         private bool isEnabled = true;
-        public EntityManager EntityManager { get; set; }
+        public EntityManager EntityManager;
 
         public event Action<ISystem, bool> EnabledChanged;
 
@@ -24,7 +24,7 @@ namespace Automa.Entities.Systems
             EntityManager = null;
         }
 
-        public virtual bool IsEnabled
+        public bool IsEnabled
         {
             get => isEnabled;
             set

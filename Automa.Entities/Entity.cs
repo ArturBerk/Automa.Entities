@@ -44,7 +44,7 @@ namespace Automa.Entities
 
         public override string ToString()
         {
-            return $"{Id} ({Version})";
+            return $"E{Id}";
         }
     }
 }

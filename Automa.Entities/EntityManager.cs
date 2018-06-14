@@ -41,7 +41,7 @@ namespace Automa.Entities
         /// 27716
         /// </summary>
 
-        public Collections.Entities Entities => allEntities.Entities;
+        public Collections.EntityCollection Entities => allEntities.Entities;
 
         internal IEnumerable<EntityTypeData> Datas => entityTypeDatas.Values;
 
@@ -121,7 +121,10 @@ namespace Automa.Entities
 
         private void HandleEntityRemoving((int entityId, int newIndexInChunk) removeData)
         {
-            entityLinks[removeData.entityId].IndexInData = removeData.newIndexInChunk;
+            if (removeData.entityId >= 0)
+            {
+                entityLinks[removeData.entityId].IndexInData = removeData.newIndexInChunk;
+            }
         }
 
         public void AddComponent<T>(Entity entity, T component)
@@ -162,7 +165,7 @@ namespace Automa.Entities
             var entityTypeHash = EntityType.CalculateHash(componentTypeCache, index);
             var data = GetOrCreateData(entityTypeHash, componentTypeCache, index);
 
-            MoveEntity(ref entityLink, data, ref entityType);
+            MoveEntity(ref entityLink, data, entityType.Types, entityType.Types.Length);
             data.SetComponent(entityLink.IndexInData, component);
         }
 
@@ -175,6 +178,93 @@ namespace Automa.Entities
                 OnEntityTypeAdd(ref data);
             }
             return data;
+        }
+
+        public void ChangeComponents(Entity entity,
+            ComponentType[] addComponents,
+            ComponentType[] removeComponents)
+        {
+            ref var entityLink = ref entityLinks[entity.Id];
+            if (entityLink.Entity != entity)
+                throw new ArgumentException("Entity not found");
+            var entityType = entityLink.Data.EntityType;
+
+            if (componentTypeCache.Length < entityType.Types.Length + 1)
+            {
+                Array.Resize(ref componentTypeCache, entityType.Types.Length + 1);
+            }
+
+            var index = 0;
+            var previousTypeId = -1;
+            var entityTypeChanged = false;
+            var addedComponentTypes = 0;
+            for (int i = 0; i < entityType.Types.Length; i++)
+            {
+                var entityTypeType = entityType.Types[i];
+                if (addComponents != null)
+                {
+                    for (int j = 0; j < addComponents.Length; j++)
+                    {
+                        var componentTypeToAdd = addComponents[j];
+                        if (componentTypeToAdd.TypeId > previousTypeId
+                            && componentTypeToAdd.TypeId < entityTypeType.TypeId)
+                        {
+                            componentTypeCache[index++] = componentTypeToAdd;
+                            ++addedComponentTypes;
+                            entityTypeChanged = true;
+                        }
+                        else if (componentTypeToAdd.TypeId == entityTypeType.TypeId)
+                        {
+                            ++addedComponentTypes;
+                        }
+                    }
+                }
+                if (removeComponents != null)
+                {
+                    for (int j = 0; j < removeComponents.Length; j++)
+                    {
+                        if (removeComponents[j] == entityTypeType)
+                        {
+                            entityTypeChanged = true;
+                            goto continueNextType;
+                        }
+                    }
+                }
+                componentTypeCache[index++] = entityTypeType;
+                previousTypeId = entityTypeType.TypeId;
+                continueNextType:
+                ;
+            }
+            if (addComponents != null)
+            {
+                while (addedComponentTypes < addComponents.Length)
+                {
+                    var minimalId = int.MaxValue;
+                    var minimalComponentType = new ComponentType();
+                    for (int j = 0; j < addComponents.Length; j++)
+                    {
+                        var componentTypeToAdd = addComponents[j];
+                        if (componentTypeToAdd.TypeId > previousTypeId
+                            && componentTypeToAdd.TypeId < minimalId)
+                        {
+                            minimalId = componentTypeToAdd.TypeId;
+                            minimalComponentType = componentTypeToAdd;
+                        }
+                    }
+                    previousTypeId = minimalId;
+                    componentTypeCache[index++] = minimalComponentType;
+                    ++addedComponentTypes;
+                    entityTypeChanged = true;
+                }
+            }
+
+            // If entity type not changed => return
+            if (!entityTypeChanged) return;
+
+            var entityTypeHash = EntityType.CalculateHash(componentTypeCache, index);
+            var data = GetOrCreateData(entityTypeHash, componentTypeCache, index);
+
+            MoveEntity(ref entityLink, data, entityType.Types, entityType.Types.Length);
         }
 
         public void RemoveComponent<T>(Entity entity)
@@ -190,6 +280,7 @@ namespace Automa.Entities
             }
             ComponentType newComponentType = typeof(T);
             var index = 0;
+            var removed = false;
             for (var i = 0; i < entityType.Types.Length; i++)
             {
                 var entityComponentType = entityType.Types[i];
@@ -197,26 +288,33 @@ namespace Automa.Entities
                 {
                     componentTypeCache[index++] = entityComponentType;
                 }
+                else
+                {
+                    removed = true;
+                }
             }
+            if (!removed) throw new ApplicationException("Entity not contains component of type " + typeof(T));
             var entityTypeHash = EntityType.CalculateHash(componentTypeCache, index);
             var data = GetOrCreateData(entityTypeHash, componentTypeCache, index);
 
             var newEntityType = data.EntityType;
-            MoveEntity(ref entityLink, data, ref newEntityType);
+            MoveEntity(ref entityLink, data, newEntityType.Types, newEntityType.Types.Length);
         }
 
-        private void MoveEntity(ref EntityLink entityLink, EntityTypeData data, ref EntityType copyTypesBasedOn)
+        private void MoveEntity(ref EntityLink entityLink, EntityTypeData data, ComponentType[] copyTypesBasedOn, int typeCount)
         {
             // Add new entity to new entity type data
             var newEntityIndexInData = data.AddEntity(entityLink.Entity);
             // Copy component data from old to new entity type data
-            for (var i = 0; i < copyTypesBasedOn.Types.Length; i++)
+            for (var i = 0; i < typeCount; i++)
             {
-                var type = copyTypesBasedOn.Types[i];
-                data.GetComponentArrayUnchecked(type)
-                    .CopyFrom(entityLink.Data.GetComponentArrayUnchecked(type),
-                        entityLink.IndexInData,
-                        newEntityIndexInData);
+                var type = copyTypesBasedOn[i];
+                var sourceArray = entityLink.Data.GetComponentArray(type);
+                var destArray = data.GetComponentArray(type);
+                if (sourceArray != null && destArray != null)
+                {
+                    destArray.CopyFrom(sourceArray, entityLink.IndexInData, newEntityIndexInData);
+                }
             }
             // Remove entity from old entity type data
             HandleEntityRemoving(entityLink.Data.RemoveEntity(entityLink.IndexInData));
@@ -290,11 +388,16 @@ namespace Automa.Entities
             public Entity Entity;
             public EntityTypeData Data;
             public int IndexInData;
+
+            public override string ToString()
+            {
+                return $"{Entity} => {IndexInData} in \"{Data.EntityType}\"";
+            }
         }
 
         private class AllEntities : Group
         {
-            public Collections.Entities Entities;
+            public Collections.EntityCollection Entities;
         }
 
         private struct GroupSlot

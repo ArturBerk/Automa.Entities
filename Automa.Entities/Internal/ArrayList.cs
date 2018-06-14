@@ -178,9 +178,9 @@ namespace Automa.Entities.Internal
             Count = 0;
         }
 
-        public EcsListEnumerator<T> GetEnumerator()
+        public ArrayListEnumerator<T> GetEnumerator()
         {
-            return new EcsListEnumerator<T>(Buffer, Count);
+            return new ArrayListEnumerator<T>(Buffer, Count);
         }
 
         public void Release()
@@ -256,11 +256,11 @@ namespace Automa.Entities.Internal
         }
     }
 
-    public struct EcsListEnumerator<T> : IEnumerator<T>
+    public struct ArrayListEnumerator<T> : IEnumerator<T>
     {
         public T Current { get; private set; }
 
-        public EcsListEnumerator(T[] buffer, int size)
+        public ArrayListEnumerator(T[] buffer, int size)
         {
             this.size = size;
             counter = 0;
