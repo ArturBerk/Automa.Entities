@@ -27,6 +27,10 @@ namespace Automa.Entities.Systems
             if (debug)
             {
                 stopwatch = new Stopwatch();
+                if (debug)
+                {
+                    debugInfo = new SystemManagerDebugInfo();
+                }
             }
         }
 
@@ -59,6 +63,13 @@ namespace Automa.Entities.Systems
             {
                 systemSlot.System.OnAttachToContext(context);
             }
+            if (debug)
+            {
+                foreach (var debugInfoSystem in DebugInfo.Systems)
+                {
+                    debugInfoSystem.OnAttachToContext(context);
+                }
+            }
         }
 
         public void OnDetachFromContext(IContext context)
@@ -67,6 +78,13 @@ namespace Automa.Entities.Systems
             foreach (var systemSlot in systems)
             {
                 systemSlot.System.OnDetachFromContext(context);
+            }
+            if (debug)
+            {
+                foreach (var debugInfoSystem in DebugInfo.Systems)
+                {
+                    debugInfoSystem.OnDetachFromContext(context);
+                }
             }
         }
 
@@ -89,6 +107,13 @@ namespace Automa.Entities.Systems
             if (debug)
             {
                 debugInfo = new SystemManagerDebugInfo(systems.Select(slot => slot.DebugInfo).ToArray());
+                if (context != null)
+                {
+                    foreach (var debugInfoSystem in DebugInfo.Systems)
+                    {
+                        debugInfoSystem.OnAttachToContext(context);
+                    }
+                }
             }
         }
 
@@ -157,6 +182,13 @@ namespace Automa.Entities.Systems
             if (debug)
             {
                 debugInfo = new SystemManagerDebugInfo(systems.Select(slot => slot.DebugInfo).ToArray());
+                if (context != null)
+                {
+                    foreach (var debugInfoSystem in DebugInfo.Systems)
+                    {
+                        debugInfoSystem.OnDetachFromContext(context);
+                    }
+                }
             }
         }
 

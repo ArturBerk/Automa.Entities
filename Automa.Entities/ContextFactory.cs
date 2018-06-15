@@ -8,7 +8,7 @@ namespace Automa.Entities
     {
         public static IContext CreateEntitiesContext(bool debug = false)
         {
-            var context = new Context();
+            var context = new Context(debug);
             context.SetManager(new EntityManager(debug));
             context.SetManager(new SystemManager(debug));
             context.SetManager(new TaskManager());

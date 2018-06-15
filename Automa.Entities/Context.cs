@@ -1,11 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Automa.Entities
 {
-    public class Context : IContext
+    public class Context : IDebuggableContext
     {
         private readonly Dictionary<Type, IManager> managers = new Dictionary<Type, IManager>();
+
+        public Context() : this(false)
+        {
+        }
+
+        public Context(bool debug)
+        {
+            this.debug = debug;
+            if (debug)
+            {
+                stopwatch = new Stopwatch();
+                debugInfo = new ContextDebugInfo();
+            }
+        }
 
         public T GetManager<T>() where T : IManager
         {
@@ -38,9 +53,22 @@ namespace Automa.Entities
 
         public void Update()
         {
-            foreach (var manager in managers)
+            if (debug)
             {
-                manager.Value.OnUpdate();
+                stopwatch.Restart();
+                foreach (var manager in managers)
+                {
+                    manager.Value.OnUpdate();
+                }
+                stopwatch.Stop();
+                debugInfo.UpdateTime = stopwatch.Elapsed;
+            }
+            else
+            {
+                foreach (var manager in managers)
+                {
+                    manager.Value.OnUpdate();
+                }
             }
         }
 
@@ -52,6 +80,20 @@ namespace Automa.Entities
             }
             managers.Clear();
         }
+
+        #region Debugging
+
+        private readonly bool debug;
+        private readonly Stopwatch stopwatch;
+        private readonly ContextDebugInfo debugInfo;
+        public ContextDebugInfo DebugInfo => debugInfo;
+
+        #endregion
+    }
+
+    public class ContextDebugInfo
+    {
+        public TimeSpan UpdateTime;
     }
 
     public interface IContext : IDisposable
@@ -62,11 +104,16 @@ namespace Automa.Entities
         void Update();
     }
 
+    public interface IDebuggableContext : IContext
+    {
+        ContextDebugInfo DebugInfo { get; }
+
+    }
+
     public interface IManager
     {
         void OnAttachToContext(IContext context);
         void OnDetachFromContext(IContext context);
         void OnUpdate();
     }
-
 }

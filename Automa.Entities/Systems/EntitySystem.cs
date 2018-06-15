@@ -7,6 +7,7 @@ namespace Automa.Entities.Systems
 {
     public abstract class EntitySystem : ISystem
     {
+        internal Group[] groups;
         private bool isEnabled = true;
         public EntityManager EntityManager;
 
@@ -37,6 +38,7 @@ namespace Automa.Entities.Systems
 
         private void RegisterGroups()
         {
+            List<Group> groups = new List<Group>();
             foreach (var fieldInfo in GetInjectableFields()
                 .Where(fi => typeof(Group).IsAssignableFrom(fi.FieldType)))
             {
@@ -44,7 +46,9 @@ namespace Automa.Entities.Systems
                 var instance = (Group) Activator.CreateInstance(fieldInfo.FieldType);
                 fieldInfo.SetValue(this, instance);
                 EntityManager.RegisterGroup(instance);
+                groups.Add(instance);
             }
+            this.groups = groups.ToArray();
         }
 
         private void UnregisterGroups()

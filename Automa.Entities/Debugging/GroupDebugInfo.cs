@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Automa.Entities.Debugging
@@ -8,12 +7,14 @@ namespace Automa.Entities.Debugging
     {
         public readonly Group Group;
         public int Count => Group.Count;
-        public IEnumerable<Type> IncludeTypes => Group.includedTypes.Select(type => (Type) type);
-        public IEnumerable<Type> ExcludeTypes => Group.excludedTypes?.Select(type => (Type) type) ?? Enumerable.Empty<Type>();
+        public Type[] IncludeTypes;
+        public Type[] ExcludeTypes;
 
         public GroupDebugInfo(Group @group)
         {
             Group = @group;
+            IncludeTypes = Group.includedTypes?.Select(type => (Type)type).ToArray() ?? Array.Empty<Type>();
+            ExcludeTypes = Group.excludedTypes?.Select(type => (Type)type).ToArray() ?? Array.Empty<Type>();
         }
     }
 }

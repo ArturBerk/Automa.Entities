@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Automa.Entities.Attributes;
 using Automa.Entities.Collections;
+using Automa.Entities.Debugging;
 using Automa.Entities.Internal;
 
 namespace Automa.Entities
@@ -17,32 +18,9 @@ namespace Automa.Entities
 
         public EntityManager EntityManager { get; private set; }
         public int Count;
-
-        public void UpdateCount()
+        
+        public Group()
         {
-            componentArrayLengths.FastClear();
-            if (componentCollections.Length == 0)
-            {
-                Count = 0;
-                return;
-            }
-            Count = componentCollections[0].CalculatedCount;
-            componentCollections[0].GetArrayLengths(componentArrayLengths, out Count);
-        }
-
-        public Iterator GetIterator()
-        {
-            return new Iterator(this);
-        }
-
-        public Iterator GetIterator(int startIndex, int endIndex)
-        {
-            return new Iterator(this, startIndex, endIndex);
-        }
-
-        internal void Register(EntityManager entityManager)
-        {
-            EntityManager = entityManager;
             var includedTypesTmp = new List<ComponentType>();
             var excludedTypesTmp = new List<ComponentType>();
             var componentArraysTmp = new List<CollectionBase>();
@@ -79,7 +57,33 @@ namespace Automa.Entities
                 ? null
                 : excludedTypesTmp.ToArray();
             componentCollections = componentArraysTmp.ToArray();
+        }
 
+        public void UpdateCount()
+        {
+            componentArrayLengths.FastClear();
+            if (componentCollections.Length == 0)
+            {
+                Count = 0;
+                return;
+            }
+            Count = componentCollections[0].CalculatedCount;
+            componentCollections[0].GetArrayLengths(componentArrayLengths, out Count);
+        }
+
+        public Iterator GetIterator()
+        {
+            return new Iterator(this);
+        }
+
+        public Iterator GetIterator(int startIndex, int endIndex)
+        {
+            return new Iterator(this, startIndex, endIndex);
+        }
+
+        internal void Register(EntityManager entityManager)
+        {
+            EntityManager = entityManager;
             foreach (var entityManagerChunk in entityManager.Datas)
             {
                 var entityType = entityManagerChunk.EntityType;
@@ -192,7 +196,7 @@ namespace Automa.Entities
                 StartIndex = startIndex;
                 EndIndex = endIndex;
                 IsCompleted = StartIndex >= group.Count;
-                currentIndexRaw = StartIndex;
+                currentIndexRaw = StartIndex - 1;
 
                 // Find start CurrentIndex
                 CurrentIndex = new EntityIndex(0, -1);
