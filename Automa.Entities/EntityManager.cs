@@ -59,10 +59,11 @@ namespace Automa.Entities
 
         public void OnUpdate()
         {
-            foreach (var group in groups)
-            {
-                group.Group.UpdateCount();
-            }
+            // Need manual update groups in systems
+//            foreach (var group in groups)
+//            {
+//                group.Group.Update();
+//            }
         }
 
         public Entity CreateEntity(params ComponentType[] types)
@@ -342,7 +343,7 @@ namespace Automa.Entities
             var newSlot = new GroupSlot(group);
             groups.Add(newSlot);
             group.Register(this);
-            group.UpdateCount();
+            group.Update();
             if (debug)
             {
                 debugInfo = new EntityManagerDebugInfo(groups.Select(slot => slot.DebugInfo).ToArray());

@@ -2,7 +2,13 @@
 
 namespace Automa.Entities.Commands
 {
-    public class CommandBuffer<TCommand, TContext> where TCommand : ICommand<TContext>
+    public interface ICommandBuffer
+    {
+        void Clear();
+        void Execute();
+    }
+
+    public class CommandBuffer<TCommand, TContext> : ICommandBuffer where TCommand : ICommand<TContext>
     {
         public readonly TContext Context;
 
@@ -29,6 +35,7 @@ namespace Automa.Entities.Commands
             {
                 buffer[i].Execute(Context);
             }
+            buffer.Clear();
         }
 
         public interface ICommandList

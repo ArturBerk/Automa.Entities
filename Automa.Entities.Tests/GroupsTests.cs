@@ -137,7 +137,7 @@ namespace Automa.Entities.Tests
             contextEntityManager.AddComponent(entity, new ClassComponent(1));
 
             var group = contextEntityManager.RegisterGroup(new EntityGroup());
-            group.UpdateCount();
+            group.Update();
             Assert.AreEqual(1, group.Count);
         }
 
@@ -151,15 +151,15 @@ namespace Automa.Entities.Tests
             var group = contextEntityManager.RegisterGroup(new ExcludeGroup());
 
             contextEntityManager.AddComponent(entity, new ClassComponent(1));
-            context.Update();
+            group.Update();
             Assert.AreEqual(0, group.Count);
 
             contextEntityManager.RemoveComponent<ClassComponent>(entity);
-            context.Update();
+            group.Update();
             Assert.AreEqual(1, group.Count);
 
             contextEntityManager.AddComponent(entity, new ClassComponent(1));
-            context.Update();
+            group.Update();
             Assert.AreEqual(0, group.Count);
         }
 
@@ -167,14 +167,14 @@ namespace Automa.Entities.Tests
         private class ExcludeGroup : Group
         {
             public Collections.EntityCollection Entities;
-            public Collection<StructComponent> Structures;
+            public ComponentCollection<StructComponent> Structures;
         }
 
         private class EntityGroup : Group
         {
             public Collections.EntityCollection Entities;
-            public Collection<ClassComponent> Classes;
-            public Collection<StructComponent> Structures;
+            public ComponentCollection<ClassComponent> Classes;
+            public ComponentCollection<StructComponent> Structures;
         }
     }
 }

@@ -58,7 +58,7 @@ namespace Automa.Entities.Tasks.Special
             {
                 while (Iterator.MoveNext())
                 {
-                    task.Execute(Iterator.CurrentIndex);
+                    task.Execute(Iterator.Index);
                 }
             }
         }

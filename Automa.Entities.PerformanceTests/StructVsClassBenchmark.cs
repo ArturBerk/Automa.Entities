@@ -78,12 +78,12 @@ namespace Automa.Entities.PerformanceTests
 
         private class StructGroup : Group
         {
-            public Collection<StructComponent> Data;
+            public ComponentCollection<StructComponent> Data;
         }
 
         private class ClassGroup : Group
         {
-            public Collection<ClassComponent> Data;
+            public ComponentCollection<ClassComponent> Data;
         }
     }
 }

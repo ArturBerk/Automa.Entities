@@ -35,7 +35,7 @@ namespace Automa.Entities.Tests
             }
 
             var group = contextEntityManager.RegisterGroup(new EntityGroup());
-            group.UpdateCount();
+            group.Update();
 
             for (int i = 0; i < group.Count; i++)
             {
@@ -46,7 +46,7 @@ namespace Automa.Entities.Tests
         private class EntityGroup : Group
         {
             public Collections.EntityCollection Entities;
-            public Collection<StructComponent> Structures;
+            public ComponentCollection<StructComponent> Structures;
         }
 
     }

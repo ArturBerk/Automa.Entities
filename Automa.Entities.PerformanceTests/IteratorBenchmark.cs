@@ -51,14 +51,14 @@ namespace Automa.Entities.PerformanceTests
 
         private class BenchmarkGroup : Group
         {
-            public Collection<StructComponent> Data1;
-            public Collection<Struct2Component> Data2;
+            public ComponentCollection<StructComponent> Data1;
+            public ComponentCollection<Struct2Component> Data2;
         }
 
         [Case("Index")]
         private void TestIndex()
         {
-            @group.UpdateCount();
+            @group.Update();
             for (int i = 0; i < @group.Count; i++)
             {
                 @group.Data1[i].Value += @group.Data1[i].Value;
@@ -69,11 +69,11 @@ namespace Automa.Entities.PerformanceTests
         [Case("Iterator")]
         private void TestIterator()
         {
-            @group.UpdateCount();
+            @group.Update();
             for (var iterator = @group.GetIterator(); iterator.MoveNext();)
             {
-                @group.Data1[iterator.CurrentIndex].Value += @group.Data1[iterator.CurrentIndex].Value;
-                @group.Data2[iterator.CurrentIndex].Value += @group.Data2[iterator.CurrentIndex].Value;
+                @group.Data1[iterator.Index].Value += @group.Data1[iterator.Index].Value;
+                @group.Data2[iterator.Index].Value += @group.Data2[iterator.Index].Value;
             }
         }
     }

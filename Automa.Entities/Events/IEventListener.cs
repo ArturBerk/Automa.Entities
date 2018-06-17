@@ -4,4 +4,8 @@
     {
         void OnEvent(TSource source, TEvent eventInstance);
     }
+
+    public interface IEntityEventListener<in TEvent> : IEventListener<Entity, TEvent> where TEvent : struct
+    {
+    }
 }

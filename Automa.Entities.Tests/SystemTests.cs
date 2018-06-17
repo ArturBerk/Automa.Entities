@@ -1,4 +1,5 @@
-﻿using Automa.Entities.Collections;
+﻿using Automa.Entities.Attributes;
+using Automa.Entities.Collections;
 using Automa.Entities.Systems;
 using Automa.Entities.Tests.Model;
 using NUnit.Framework;
@@ -95,6 +96,7 @@ namespace Automa.Entities.Tests
         {
             public bool Updated = false;
 
+            [Inject]
             internal TestGroup Group;
 
             public void OnUpdate()
@@ -104,7 +106,7 @@ namespace Automa.Entities.Tests
 
             internal class TestGroup : Group
             {
-                //public Collection<StructComponent> Structs;
+                //public ComponentCollection<StructComponent> Structs;
             }
         }
 

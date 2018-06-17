@@ -2,7 +2,7 @@
 
 namespace Automa.Entities.Collections
 {
-    public class Collection<T> : CollectionBase<T>
+    public class ComponentCollection<T> : CollectionBase<T>
     {
     }
 }

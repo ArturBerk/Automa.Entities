@@ -30,7 +30,7 @@ namespace Automa.Entities
                 if (fieldType.IsGenericType)
                 {
                     var genericType = fieldType.GetGenericTypeDefinition();
-                    if (genericType == typeof(Collection<>))
+                    if (genericType == typeof(ComponentCollection<>))
                     {
                         ComponentType componentType = fieldType.GetGenericArguments()[0];
                         includedTypesTmp.Add(componentType);
@@ -59,7 +59,7 @@ namespace Automa.Entities
             componentCollections = componentArraysTmp.ToArray();
         }
 
-        public void UpdateCount()
+        public void Update()
         {
             componentArrayLengths.FastClear();
             if (componentCollections.Length == 0)
@@ -131,7 +131,7 @@ namespace Automa.Entities
                 if (fieldType.IsGenericType)
                 {
                     var genericType = fieldType.GetGenericTypeDefinition();
-                    if (genericType == typeof(Collection<>))
+                    if (genericType == typeof(ComponentCollection<>))
                     {
                         fieldInfo.SetValue(this, null);
                     }
@@ -179,7 +179,7 @@ namespace Automa.Entities
         public struct Iterator
         {
             public readonly Group Group;
-            public EntityIndex CurrentIndex;
+            public EntityIndex Index;
             private int currentIndexRaw;
             public int StartIndex;
             public int EndIndex;
@@ -192,20 +192,20 @@ namespace Automa.Entities
             public Iterator(Group @group, int startIndex, int endIndex) : this()
             {
                 Group = @group;
-                CurrentIndex = new EntityIndex(0, 0);
+                Index = new EntityIndex(0, 0);
                 StartIndex = startIndex;
                 EndIndex = endIndex;
                 IsCompleted = StartIndex >= group.Count;
                 currentIndexRaw = StartIndex - 1;
 
-                // Find start CurrentIndex
-                CurrentIndex = new EntityIndex(0, -1);
+                // Find start Index
+                Index = new EntityIndex(0, -1);
                 for (int i = 0; i < group.componentArrayLengths.Count; i++)
                 {
                     var currentArrayLength = Group.componentArrayLengths.Buffer[i];
                     if (currentArrayLength > 0)
                     {
-                        CurrentIndex = new EntityIndex(i, -1);
+                        Index = new EntityIndex(i, -1);
                         break;
                     }
                 }
@@ -220,21 +220,21 @@ namespace Automa.Entities
                     IsCompleted = true;
                     return false;
                 }
-                ++CurrentIndex.Index;
-                var currentArrayLength = Group.componentArrayLengths.Buffer[CurrentIndex.ArrayIndex];
-                if (CurrentIndex.Index < currentArrayLength) return true;
-                CurrentIndex.Index = 0;
+                ++Index.Index;
+                var currentArrayLength = Group.componentArrayLengths.Buffer[Index.ArrayIndex];
+                if (Index.Index < currentArrayLength) return true;
+                Index.Index = 0;
                 // move to next array
                 while (true)
                 {
-                    ++CurrentIndex.ArrayIndex;
-                    if (CurrentIndex.ArrayIndex >= Group.componentArrayLengths.Count)
+                    ++Index.ArrayIndex;
+                    if (Index.ArrayIndex >= Group.componentArrayLengths.Count)
                     {
                         IsCompleted = true;
                         return false;
                     }
-                    currentArrayLength = Group.componentArrayLengths.Buffer[CurrentIndex.ArrayIndex];
-                    if (CurrentIndex.Index < currentArrayLength) return true;
+                    currentArrayLength = Group.componentArrayLengths.Buffer[Index.ArrayIndex];
+                    if (Index.Index < currentArrayLength) return true;
                 }
             }
         }
