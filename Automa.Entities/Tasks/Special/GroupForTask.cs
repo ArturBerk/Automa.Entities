@@ -1,27 +1,29 @@
-﻿using Automa.Entities.Internal;
+﻿using System;
+using Automa.Entities.Internal;
 
 namespace Automa.Entities.Tasks.Special
 {
     public abstract class GroupForTask<TGroup> : ITaskSource where TGroup: Group
     {
         protected readonly TGroup Group;
-        private readonly int batch;
+        private readonly int batchGroupCount;
         private readonly ArrayList<ITask> subTasks = new ArrayList<ITask>();
 
-        protected GroupForTask(TGroup @group, int batch)
+        protected GroupForTask(TGroup @group, int batchGroupCount)
         {
             this.Group = @group;
-            this.batch = batch;
+            this.batchGroupCount = Math.Max(Math.Min(batchGroupCount, 16), 1);
         }
 
         public int Tasks(out ITask[] tasks)
         {
             var startIndex = 0;
-            Expand(Group.Count / batch + 1);
+            Expand(batchGroupCount);
             var batchIndex = 0;
+            var batchSize = (int)Math.Ceiling((float)Group.Count / batchGroupCount);
             while (startIndex < Group.Count)
             {
-                var endIndex = startIndex + batch;
+                var endIndex = startIndex + batchSize;
                 if (endIndex >= Group.Count) endIndex = Group.Count;
                 var task = (SubTask)subTasks[batchIndex++];
                 task.startIndex = startIndex;

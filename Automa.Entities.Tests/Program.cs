@@ -12,7 +12,7 @@ namespace Automa.Entities.Tests
         public static void Main()
         {
             TaskTests test = new TaskTests();
-            test.ExecuteTasks();
+            test.GroupIteratorTask();
 
 //            EntityTests e = new EntityTests();
 //            e.AddComponentTest();

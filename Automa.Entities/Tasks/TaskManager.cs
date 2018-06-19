@@ -6,17 +6,18 @@ namespace Automa.Entities.Tasks
 {
     public class TaskManager : IManager
     {
-        private int workersCount = 2;
+        private const int WorkersCount = 8;
         private int index;
         private Worker[] workers;
-        private object sync = new object();
+        private readonly AutoResetEvent taskCompletedEvent = new AutoResetEvent(false);
+        private long activeTasks = 0;
 
         public void OnAttachToContext(IContext context)
         {
-            workers = new Worker[workersCount];
+            workers = new Worker[WorkersCount];
             for (var i = 0; i < workers.Length; i++)
             {
-                workers[i] = new Worker(sync);
+                workers[i] = new Worker(this);
                 workers[i].Start();
             }
         }
@@ -36,8 +37,9 @@ namespace Automa.Entities.Tasks
         public void Schedule(ITask task)
         {
             AdvanceWorkerIndex();
-            Interlocked.Increment(ref workers[index].ActiveTasks);
-            workers[index].queue.Add(task);
+            Interlocked.Increment(ref activeTasks);
+            workers[index].queue.Enqueue(task);
+            workers[index].TaskEnqueuedEvent.Set();
         }
 
         public void ScheduleFrom(ITaskSource taskSource)
@@ -47,8 +49,9 @@ namespace Automa.Entities.Tasks
             {
                 var task = tasks[i];
                 AdvanceWorkerIndex();
-                Interlocked.Increment(ref workers[this.index].ActiveTasks);
-                workers[this.index].queue.Add(task);
+                Interlocked.Increment(ref activeTasks);
+                workers[index].queue.Enqueue(task);
+                workers[index].TaskEnqueuedEvent.Set();
             }
         }
 
@@ -66,40 +69,21 @@ namespace Automa.Entities.Tasks
         {
             while (true)
             {
-                try
-                {
-                    Monitor.Enter(sync);
-                    if (IsCompleted()) break;
-                    Monitor.Wait(sync, 100);
-                }
-                finally
-                {
-                    Monitor.Exit(sync);
-                }
-//                syncEvent.WaitOne(100);
+                taskCompletedEvent.WaitOne(100);
+                if (Interlocked.Read(ref activeTasks) == 0) break;
             }
-        }
-        
-        private bool IsCompleted()
-        {
-            for (var i = 0; i < workers.Length; i++)
-            {
-                var activeTasks = Interlocked.Read(ref workers[i].ActiveTasks);
-                if (activeTasks > 0) return false;
-            }
-            return true;
         }
 
         private class Worker
         {
-            public readonly BlockingCollection<ITask> queue = new BlockingCollection<ITask>();
+            public readonly ConcurrentQueue<ITask> queue = new ConcurrentQueue<ITask>();
             private Thread thread;
-            private readonly object sync;
-            public long ActiveTasks = 0;
+            private readonly TaskManager taskManager;
+            public readonly AutoResetEvent TaskEnqueuedEvent = new AutoResetEvent(false);
 
-            public Worker(object sync)
+            public Worker(TaskManager taskManager)
             {
-                this.sync = sync;
+                this.taskManager = taskManager;
             }
 
             public void Start()
@@ -110,31 +94,31 @@ namespace Automa.Entities.Tasks
 
             public void Stop()
             {
-                queue.CompleteAdding();
+                thread.Interrupt();
             }
 
             private void Run()
             {
-                foreach (var task in queue.GetConsumingEnumerable())
+                try
                 {
-                    try
+                    while (true)
                     {
-                        task.Execute();
-                    }
-                    finally
-                    {
-                        Interlocked.Decrement(ref ActiveTasks);
-                        try
+                        TaskEnqueuedEvent.WaitOne();
+                        while (queue.TryDequeue(out var task))
                         {
-                            Monitor.Enter(sync);
-                            Monitor.Pulse(sync);
-                        }
-                        finally
-                        {
-                            Monitor.Exit(sync);
+                            try
+                            {
+                                task.Execute();
+                            }
+                            finally
+                            {
+                                Interlocked.Decrement(ref taskManager.activeTasks);
+                                taskManager.taskCompletedEvent.Set();
+                            }
                         }
                     }
                 }
+                catch (ThreadInterruptedException) { }
             }
         }
     }

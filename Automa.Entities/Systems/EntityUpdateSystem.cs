@@ -52,6 +52,7 @@ namespace Automa.Entities.Systems
 
         protected void OnAfterUpdate()
         {
+            if (commandBuffers.Length == 0) return;
             for (var index = 0; index < commandBuffers.Length; index++)
             {
                 var commandBuffer = commandBuffers[index];

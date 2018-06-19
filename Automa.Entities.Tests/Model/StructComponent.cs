@@ -32,4 +32,15 @@
         }
 
     }
+
+    public struct FloatComponent
+    {
+        public float Value;
+
+        public FloatComponent(float value)
+        {
+            Value = value;
+        }
+
+    }
 }

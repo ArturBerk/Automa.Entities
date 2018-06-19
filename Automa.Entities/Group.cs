@@ -200,14 +200,17 @@ namespace Automa.Entities
 
                 // Find start Index
                 Index = new EntityIndex(0, -1);
+                var currentIndex = 0;
                 for (int i = 0; i < group.componentArrayLengths.Count; i++)
                 {
                     var currentArrayLength = Group.componentArrayLengths.Buffer[i];
-                    if (currentArrayLength > 0)
+                    var indexInArray = StartIndex - currentIndex;
+                    if (indexInArray < currentArrayLength)
                     {
-                        Index = new EntityIndex(i, -1);
+                        Index = new EntityIndex(i, indexInArray - 1);
                         break;
                     }
+                    currentIndex += currentArrayLength;
                 }
             }
 
