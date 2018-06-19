@@ -14,7 +14,7 @@ namespace Automa.Entities.Tasks.Special
             this.batch = batch;
         }
 
-        public ITask[] Tasks()
+        public int Tasks(out ITask[] tasks)
         {
             var startIndex = 0;
             Expand(Group.Count / batch + 1);
@@ -27,7 +27,8 @@ namespace Automa.Entities.Tasks.Special
                 task.Iterator = Group.GetIterator(startIndex, endIndex);
                 startIndex = endIndex;
             }
-            return subTasks.Buffer;
+            tasks = subTasks.Buffer;
+            return batchIndex;
         }
 
         public void Expand(int size)

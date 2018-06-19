@@ -2,6 +2,6 @@
 {
     public interface ITaskSource
     {
-        ITask[] Tasks();
+         int Tasks(out ITask[] tasks);
     }
 }

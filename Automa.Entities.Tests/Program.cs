@@ -11,8 +11,11 @@ namespace Automa.Entities.Tests
     {
         public static void Main()
         {
-            EntityTests e = new EntityTests();
-            e.AddComponentTest();
+            TaskTests test = new TaskTests();
+            test.ExecuteTasks();
+
+//            EntityTests e = new EntityTests();
+//            e.AddComponentTest();
 
 
 //            var context = ContextFactory.CreateEntitiesContext();

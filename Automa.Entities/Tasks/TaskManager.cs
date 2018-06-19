@@ -9,7 +9,7 @@ namespace Automa.Entities.Tasks
         private int workersCount = 2;
         private int index;
         private Worker[] workers;
-        private readonly object sync = new object();
+        private object sync = new object();
 
         public void OnAttachToContext(IContext context)
         {
@@ -36,18 +36,18 @@ namespace Automa.Entities.Tasks
         public void Schedule(ITask task)
         {
             AdvanceWorkerIndex();
-            Interlocked.Increment(ref workers[index].activeTasks);
+            Interlocked.Increment(ref workers[index].ActiveTasks);
             workers[index].queue.Add(task);
         }
 
         public void ScheduleFrom(ITaskSource taskSource)
         {
-            var tasks = taskSource.Tasks();
-            for (var i = 0; i < tasks.Length; i++)
+            var count = taskSource.Tasks(out var tasks);
+            for (var i = 0; i < count; i++)
             {
                 var task = tasks[i];
                 AdvanceWorkerIndex();
-                Interlocked.Increment(ref workers[this.index].activeTasks);
+                Interlocked.Increment(ref workers[this.index].ActiveTasks);
                 workers[this.index].queue.Add(task);
             }
         }
@@ -66,11 +66,17 @@ namespace Automa.Entities.Tasks
         {
             while (true)
             {
-                lock (sync)
+                try
                 {
+                    Monitor.Enter(sync);
                     if (IsCompleted()) break;
-                    Monitor.Wait(sync);
+                    Monitor.Wait(sync, 100);
                 }
+                finally
+                {
+                    Monitor.Exit(sync);
+                }
+//                syncEvent.WaitOne(100);
             }
         }
         
@@ -78,7 +84,7 @@ namespace Automa.Entities.Tasks
         {
             for (var i = 0; i < workers.Length; i++)
             {
-                var activeTasks = Interlocked.Read(ref workers[i].activeTasks);
+                var activeTasks = Interlocked.Read(ref workers[i].ActiveTasks);
                 if (activeTasks > 0) return false;
             }
             return true;
@@ -89,7 +95,7 @@ namespace Automa.Entities.Tasks
             public readonly BlockingCollection<ITask> queue = new BlockingCollection<ITask>();
             private Thread thread;
             private readonly object sync;
-            public long activeTasks = 0;
+            public long ActiveTasks = 0;
 
             public Worker(object sync)
             {
@@ -111,11 +117,22 @@ namespace Automa.Entities.Tasks
             {
                 foreach (var task in queue.GetConsumingEnumerable())
                 {
-                    task.Execute();
-                    Interlocked.Decrement(ref activeTasks);
-                    lock (sync)
+                    try
                     {
-                        Monitor.Pulse(sync);
+                        task.Execute();
+                    }
+                    finally
+                    {
+                        Interlocked.Decrement(ref ActiveTasks);
+                        try
+                        {
+                            Monitor.Enter(sync);
+                            Monitor.Pulse(sync);
+                        }
+                        finally
+                        {
+                            Monitor.Exit(sync);
+                        }
                     }
                 }
             }
