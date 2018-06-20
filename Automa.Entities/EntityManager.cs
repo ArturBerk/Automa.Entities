@@ -66,6 +66,19 @@ namespace Automa.Entities
 //            }
         }
 
+        public EntityReference CreateEntityReferenced(params ComponentType[] types)
+        {
+            return new EntityReference(CreateEntity(types), this);
+        }
+
+        public EntityReference GetReference(Entity entity)
+        {
+            var entityLink = entityLinks[entity.Id];
+            if (entityLink.Entity != entity)
+                throw new ArgumentException("Entity not found");
+            return new EntityReference(entity, this);
+        }
+
         public Entity CreateEntity(params ComponentType[] types)
         {
             var entityType = new EntityType(types);
