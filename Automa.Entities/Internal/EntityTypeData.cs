@@ -2,7 +2,7 @@
 
 namespace Automa.Entities.Internal
 {
-    internal class EntityTypeData
+    internal sealed class EntityTypeData
     {
         public readonly EntityType EntityType;
         private IComponentArray[] componentArrays;
@@ -24,7 +24,7 @@ namespace Automa.Entities.Internal
 
         public ComponentArray<T> GetComponentArray<T>()
         {
-            var r = componentArrays[((ComponentType) typeof(T)).TypeId];
+            var r = componentArrays[ComponentTypeManager.GetTypeIndex<T>()];
             if (r == null) throw new ArgumentException($"Chunk not contains component of type {typeof(T)}");
             return (ComponentArray<T>) r;
         }
@@ -76,7 +76,7 @@ namespace Automa.Entities.Internal
 
         public bool HasComponent<T>()
         {
-            var typeId = ((ComponentType) typeof(T)).TypeId;
+            var typeId = ComponentTypeManager.GetTypeIndex<T>();
             return componentArrays.Length > typeId && componentArrays[typeId] != null;
         }
 

@@ -7,6 +7,9 @@ namespace Automa.Entities.PerformanceTests
     {
         private static void Main()
         {
+//            EntityComponentAccessBenchmark b = new EntityComponentAccessBenchmark();
+            //Console.ReadKey();
+//            b.Execute().Print();
             Benchmark.ExecuteAll();
             Console.ReadKey();
         }

@@ -14,13 +14,13 @@ namespace Automa.Entities.Tests
         public void CreateEntityTest()
         {
             EntityManager entityManager = new EntityManager();
-            var entity = entityManager.CreateEntity(typeof(ClassComponent), typeof(StructComponent));
+            var entity = entityManager.CreateEntity(ComponentType.Create<ClassComponent>(), ComponentType.Create<StructComponent>());
             Assert.AreEqual(0, entity.Id);
             Assert.AreEqual(0, entity.Version);
-            entity = entityManager.CreateEntity(typeof(ClassComponent));
+            entity = entityManager.CreateEntity(ComponentType.Create<ClassComponent>());
             Assert.AreEqual(1, entity.Id);
             Assert.AreEqual(0, entity.Version);
-            entity = entityManager.CreateEntity(typeof(StructComponent));
+            entity = entityManager.CreateEntity(ComponentType.Create<StructComponent>());
             Assert.AreEqual(2, entity.Id);
             Assert.AreEqual(0, entity.Version);
 
@@ -31,7 +31,7 @@ namespace Automa.Entities.Tests
         public void RemoveEntityTest()
         {
             EntityManager entityManager = new EntityManager();
-            var entity = entityManager.CreateEntity(typeof(ClassComponent), typeof(StructComponent));
+            var entity = entityManager.CreateEntity(ComponentType.Create<ClassComponent>(), ComponentType.Create<StructComponent>());
             Assert.AreEqual(1, entityManager.EntityCount);
             entityManager.RemoveEntity(entity);
             Assert.AreEqual(0, entityManager.EntityCount);
@@ -41,9 +41,9 @@ namespace Automa.Entities.Tests
         public void SetComponentTest()
         {
             EntityManager entityManager = new EntityManager();
-            var entity1 = entityManager.CreateEntity(typeof(ClassComponent), typeof(StructComponent));
-            var entity2 = entityManager.CreateEntity(typeof(ClassComponent), typeof(StructComponent));
-            var entity3 = entityManager.CreateEntity(typeof(ClassComponent));
+            var entity1 = entityManager.CreateEntity(ComponentType.Create<ClassComponent>(), ComponentType.Create<StructComponent>());
+            var entity2 = entityManager.CreateEntity(ComponentType.Create<ClassComponent>(), ComponentType.Create<StructComponent>());
+            var entity3 = entityManager.CreateEntity(ComponentType.Create<ClassComponent>());
 
             var c1 = entityManager.GetComponent<ClassComponent>(entity1);
             var c2 = entityManager.GetComponent<ClassComponent>(entity2);
@@ -91,7 +91,7 @@ namespace Automa.Entities.Tests
             var entities = new Entity[10];
             for (int i = 0; i < 10; i++)
             {
-                entities[i] = entityManager.CreateEntity(typeof(StructComponent));
+                entities[i] = entityManager.CreateEntity(ComponentType.Create<StructComponent>());
             }
             var entitiesArray = entityManager.Entities.ToArray();
             Assert.AreEqual(10, entitiesArray.Length);
@@ -105,7 +105,7 @@ namespace Automa.Entities.Tests
         public void HasComponentTest()
         {
             EntityManager entityManager = new EntityManager();
-            var e = entityManager.CreateEntity(typeof(StructComponent), typeof(ClassComponent), typeof(Struct2Component));
+            var e = entityManager.CreateEntity(ComponentType.Create<StructComponent>(), ComponentType.Create<ClassComponent>(), ComponentType.Create<Struct2Component>());
             entityManager.SetComponent(e, new StructComponent(10 + e.Id));
             entityManager.SetComponent(e, new Struct2Component(20 + e.Id));
             entityManager.SetComponent(e, new ClassComponent(40 + e.Id));
@@ -122,15 +122,15 @@ namespace Automa.Entities.Tests
             EntityManager entityManager = new EntityManager();
             for (int i = 0; i < 10; i++)
             {
-                var e = entityManager.CreateEntity(typeof(StructComponent), typeof(ClassComponent), typeof(Struct2Component));
+                var e = entityManager.CreateEntity(ComponentType.Create<StructComponent>(), ComponentType.Create<ClassComponent>(), ComponentType.Create<Struct2Component>());
                 entityManager.SetComponent(e, new StructComponent(10 + e.Id));
                 entityManager.SetComponent(e, new Struct2Component(20 + e.Id));
                 entityManager.SetComponent(e, new ClassComponent(40 + e.Id));
             }
             for (int i = 0; i < 10; i++)
             {
-                var e = entityManager.CreateEntity(typeof(StructComponent), typeof(ClassComponent), 
-                    typeof(Struct2Component), typeof(Struct3Component));
+                var e = entityManager.CreateEntity(ComponentType.Create<StructComponent>(), ComponentType.Create<ClassComponent>(), 
+                    ComponentType.Create<Struct2Component>(), ComponentType.Create<Struct3Component>());
                 entityManager.SetComponent(e, new StructComponent(10 + e.Id));
                 entityManager.SetComponent(e, new Struct2Component(20 + e.Id));
                 entityManager.SetComponent(e, new ClassComponent(40 + e.Id));
@@ -160,7 +160,7 @@ namespace Automa.Entities.Tests
             EntityManager entityManager = new EntityManager();
             for (int i = 0; i < 10; i++)
             {
-                var e = entityManager.CreateEntity(typeof(StructComponent), typeof(ClassComponent), typeof(Struct2Component));
+                var e = entityManager.CreateEntity(ComponentType.Create<StructComponent>(), ComponentType.Create<ClassComponent>(), ComponentType.Create<Struct2Component>());
                 entityManager.SetComponent(e, new StructComponent(10 + e.Id));
                 entityManager.SetComponent(e, new Struct2Component(20 + e.Id));
                 entityManager.SetComponent(e, new ClassComponent(40 + e.Id));
@@ -194,7 +194,7 @@ namespace Automa.Entities.Tests
         {
             var contextEntityManager = new EntityManager();
 
-            var entity = contextEntityManager.CreateEntity(typeof(StructComponent), typeof(Struct2Component));
+            var entity = contextEntityManager.CreateEntity(ComponentType.Create<StructComponent>(), ComponentType.Create<Struct2Component>());
             contextEntityManager.SetComponent(entity, new StructComponent(1));
             contextEntityManager.SetComponent(entity, new Struct2Component(2));
 
@@ -203,11 +203,11 @@ namespace Automa.Entities.Tests
 
             contextEntityManager.ChangeComponents(entity, new ComponentType[]
             {
-                typeof(ClassComponent),
-                typeof(Struct3Component)
+                ComponentType.Create<ClassComponent>(),
+                ComponentType.Create<Struct3Component>()
             }, new ComponentType[]
             {
-                typeof(StructComponent)
+                ComponentType.Create<StructComponent>()
             });
 
 

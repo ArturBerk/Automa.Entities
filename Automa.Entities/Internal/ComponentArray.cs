@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Automa.Entities.Internal
 {
-    internal class ComponentArray<T> : IComponentArray
+    internal sealed class ComponentArray<T> : IComponentArray
     {
         public void CopyFrom(IComponentArray source, int sourceIndex, int destIndex)
         {

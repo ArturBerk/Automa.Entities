@@ -8,7 +8,7 @@ using Automa.Entities.Systems.Debugging;
 
 namespace Automa.Entities.Systems
 {
-    public class SystemManager : IManager
+    public sealed class SystemManager : IManager
     {
         internal static int DefaultOrder = 0;
 

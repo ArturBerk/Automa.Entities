@@ -32,7 +32,7 @@ namespace Automa.Entities
                     var genericType = fieldType.GetGenericTypeDefinition();
                     if (genericType == typeof(ComponentCollection<>))
                     {
-                        ComponentType componentType = fieldType.GetGenericArguments()[0];
+                        ComponentType componentType = ComponentType.Create(fieldType.GetGenericArguments()[0]);
                         includedTypesTmp.Add(componentType);
                         var componentsArray = (CollectionBase)Activator.CreateInstance(fieldType);
                         componentArraysTmp.Add(componentsArray);
@@ -48,7 +48,7 @@ namespace Automa.Entities
             }
             foreach (var excludeComponentAttribute in GetType().GetCustomAttributes<ExcludeComponentAttribute>())
             {
-                ComponentType componentType = excludeComponentAttribute.ComponentType;
+                ComponentType componentType = ComponentType.Create(excludeComponentAttribute.ComponentType);
                 excludedTypesTmp.Add(componentType);
             }
 

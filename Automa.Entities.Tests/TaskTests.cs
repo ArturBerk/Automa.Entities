@@ -37,7 +37,7 @@ namespace Automa.Entities.Tests
 
             for (int i = 0; i < 10000; i++)
             {
-                entityManager.CreateEntity(typeof(FloatComponent));
+                entityManager.CreateEntity(ComponentType.Create<FloatComponent>());
             }
 
             var group = entityManager.RegisterGroup(new FloatGroup());

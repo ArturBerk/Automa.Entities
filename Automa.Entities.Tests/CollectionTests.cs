@@ -19,18 +19,18 @@ namespace Automa.Entities.Tests
 
             for (int i = 0; i < 2; i++)
             {
-                var entity = contextEntityManager.CreateEntity(typeof(StructComponent), typeof(ClassComponent));
+                var entity = contextEntityManager.CreateEntity(ComponentType.Create<StructComponent>(), ComponentType.Create<ClassComponent>());
                 contextEntityManager.SetComponent(entity, new ClassComponent(i));
                 contextEntityManager.SetComponent(entity, new StructComponent(i));
             }
             for (int i = 0; i < 2; i++)
             {
-                var entity = contextEntityManager.CreateEntity(typeof(StructComponent));
+                var entity = contextEntityManager.CreateEntity(ComponentType.Create<StructComponent>());
                 contextEntityManager.SetComponent(entity, new StructComponent(i));
             }
             for (int i = 0; i < 2; i++)
             {
-                var entity = contextEntityManager.CreateEntity(typeof(StructComponent), typeof(Struct2Component));
+                var entity = contextEntityManager.CreateEntity(ComponentType.Create<StructComponent>(), ComponentType.Create<Struct2Component>());
                 contextEntityManager.SetComponent(entity, new StructComponent(i));
             }
 

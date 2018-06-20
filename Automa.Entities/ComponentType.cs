@@ -24,19 +24,19 @@ namespace Automa.Entities
 
         public ushort TypeId;
 
-        private ComponentType(Type type)
+        private ComponentType(ushort typeId)
         {
-            TypeId = ComponentTypeManager.GetTypeIndex(type);
+            TypeId = typeId;
         }
 
         public static ComponentType Create<T>()
         {
-            return new ComponentType(typeof(T));
+            return new ComponentType(ComponentTypeManager.GetTypeIndex<T>());
         }
 
-        public static implicit operator ComponentType(Type type)
+        public static ComponentType Create(Type type)
         {
-            return new ComponentType(type);
+            return new ComponentType(ComponentTypeManager.GetTypeIndex(type));
         }
 
         public static implicit operator Type(ComponentType type)

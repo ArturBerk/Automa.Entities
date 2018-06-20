@@ -91,11 +91,11 @@ namespace Automa.Entities.Tests
         {
             var contextEntityManager = new EntityManager();
 
-            var entity = contextEntityManager.CreateEntity(typeof(StructComponent));
+            var entity = contextEntityManager.CreateEntity(ComponentType.Create<StructComponent>());
             contextEntityManager.AddComponent(entity, new ClassComponent(1));
             contextEntityManager.SetComponent(entity, new StructComponent(2));
 
-            entity = contextEntityManager.CreateEntity(typeof(ClassComponent));
+            entity = contextEntityManager.CreateEntity(ComponentType.Create<ClassComponent>());
             contextEntityManager.SetComponent(entity, new ClassComponent(3));
             contextEntityManager.AddComponent(entity, new StructComponent(4));
 
@@ -121,7 +121,7 @@ namespace Automa.Entities.Tests
         {
             var contextEntityManager = new EntityManager();
 
-            var entity = contextEntityManager.CreateEntity(typeof(StructComponent));
+            var entity = contextEntityManager.CreateEntity(ComponentType.Create<StructComponent>());
             contextEntityManager.AddComponent(entity, new ClassComponent(1));
 
             var group = contextEntityManager.RegisterGroup(new ExcludeGroup());
@@ -133,7 +133,7 @@ namespace Automa.Entities.Tests
         {
             var contextEntityManager = new EntityManager();
 
-            var entity = contextEntityManager.CreateEntity(typeof(StructComponent));
+            var entity = contextEntityManager.CreateEntity(ComponentType.Create<StructComponent>());
             contextEntityManager.AddComponent(entity, new ClassComponent(1));
 
             var group = contextEntityManager.RegisterGroup(new EntityGroup());
@@ -147,7 +147,7 @@ namespace Automa.Entities.Tests
             var context = ContextFactory.CreateEntitiesContext();
             var contextEntityManager = context.GetManager<EntityManager>();
 
-            var entity = contextEntityManager.CreateEntity(typeof(StructComponent));
+            var entity = contextEntityManager.CreateEntity(ComponentType.Create<StructComponent>());
             var group = contextEntityManager.RegisterGroup(new ExcludeGroup());
 
             contextEntityManager.AddComponent(entity, new ClassComponent(1));

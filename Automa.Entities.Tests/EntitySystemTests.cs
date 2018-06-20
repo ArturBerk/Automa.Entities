@@ -16,7 +16,7 @@ namespace Automa.Entities.Tests
         public void InjectGroupTest()
         {
             var context = ContextFactory.CreateEntitiesContext();
-            context.GetManager<EntityManager>().CreateEntity(typeof(StructComponent));
+            context.GetManager<EntityManager>().CreateEntity(ComponentType.Create<StructComponent>());
 
             var systems = context.GetManager<SystemManager>();
             var system = new TestSystem();
@@ -39,7 +39,7 @@ namespace Automa.Entities.Tests
             systems.AddSystem(system);
             Assert.AreEqual(0, system.@group.Count);
 
-            context.GetManager<EntityManager>().CreateEntity(typeof(StructComponent));
+            context.GetManager<EntityManager>().CreateEntity(ComponentType.Create<StructComponent>());
             context.Update();
             Assert.AreEqual(1, system.@group.Count);
         }

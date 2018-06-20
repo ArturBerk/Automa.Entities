@@ -15,21 +15,21 @@ namespace Automa.Entities.PerformanceTests
             entityManager = new EntityManager();
             var v1 = new ComponentType[]
             {
-                typeof(StructComponent),
-                typeof(Struct2Component),
-                typeof(Struct3Component),
-                typeof(ClassComponent)
+                ComponentType.Create<StructComponent>(),
+                ComponentType.Create<Struct2Component>(),
+                ComponentType.Create<Struct3Component>(),
+                ComponentType.Create<ClassComponent>()
             };
             var v2 = new ComponentType[]
             {
-                typeof(StructComponent),
-                typeof(Struct2Component),
-                typeof(Struct3Component)
+                ComponentType.Create<StructComponent>(),
+                ComponentType.Create<Struct2Component>(),
+                ComponentType.Create<Struct3Component>()
             };
             var v3 = new ComponentType[]
             {
-                typeof(StructComponent),
-                typeof(Struct2Component)
+                ComponentType.Create<StructComponent>(),
+                ComponentType.Create<Struct2Component>()
             };
             for (int i = 0; i < 12000; i++)
             {

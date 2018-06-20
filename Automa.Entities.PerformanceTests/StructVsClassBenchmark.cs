@@ -18,16 +18,16 @@ namespace Automa.Entities.PerformanceTests
             var entityManager = new EntityManager();
             var entityType1 = new ComponentType[]
             {
-                typeof(StructComponent),
-                typeof(ClassComponent),
+                ComponentType.Create<StructComponent>(),
+                ComponentType.Create<ClassComponent>(),
             };
             var entityType2 = new ComponentType[]
             {
-                typeof(ClassComponent),
+                ComponentType.Create<ClassComponent>(),
             };
             var entityType3 = new ComponentType[]
             {
-                typeof(StructComponent)
+                ComponentType.Create<StructComponent>()
             };
             var classObjects = new ClassComponent[entityCount];
             for (int i = classObjects.Length - 1; i >= 0; i--)

@@ -1,6 +1,6 @@
 namespace Automa.Entities.Collections
 {
-    public class EntityCollection : CollectionBase<Entity>
+    public sealed class EntityCollection : CollectionBase<Entity>
     {
     }
 }

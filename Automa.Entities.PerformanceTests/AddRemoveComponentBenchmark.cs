@@ -8,16 +8,16 @@ namespace Automa.Entities.PerformanceTests
     class AddRemoveComponentBenchmark : Benchmark
     {
         private EntityManager entityManager;
-        
+
         protected override void Prepare()
         {
             IterationCount = 100;
             entityManager = new EntityManager();
-            var v1 = new ComponentType[]
+            var v1 = new[]
             {
-                typeof(StructComponent),
-                typeof(Struct2Component),
-                typeof(ClassComponent)
+                ComponentType.Create<StructComponent>(),
+                ComponentType.Create<Struct2Component>(),
+                ComponentType.Create<ClassComponent>()
             };
             for (int i = 0; i < 12000; i++)
             {
@@ -45,8 +45,8 @@ namespace Automa.Entities.PerformanceTests
         private void TestUnited()
         {
             var entities = entityManager.Entities.ToArray();
-            var remove = new ComponentType[] { typeof(Struct2Component)};
-            var add = new ComponentType[] { typeof(Struct3Component) };
+            var remove = new [] { ComponentType.Create<Struct2Component>() };
+            var add = new [] { ComponentType.Create<Struct3Component>() };
             for (int i = 0; i < entities.Length; i++)
             {
                 entityManager.ChangeComponents(entities[i], add, remove);

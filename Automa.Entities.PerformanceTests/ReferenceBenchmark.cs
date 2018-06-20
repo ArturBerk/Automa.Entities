@@ -11,11 +11,11 @@ namespace Automa.Entities.PerformanceTests
         {
             IterationCount = 100;
             entityManager = new EntityManager();
-            var v1 = new ComponentType[]
+            var v1 = new []
             {
-                typeof(StructComponent),
-                typeof(Struct2Component),
-                typeof(ClassComponent)
+                ComponentType.Create<StructComponent>(),
+                ComponentType.Create<Struct2Component>(),
+                ComponentType.Create<ClassComponent>()
             };
             for (int i = 0; i < 120000; i++)
             {

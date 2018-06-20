@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace Automa.Entities.Tasks
 {
-    public class TaskManager : IManager
+    public sealed class TaskManager : IManager
     {
         private int workerCount;
         private int index;

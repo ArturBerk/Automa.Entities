@@ -153,7 +153,7 @@ namespace Automa.Entities
             {
                 Array.Resize(ref componentTypeCache, entityType.Types.Length + 1);
             }
-            ComponentType newComponentType = typeof(T);
+            var newComponentType = ComponentType.Create<T>();
             var index = 0;
             for (var i = 0; i < entityType.Types.Length; i++)
             {
@@ -292,7 +292,7 @@ namespace Automa.Entities
             {
                 Array.Resize(ref componentTypeCache, entityType.Types.Length - 1);
             }
-            ComponentType newComponentType = typeof(T);
+            ComponentType newComponentType = ComponentType.Create<T>();
             var index = 0;
             var removed = false;
             for (var i = 0; i < entityType.Types.Length; i++)
@@ -339,8 +339,8 @@ namespace Automa.Entities
 
         public ref T GetComponent<T>(Entity entity)
         {
-            var entityLink = entityLinks[entity.Id];
-            if (entityLink.Entity != entity)
+            ref var entityLink = ref entityLinks[entity.Id];
+            if (entityLink.Entity.Id != entity.Id && entityLink.Entity.Version != entity.Version)
                 throw new ArgumentException("Entity not found");
             return ref entityLink.Data.GetComponentArray<T>()[entityLink.IndexInData];
         }
