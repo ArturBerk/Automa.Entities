@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Automa.Entities.Internal
 {
-    internal class ArrayList<T> : IEnumerable<T>
+    internal sealed class ArrayList<T> : IEnumerable<T>
     {
         private const int MinSize = 4;
 
@@ -45,11 +45,6 @@ namespace Automa.Entities.Internal
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
-        }
-
-        public ref T Get(int index)
-        {
-            return ref Buffer[index];
         }
 
         public void SetAt(int index, T value)

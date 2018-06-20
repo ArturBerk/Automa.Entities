@@ -2,7 +2,7 @@
 
 namespace Automa.Entities.Events
 {
-    internal class EventHandler<TSource, TEvent> : ArrayList<(TSource, TEvent)>, IEventHandler where TEvent : struct
+    internal class EventHandler<TSource, TEvent> : IEventHandler where TEvent : struct
     {
         private readonly ArrayList<(TSource Source, TEvent Event)> events = new ArrayList<(TSource, TEvent)>();
         private readonly ArrayList<IEventListener<TSource, TEvent>> listeners = new ArrayList<IEventListener<TSource, TEvent>>();
