@@ -15,7 +15,7 @@ namespace Automa.Entities.PerformanceTests
             public StructComponent s5;
         }
 
-        private ArrayList<StructTest> test = new ArrayList<StructTest>();
+        private ArrayList<StructTest> test = new ArrayList<StructTest>(4);
 
         protected override void Prepare()
         {

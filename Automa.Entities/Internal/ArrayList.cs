@@ -4,14 +4,14 @@ using System.Collections.Generic;
 
 namespace Automa.Entities.Internal
 {
-    internal sealed class ArrayList<T> : IEnumerable<T>
+    internal struct ArrayList<T> : IEnumerable<T>
     {
         private const int MinSize = 4;
 
         public T[] Buffer;
         public int Count;
 
-        public ArrayList(int initialSize = MinSize)
+        public ArrayList(int initialSize)
         {
             Count = 0;
             Buffer = new T[initialSize];
@@ -143,7 +143,7 @@ namespace Automa.Entities.Internal
             AddRange(items.GetEnumerator(), items.Count);
         }
 
-        public void AddRange(ArrayList<T> items)
+        public void AddRange(ref ArrayList<T> items)
         {
             AddRange(items.Buffer, items.Count);
         }

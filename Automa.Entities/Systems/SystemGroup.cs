@@ -8,7 +8,7 @@ namespace Automa.Entities
 {
     public sealed class SystemGroup : ISystem, IUpdateSystem
     {
-        private readonly ArrayList<SystemSlot> systems = new ArrayList<SystemSlot>();
+        private ArrayList<SystemSlot> systems = new ArrayList<SystemSlot>(4);
 
         private IContext context;
 

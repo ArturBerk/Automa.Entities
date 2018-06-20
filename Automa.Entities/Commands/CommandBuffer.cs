@@ -17,7 +17,7 @@ namespace Automa.Entities.Commands
             Context = context;
         }
 
-        private readonly ArrayList<TCommand> buffer = new ArrayList<TCommand>();
+        private ArrayList<TCommand> buffer = new ArrayList<TCommand>(4);
 
         public void Clear()
         {

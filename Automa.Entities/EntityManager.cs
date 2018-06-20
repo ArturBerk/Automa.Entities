@@ -11,10 +11,10 @@ namespace Automa.Entities
         private readonly Queue<int> availableIndices = new Queue<int>();
 
         private readonly AllEntities allEntities;
-        private readonly ArrayList<EntityLink> entityLinks = new ArrayList<EntityLink>();
+        private ArrayList<EntityLink> entityLinks = new ArrayList<EntityLink>(4);
         private readonly Dictionary<uint, EntityTypeData> entityTypeDatas = new Dictionary<uint, EntityTypeData>();
 
-        private readonly ArrayList<GroupSlot> groups = new ArrayList<GroupSlot>();
+        private ArrayList<GroupSlot> groups = new ArrayList<GroupSlot>(4);
 
         private ComponentType[] componentTypeCache = new ComponentType[10];
 

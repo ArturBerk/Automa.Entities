@@ -8,12 +8,12 @@ namespace Automa.Entities.Collections
         public abstract int CalculatedCount { get; }
         internal abstract void AddArray(EntityTypeData data);
         internal abstract void RemoveArray(EntityTypeData data);
-        internal abstract void GetArrayLengths(ArrayList<int> componentArrayLengths, out int count);
+        internal abstract void GetArrayLengths(ref ArrayList<int> componentArrayLengths, out int count);
     }
 
     public abstract class CollectionBase<T> : CollectionBase
     {
-        internal readonly ArrayList<ComponentArray<T>> arrays = new ArrayList<ComponentArray<T>>();
+        internal ArrayList<ComponentArray<T>> arrays = new ArrayList<ComponentArray<T>>(4);
 
         public override int CalculatedCount
         {
@@ -49,7 +49,7 @@ namespace Automa.Entities.Collections
 
         public ref T this[Group.EntityIndex index] => ref arrays.Buffer[index.ArrayIndex][index.Index];
 
-        internal override void GetArrayLengths(ArrayList<int> componentArrayLengths, out int count)
+        internal override void GetArrayLengths(ref ArrayList<int> componentArrayLengths, out int count)
         {
             count = 0;
             for (int i = 0; i < arrays.Count; i++)

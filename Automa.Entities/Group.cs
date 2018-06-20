@@ -11,7 +11,7 @@ namespace Automa.Entities
 
     public class Group
     {
-        internal ArrayList<int> componentArrayLengths = new ArrayList<int>();
+        internal ArrayList<int> componentArrayLengths = new ArrayList<int>(4);
         internal CollectionBase[] componentCollections;
         internal ComponentType[] excludedTypes;
         internal ComponentType[] includedTypes;
@@ -68,7 +68,7 @@ namespace Automa.Entities
                 return;
             }
             Count = componentCollections[0].CalculatedCount;
-            componentCollections[0].GetArrayLengths(componentArrayLengths, out Count);
+            componentCollections[0].GetArrayLengths(ref componentArrayLengths, out Count);
         }
 
         public Iterator GetIterator()

@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using Automa.Entities.Internal;
 
-namespace Automa.Entities
+namespace Automa.Entities.Internal
 {
     internal class ComponentArray<T> : IComponentArray
     {
@@ -153,7 +151,7 @@ namespace Automa.Entities
             AddRange(items.GetEnumerator(), items.Count);
         }
 
-        public void AddRange(ArrayList<T> items)
+        public void AddRange(ref ArrayList<T> items)
         {
             AddRange(items.Buffer, items.Count);
         }

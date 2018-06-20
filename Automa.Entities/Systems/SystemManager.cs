@@ -12,8 +12,8 @@ namespace Automa.Entities.Systems
     {
         internal static int DefaultOrder = 0;
 
-        internal readonly ArrayList<SystemSlot> systems = new ArrayList<SystemSlot>();
-        internal readonly ArrayList<SystemSlot> updateSystems = new ArrayList<SystemSlot>();
+        internal ArrayList<SystemSlot> systems = new ArrayList<SystemSlot>(4);
+        internal ArrayList<SystemSlot> updateSystems = new ArrayList<SystemSlot>(4);
 
         private IContext context;
 
@@ -92,7 +92,7 @@ namespace Automa.Entities.Systems
         {
             var orderAttribute = system.GetType().GetCustomAttribute<OrderAttribute>();
             var newSlot = new SystemSlot(orderAttribute?.Order ?? DefaultOrder, system);
-            AddSystemToGroup(systems, ref newSlot);
+            AddSystemToGroup(ref systems, ref newSlot);
             if (context != null)
             {
                 newSlot.System.OnAttachToContext(context);
@@ -100,7 +100,7 @@ namespace Automa.Entities.Systems
 
             if (newSlot.System.IsEnabled && newSlot.UpdateSystem != null)
             {
-                AddSystemToGroup(updateSystems, ref newSlot);
+                AddSystemToGroup(ref updateSystems, ref newSlot);
             }
             system.EnabledChanged += SystemOnEnabledChanged;
 
@@ -121,24 +121,24 @@ namespace Automa.Entities.Systems
         {
             if (state)
             {
-                ref var slot = ref systems[FindSystemInGroup(systems, system)];
+                ref var slot = ref systems[FindSystemInGroup(ref systems, system)];
                 if (slot.UpdateSystem != null)
                 {
-                    AddSystemToGroup(updateSystems, ref slot);
+                    AddSystemToGroup(ref updateSystems, ref slot);
                 }
             }
             else
             {
-                ref var slot = ref systems[FindSystemInGroup(systems, system)];
+                ref var slot = ref systems[FindSystemInGroup(ref systems, system)];
                 if (slot.DebugInfo != null) slot.DebugInfo.UpdateTime = TimeSpan.Zero;
                 if (system is IUpdateSystem)
                 {
-                    RemoveSystemFromGroup(updateSystems, system);
+                    RemoveSystemFromGroup(ref updateSystems, system);
                 }
             }
         }
 
-        private int FindSystemInGroup(ArrayList<SystemSlot> array, ISystem system)
+        private int FindSystemInGroup(ref ArrayList<SystemSlot> array, ISystem system)
         {
             for (var i = 0; i < array.Count; i++)
             {
@@ -151,7 +151,7 @@ namespace Automa.Entities.Systems
             return -1;
         }
 
-        private void AddSystemToGroup(ArrayList<SystemSlot> array, ref SystemSlot newSlot)
+        private void AddSystemToGroup(ref ArrayList<SystemSlot> array, ref SystemSlot newSlot)
         {
             var inserted = false;
             for (var i = 0; i < array.Count; i++)
@@ -171,13 +171,13 @@ namespace Automa.Entities.Systems
 
         public void RemoveSystem(ISystem system)
         {
-            if (RemoveSystemFromGroup(systems, system))
+            if (RemoveSystemFromGroup(ref systems, system))
             {
                 if (context != null)
                 {
                     system.OnDetachFromContext(context);
                 }
-                RemoveSystemFromGroup(updateSystems, system);
+                RemoveSystemFromGroup(ref updateSystems, system);
             }
             if (debug)
             {
@@ -192,9 +192,9 @@ namespace Automa.Entities.Systems
             }
         }
 
-        private bool RemoveSystemFromGroup(ArrayList<SystemSlot> array, ISystem system)
+        private bool RemoveSystemFromGroup(ref ArrayList<SystemSlot> array, ISystem system)
         {
-            var index = FindSystemInGroup(array, system);
+            var index = FindSystemInGroup(ref array, system);
             if (index >= 0)
             {
                 array.RemoveAt(index);

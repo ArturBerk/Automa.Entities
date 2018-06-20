@@ -63,7 +63,7 @@ namespace Automa.Entities.Events
     internal static class EventTypeManager
     {
         private static readonly Dictionary<Type, ushort> indicesByTypes = new Dictionary<Type, ushort>();
-        private static readonly ArrayList<Type> types = new ArrayList<Type>();
+        private static ArrayList<Type> types = new ArrayList<Type>(4);
 
         static EventTypeManager()
         {

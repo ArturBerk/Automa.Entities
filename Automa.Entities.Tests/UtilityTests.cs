@@ -14,7 +14,7 @@ namespace Automa.Entities.Tests
         [Test]
         public void FastListSetTest()
         {
-            ArrayList<int> list = new ArrayList<int> { 1, 2, 3 };
+            ArrayList<int> list = new ArrayList<int>(4) { 1, 2, 3 };
             list.SetAt(3, 4);
             Assert.AreEqual(4, list.Count);
             Assert.AreEqual(1, list[0]);

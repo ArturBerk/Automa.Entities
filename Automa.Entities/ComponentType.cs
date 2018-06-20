@@ -63,7 +63,7 @@ namespace Automa.Entities
     internal static class ComponentTypeManager
     {
         private static readonly Dictionary<Type, ushort> indicesByTypes = new Dictionary<Type, ushort>();
-        private static readonly ArrayList<Type> types = new ArrayList<Type>();
+        private static ArrayList<Type> types = new ArrayList<Type>(4);
 
         static ComponentTypeManager()
         {

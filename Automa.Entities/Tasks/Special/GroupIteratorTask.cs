@@ -7,7 +7,7 @@ namespace Automa.Entities.Tasks.Special
     {
         protected readonly TGroup Group;
         private readonly int batchGroupCount;
-        private readonly ArrayList<ITask> subTasks = new ArrayList<ITask>();
+        private ArrayList<ITask> subTasks = new ArrayList<ITask>(4);
 
         protected GroupIteratorTask(TGroup @group, int batchGroupCount)
         {
