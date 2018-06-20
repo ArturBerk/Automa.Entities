@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
@@ -6,7 +7,7 @@ namespace Automa.Entities.Tasks
 {
     public class TaskManager : IManager
     {
-        private const int WorkersCount = 8;
+        private int workerCount;
         private int index;
         private Worker[] workers;
         private readonly AutoResetEvent taskCompletedEvent = new AutoResetEvent(false);
@@ -14,8 +15,9 @@ namespace Automa.Entities.Tasks
 
         public void OnAttachToContext(IContext context)
         {
-            workers = new Worker[WorkersCount];
-            for (var i = 0; i < workers.Length; i++)
+            workerCount = Environment.ProcessorCount;
+            workers = new Worker[workerCount];
+            for (var i = 0; i < workerCount; i++)
             {
                 workers[i] = new Worker(this);
                 workers[i].Start();
@@ -24,7 +26,7 @@ namespace Automa.Entities.Tasks
 
         public void OnDetachFromContext(IContext context)
         {
-            for (var i = 0; i < workers.Length; i++)
+            for (var i = 0; i < workerCount; i++)
             {
                 workers[i].Stop();
             }
@@ -59,7 +61,7 @@ namespace Automa.Entities.Tasks
         private void AdvanceWorkerIndex()
         {
             ++index;
-            if (++index >= workers.Length)
+            if (++index >= workerCount)
             {
                 index = 0;
             }
