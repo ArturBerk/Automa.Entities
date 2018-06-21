@@ -67,8 +67,7 @@ namespace Automa.Entities.Internal
             }
             return (index != count ? entityArray[index].Id : -1, index);
         }
-
-
+        
         public void SetComponent<T>(int index, T component)
         {
             GetComponentArray<T>().SetAt(index, component);

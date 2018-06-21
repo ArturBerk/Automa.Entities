@@ -17,7 +17,7 @@ namespace Automa.Entities.PerformanceTests
                 ComponentType.Create<Struct2Component>(),
                 ComponentType.Create<ClassComponent>()
             };
-            for (int i = 0; i < 120000; i++)
+            for (int i = 0; i < 12000; i++)
             {
                 entityManager.CreateEntity(v1);
             }
@@ -32,6 +32,10 @@ namespace Automa.Entities.PerformanceTests
                 var entity = entities[i];
                 entityManager.SetComponent(entity, new Struct2Component());
                 entityManager.SetComponent(entity, new StructComponent());
+                entityManager.SetComponent(entity, new Struct2Component());
+                entityManager.SetComponent(entity, new StructComponent());
+                entityManager.SetComponent(entity, new Struct2Component());
+                entityManager.SetComponent(entity, new StructComponent());
             }
         }
 
@@ -41,7 +45,11 @@ namespace Automa.Entities.PerformanceTests
             var entities = entityManager.Entities.ToArray();
             for (int i = 0; i < entities.Length; i++)
             {
-                var reference = new EntityReference(entities[i], entityManager);
+                var reference = entityManager.GetReference(entities[i]);
+                reference.SetComponent(new Struct2Component());
+                reference.SetComponent(new StructComponent());
+                reference.SetComponent(new Struct2Component());
+                reference.SetComponent(new StructComponent());
                 reference.SetComponent(new Struct2Component());
                 reference.SetComponent(new StructComponent());
             }

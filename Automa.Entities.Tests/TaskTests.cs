@@ -45,9 +45,7 @@ namespace Automa.Entities.Tests
             for (int i = 0; i < 100; i++)
             {
                 taskManager.ScheduleFrom(task);
-                Thread.Sleep(10);
                 taskManager.Wait();
-                Thread.Sleep(10);
             }
             context.Dispose();
         }

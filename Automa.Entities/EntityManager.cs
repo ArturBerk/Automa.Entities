@@ -8,10 +8,10 @@ namespace Automa.Entities
 {
     public sealed class EntityManager : IManager
     {
-        private readonly Queue<int> availableIndices = new Queue<int>();
+        internal readonly Queue<int> availableIndices = new Queue<int>();
 
         private readonly AllEntities allEntities;
-        private ArrayList<EntityLink> entityLinks = new ArrayList<EntityLink>(4);
+        internal ArrayList<EntityLink> entityLinks = new ArrayList<EntityLink>(4);
         private readonly Dictionary<uint, EntityTypeData> entityTypeDatas = new Dictionary<uint, EntityTypeData>();
 
         private ArrayList<GroupSlot> groups = new ArrayList<GroupSlot>(4);
@@ -76,7 +76,7 @@ namespace Automa.Entities
 
         public EntityReference CreateEntityReferenced(params ComponentType[] types)
         {
-            return new EntityReference(CreateEntity(types), this);
+            return GetReference(CreateEntity(types));
         }
 
         public EntityReference GetReference(Entity entity)
@@ -84,37 +84,39 @@ namespace Automa.Entities
             var entityLink = entityLinks[entity.Id];
             if (entityLink.Entity != entity)
                 throw new ArgumentException("Entity not found");
-            return new EntityReference(entity, this);
+            return new EntityReference(entityLink, this);
         }
 
         public Entity CreateEntity(params ComponentType[] types)
         {
             var entityType = new EntityType(types);
-            var chunk = GetOrCreateData(entityType.Hash, types, types.Length);
+            var data = GetOrCreateData(entityType.Hash, types, types.Length);
             var entityId = availableIndices.Count > 0 ? availableIndices.Dequeue() : entityLinks.Count;
             var version = 0;
+            EntityLink link;
             if (entityLinks.Count > entityId)
             {
-                version = entityLinks[entityId].Entity.Version + 1;
+                link = entityLinks[entityId];
+                version = link.Entity.Version + 1;
             }
             else
             {
-                entityLinks.SetAt(entityId, new EntityLink());
+                link = new EntityLink();
+                entityLinks.SetAt(entityId, link);
             }
             var entity = new Entity(entityId, version);
-            var chunkIndex = chunk.AddEntity(entity);
-            entityLinks[entityId] = new EntityLink
-            {
-                Data = chunk,
-                IndexInData = chunkIndex,
-                Entity = entity
-            };
+            var dataIndex = data.AddEntity(entity);
+
+            link.Data = data;
+            link.IndexInData = dataIndex;
+            link.Entity = entity;
+
             return entity;
         }
 
         public void SetComponent<T>(Entity entity, T component)
         {
-            ref var entityLink = ref entityLinks[entity.Id];
+            var entityLink = entityLinks[entity.Id];
             if (entityLink.Entity != entity)
                 throw new ArgumentException("Entity not found");
             entityLink.Data.SetComponent(entityLink.IndexInData, component);
@@ -122,7 +124,7 @@ namespace Automa.Entities
 
         public bool HasComponent<T>(Entity entity)
         {
-            ref var entityLink = ref entityLinks[entity.Id];
+            var entityLink = entityLinks[entity.Id];
             if (entityLink.Entity != entity)
                 throw new ArgumentException("Entity not found");
             return entityLink.Data.HasComponent<T>();
@@ -130,18 +132,15 @@ namespace Automa.Entities
 
         public void RemoveEntity(Entity entity)
         {
-            ref var entityLink = ref entityLinks[entity.Id];
+            var entityLink = entityLinks[entity.Id];
             if (entityLink.Entity != entity)
                 throw new ArgumentException("Entity not found");
             HandleEntityRemoving(entityLink.Data.RemoveEntity(entityLink.IndexInData));
-            entityLinks[entity.Id] = new EntityLink
-            {
-                Entity = Entity.Null
-            };
+            entityLink.Entity = Entity.Null;
             availableIndices.Enqueue(entity.Id);
         }
 
-        private void HandleEntityRemoving((int entityId, int newIndexInChunk) removeData)
+        internal void HandleEntityRemoving((int entityId, int newIndexInChunk) removeData)
         {
             if (removeData.entityId >= 0)
             {
@@ -151,11 +150,10 @@ namespace Automa.Entities
 
         public void AddComponent<T>(Entity entity, T component)
         {
-            ref var entityLink = ref entityLinks[entity.Id];
+            var entityLink = entityLinks[entity.Id];
             if (entityLink.Entity != entity)
                 throw new ArgumentException("Entity not found");
             var entityType = entityLink.Data.EntityType;
-
 
             if (componentTypeCache.Length < entityType.Types.Length + 1)
             {
@@ -187,7 +185,7 @@ namespace Automa.Entities
             var entityTypeHash = EntityType.CalculateHash(componentTypeCache, index);
             var data = GetOrCreateData(entityTypeHash, componentTypeCache, index);
 
-            MoveEntity(ref entityLink, data, entityType.Types, entityType.Types.Length);
+            MoveEntity(entityLink, data, entityType.Types, entityType.Types.Length);
             data.SetComponent(entityLink.IndexInData, component);
         }
 
@@ -204,7 +202,7 @@ namespace Automa.Entities
 
         public void AddComponents(Entity entity, ComponentType[] addComponents)
         {
-            ref var entityLink = ref entityLinks[entity.Id];
+            var entityLink = entityLinks[entity.Id];
             if (entityLink.Entity != entity)
                 throw new ArgumentException("Entity not found");
             var entityType = entityLink.Data.EntityType;
@@ -264,12 +262,12 @@ namespace Automa.Entities
             var entityTypeHash = EntityType.CalculateHash(componentTypeCache, index);
             var data = GetOrCreateData(entityTypeHash, componentTypeCache, index);
 
-            MoveEntity(ref entityLink, data, entityType.Types, entityType.Types.Length);
+            MoveEntity(entityLink, data, entityType.Types, entityType.Types.Length);
         }
 
         public void RemoveComponents(Entity entity, ComponentType[] removeComponents)
         {
-            ref var entityLink = ref entityLinks[entity.Id];
+            var entityLink = entityLinks[entity.Id];
             if (entityLink.Entity != entity)
                 throw new ArgumentException("Entity not found");
             var entityType = entityLink.Data.EntityType;
@@ -303,14 +301,14 @@ namespace Automa.Entities
             var entityTypeHash = EntityType.CalculateHash(componentTypeCache, index);
             var data = GetOrCreateData(entityTypeHash, componentTypeCache, index);
 
-            MoveEntity(ref entityLink, data, entityType.Types, entityType.Types.Length);
+            MoveEntity(entityLink, data, entityType.Types, entityType.Types.Length);
         }
 
         public void ChangeComponents(Entity entity,
             ComponentType[] addComponents,
             ComponentType[] removeComponents)
         {
-            ref var entityLink = ref entityLinks[entity.Id];
+            var entityLink = entityLinks[entity.Id];
             if (entityLink.Entity != entity)
                 throw new ArgumentException("Entity not found");
             var entityType = entityLink.Data.EntityType;
@@ -382,12 +380,12 @@ namespace Automa.Entities
             var entityTypeHash = EntityType.CalculateHash(componentTypeCache, index);
             var data = GetOrCreateData(entityTypeHash, componentTypeCache, index);
 
-            MoveEntity(ref entityLink, data, entityType.Types, entityType.Types.Length);
+            MoveEntity(entityLink, data, entityType.Types, entityType.Types.Length);
         }
 
         public void RemoveComponent<T>(Entity entity)
         {
-            ref var entityLink = ref entityLinks[entity.Id];
+            var entityLink = entityLinks[entity.Id];
             if (entityLink.Entity != entity)
                 throw new ArgumentException("Entity not found");
             var entityType = entityLink.Data.EntityType;
@@ -416,10 +414,10 @@ namespace Automa.Entities
             var data = GetOrCreateData(entityTypeHash, componentTypeCache, index);
 
             var newEntityType = data.EntityType;
-            MoveEntity(ref entityLink, data, newEntityType.Types, newEntityType.Types.Length);
+            MoveEntity(entityLink, data, newEntityType.Types, newEntityType.Types.Length);
         }
 
-        private void MoveEntity(ref EntityLink entityLink, EntityTypeData data, ComponentType[] copyTypesBasedOn, int typeCount)
+        private void MoveEntity(EntityLink entityLink, EntityTypeData data, ComponentType[] copyTypesBasedOn, int typeCount)
         {
             // Add new entity to new entity type data
             var newEntityIndexInData = data.AddEntity(entityLink.Entity);
@@ -443,7 +441,7 @@ namespace Automa.Entities
 
         public ref T GetComponent<T>(Entity entity)
         {
-            ref var entityLink = ref entityLinks[entity.Id];
+            var entityLink = entityLinks[entity.Id];
             if (entityLink.Entity.Id != entity.Id && entityLink.Entity.Version != entity.Version)
                 throw new ArgumentException("Entity not found");
             return ref entityLink.Data.GetComponentArray<T>()[entityLink.IndexInData];
@@ -501,7 +499,7 @@ namespace Automa.Entities
         //            }
         //        }
 
-        private struct EntityLink
+        internal class EntityLink
         {
             public Entity Entity;
             public EntityTypeData Data;

@@ -11,7 +11,7 @@ namespace Automa.Entities.PerformanceTests
 
         protected override void Prepare()
         {
-            IterationCount = 100;
+            IterationCount = 20;
             entityManager = new EntityManager();
             var v1 = new[]
             {
