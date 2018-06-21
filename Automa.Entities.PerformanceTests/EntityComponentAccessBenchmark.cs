@@ -63,9 +63,9 @@ namespace Automa.Entities.PerformanceTests
             for (int i = 0; i < @group.Count; i++)
             {
                 ref var data1 = ref @group.Data1[i];
-                //ref var data2 = ref @group.Data2[i];
+                ref var data2 = ref @group.Data2[i];
                 data1.Value += data1.Value;
-                //data2.Value += data2.Value;
+                data2.Value += data2.Value;
             }
         }
 
@@ -77,9 +77,9 @@ namespace Automa.Entities.PerformanceTests
             {
                 var entity = @group.Entities[i];
                 ref var data1 = ref entityManager.GetComponent<StructComponent>(entity);
-                //ref var data2 = ref entityManager.GetComponent<Struct2Component>(entity);
+                ref var data2 = ref entityManager.GetComponent<Struct2Component>(entity);
                 data1.Value += data1.Value;
-                //data2.Value += data2.Value;
+                data2.Value += data2.Value;
             }
         }
     }

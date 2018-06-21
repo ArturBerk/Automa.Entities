@@ -7,10 +7,11 @@ namespace Automa.Entities.PerformanceTests
     {
         private static void Main()
         {
+            var b = new EventVsStateComponentBenchmark();
 //            EntityComponentAccessBenchmark b = new EntityComponentAccessBenchmark();
             //Console.ReadKey();
-//            b.Execute().Print();
-            Benchmark.ExecuteAll();
+            b.Execute().Print();
+//            Benchmark.ExecuteAll();
             Console.ReadKey();
         }
     }

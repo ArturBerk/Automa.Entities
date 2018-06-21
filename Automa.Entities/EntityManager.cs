@@ -19,9 +19,10 @@ namespace Automa.Entities
         private ComponentType[] componentTypeCache = new ComponentType[10];
 
         #region Debugging
-        private bool debug;
-        private EntityManagerDebugInfo debugInfo;
-        public EntityManagerDebugInfo DebugInfo => debugInfo;
+
+        private readonly bool debug;
+        public EntityManagerDebugInfo DebugInfo { get; private set; }
+
         #endregion
 
         public EntityManager() : this(false)
@@ -34,14 +35,21 @@ namespace Automa.Entities
             this.debug = debug;
             if (debug)
             {
-                debugInfo = new EntityManagerDebugInfo(groups.Select(slot => slot.DebugInfo).ToArray());
+                DebugInfo = new EntityManagerDebugInfo(groups.Select(slot => slot.DebugInfo).ToArray());
             }
         }
         /// <summary>
         /// 27716
         /// </summary>
 
-        public Collections.EntityCollection Entities => allEntities.Entities;
+        public Collections.EntityCollection Entities
+        {
+            get
+            {
+                allEntities.Update();
+                return allEntities.Entities;
+            }
+        }
 
         internal IEnumerable<EntityTypeData> Datas => entityTypeDatas.Values;
 
@@ -60,10 +68,10 @@ namespace Automa.Entities
         public void OnUpdate()
         {
             // Need manual update groups in systems
-//            foreach (var group in groups)
-//            {
-//                group.Group.Update();
-//            }
+            //            foreach (var group in groups)
+            //            {
+            //                group.Group.Update();
+            //            }
         }
 
         public EntityReference CreateEntityReferenced(params ComponentType[] types)
@@ -106,7 +114,7 @@ namespace Automa.Entities
 
         public void SetComponent<T>(Entity entity, T component)
         {
-            var entityLink = entityLinks[entity.Id];
+            ref var entityLink = ref entityLinks[entity.Id];
             if (entityLink.Entity != entity)
                 throw new ArgumentException("Entity not found");
             entityLink.Data.SetComponent(entityLink.IndexInData, component);
@@ -114,7 +122,7 @@ namespace Automa.Entities
 
         public bool HasComponent<T>(Entity entity)
         {
-            var entityLink = entityLinks[entity.Id];
+            ref var entityLink = ref entityLinks[entity.Id];
             if (entityLink.Entity != entity)
                 throw new ArgumentException("Entity not found");
             return entityLink.Data.HasComponent<T>();
@@ -122,7 +130,7 @@ namespace Automa.Entities
 
         public void RemoveEntity(Entity entity)
         {
-            var entityLink = entityLinks[entity.Id];
+            ref var entityLink = ref entityLinks[entity.Id];
             if (entityLink.Entity != entity)
                 throw new ArgumentException("Entity not found");
             HandleEntityRemoving(entityLink.Data.RemoveEntity(entityLink.IndexInData));
@@ -359,7 +367,7 @@ namespace Automa.Entities
             group.Update();
             if (debug)
             {
-                debugInfo = new EntityManagerDebugInfo(groups.Select(slot => slot.DebugInfo).ToArray());
+                DebugInfo = new EntityManagerDebugInfo(groups.Select(slot => slot.DebugInfo).ToArray());
             }
         }
 
@@ -372,7 +380,7 @@ namespace Automa.Entities
                     groups.RemoveAt(i);
                     if (debug)
                     {
-                        debugInfo = new EntityManagerDebugInfo(groups.Select(slot => slot.DebugInfo).ToArray());
+                        DebugInfo = new EntityManagerDebugInfo(groups.Select(slot => slot.DebugInfo).ToArray());
                     }
                     return;
                 }
@@ -388,14 +396,14 @@ namespace Automa.Entities
             }
         }
 
-        private void OnEntityTypeRemove(ref EntityTypeData data)
-        {
-            for (var index = 0; index < groups.Count; index++)
-            {
-                var group = groups[index];
-                group.Group.OnEntityTypeRemoved(data);
-            }
-        }
+//        private void OnEntityTypeRemove(ref EntityTypeData data)
+//        {
+//            for (var index = 0; index < groups.Count; index++)
+//            {
+//                var group = groups[index];
+//                group.Group.OnEntityTypeRemoved(data);
+//            }
+//        }
 
         private struct EntityLink
         {
