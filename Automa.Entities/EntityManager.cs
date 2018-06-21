@@ -202,6 +202,110 @@ namespace Automa.Entities
             return data;
         }
 
+        public void AddComponents(Entity entity, ComponentType[] addComponents)
+        {
+            ref var entityLink = ref entityLinks[entity.Id];
+            if (entityLink.Entity != entity)
+                throw new ArgumentException("Entity not found");
+            var entityType = entityLink.Data.EntityType;
+
+            if (componentTypeCache.Length < entityType.Types.Length + 1)
+            {
+                Array.Resize(ref componentTypeCache, entityType.Types.Length + 1);
+            }
+
+            var index = 0;
+            var previousTypeId = -1;
+            var entityTypeChanged = false;
+            var addedComponentTypes = 0;
+            for (int i = 0; i < entityType.Types.Length; i++)
+            {
+                var entityTypeType = entityType.Types[i];
+                for (int j = 0; j < addComponents.Length; j++)
+                {
+                    var componentTypeToAdd = addComponents[j];
+                    if (componentTypeToAdd.TypeId > previousTypeId
+                        && componentTypeToAdd.TypeId < entityTypeType.TypeId)
+                    {
+                        componentTypeCache[index++] = componentTypeToAdd;
+                        ++addedComponentTypes;
+                        entityTypeChanged = true;
+                    }
+                    else if (componentTypeToAdd.TypeId == entityTypeType.TypeId)
+                    {
+                        ++addedComponentTypes;
+                    }
+                }
+                componentTypeCache[index++] = entityTypeType;
+                previousTypeId = entityTypeType.TypeId;
+            }
+            while (addedComponentTypes < addComponents.Length)
+            {
+                var minimalId = int.MaxValue;
+                var minimalComponentType = new ComponentType();
+                for (int j = 0; j < addComponents.Length; j++)
+                {
+                    var componentTypeToAdd = addComponents[j];
+                    if (componentTypeToAdd.TypeId > previousTypeId
+                        && componentTypeToAdd.TypeId < minimalId)
+                    {
+                        minimalId = componentTypeToAdd.TypeId;
+                        minimalComponentType = componentTypeToAdd;
+                    }
+                }
+                previousTypeId = minimalId;
+                componentTypeCache[index++] = minimalComponentType;
+                ++addedComponentTypes;
+                entityTypeChanged = true;
+            }
+            // If entity type not changed => return
+            if (!entityTypeChanged) return;
+
+            var entityTypeHash = EntityType.CalculateHash(componentTypeCache, index);
+            var data = GetOrCreateData(entityTypeHash, componentTypeCache, index);
+
+            MoveEntity(ref entityLink, data, entityType.Types, entityType.Types.Length);
+        }
+
+        public void RemoveComponents(Entity entity, ComponentType[] removeComponents)
+        {
+            ref var entityLink = ref entityLinks[entity.Id];
+            if (entityLink.Entity != entity)
+                throw new ArgumentException("Entity not found");
+            var entityType = entityLink.Data.EntityType;
+
+            if (componentTypeCache.Length < entityType.Types.Length + 1)
+            {
+                Array.Resize(ref componentTypeCache, entityType.Types.Length + 1);
+            }
+
+            var index = 0;
+            var entityTypeChanged = false;
+            for (int i = 0; i < entityType.Types.Length; i++)
+            {
+                var entityTypeType = entityType.Types[i];
+                for (int j = 0; j < removeComponents.Length; j++)
+                {
+                    if (removeComponents[j] == entityTypeType)
+                    {
+                        entityTypeChanged = true;
+                        goto continueNextType;
+                    }
+                }
+                componentTypeCache[index++] = entityTypeType;
+                continueNextType:
+                ;
+            }
+
+            // If entity type not changed => return
+            if (!entityTypeChanged) return;
+
+            var entityTypeHash = EntityType.CalculateHash(componentTypeCache, index);
+            var data = GetOrCreateData(entityTypeHash, componentTypeCache, index);
+
+            MoveEntity(ref entityLink, data, entityType.Types, entityType.Types.Length);
+        }
+
         public void ChangeComponents(Entity entity,
             ComponentType[] addComponents,
             ComponentType[] removeComponents)
@@ -223,33 +327,28 @@ namespace Automa.Entities
             for (int i = 0; i < entityType.Types.Length; i++)
             {
                 var entityTypeType = entityType.Types[i];
-                if (addComponents != null)
+
+                for (int j = 0; j < addComponents.Length; j++)
                 {
-                    for (int j = 0; j < addComponents.Length; j++)
+                    var componentTypeToAdd = addComponents[j];
+                    if (componentTypeToAdd.TypeId > previousTypeId
+                        && componentTypeToAdd.TypeId < entityTypeType.TypeId)
                     {
-                        var componentTypeToAdd = addComponents[j];
-                        if (componentTypeToAdd.TypeId > previousTypeId
-                            && componentTypeToAdd.TypeId < entityTypeType.TypeId)
-                        {
-                            componentTypeCache[index++] = componentTypeToAdd;
-                            ++addedComponentTypes;
-                            entityTypeChanged = true;
-                        }
-                        else if (componentTypeToAdd.TypeId == entityTypeType.TypeId)
-                        {
-                            ++addedComponentTypes;
-                        }
+                        componentTypeCache[index++] = componentTypeToAdd;
+                        ++addedComponentTypes;
+                        entityTypeChanged = true;
+                    }
+                    else if (componentTypeToAdd.TypeId == entityTypeType.TypeId)
+                    {
+                        ++addedComponentTypes;
                     }
                 }
-                if (removeComponents != null)
+                for (int j = 0; j < removeComponents.Length; j++)
                 {
-                    for (int j = 0; j < removeComponents.Length; j++)
+                    if (removeComponents[j] == entityTypeType)
                     {
-                        if (removeComponents[j] == entityTypeType)
-                        {
-                            entityTypeChanged = true;
-                            goto continueNextType;
-                        }
+                        entityTypeChanged = true;
+                        goto continueNextType;
                     }
                 }
                 componentTypeCache[index++] = entityTypeType;
@@ -257,27 +356,24 @@ namespace Automa.Entities
                 continueNextType:
                 ;
             }
-            if (addComponents != null)
+            while (addedComponentTypes < addComponents.Length)
             {
-                while (addedComponentTypes < addComponents.Length)
+                var minimalId = int.MaxValue;
+                var minimalComponentType = new ComponentType();
+                for (int j = 0; j < addComponents.Length; j++)
                 {
-                    var minimalId = int.MaxValue;
-                    var minimalComponentType = new ComponentType();
-                    for (int j = 0; j < addComponents.Length; j++)
+                    var componentTypeToAdd = addComponents[j];
+                    if (componentTypeToAdd.TypeId > previousTypeId
+                        && componentTypeToAdd.TypeId < minimalId)
                     {
-                        var componentTypeToAdd = addComponents[j];
-                        if (componentTypeToAdd.TypeId > previousTypeId
-                            && componentTypeToAdd.TypeId < minimalId)
-                        {
-                            minimalId = componentTypeToAdd.TypeId;
-                            minimalComponentType = componentTypeToAdd;
-                        }
+                        minimalId = componentTypeToAdd.TypeId;
+                        minimalComponentType = componentTypeToAdd;
                     }
-                    previousTypeId = minimalId;
-                    componentTypeCache[index++] = minimalComponentType;
-                    ++addedComponentTypes;
-                    entityTypeChanged = true;
                 }
+                previousTypeId = minimalId;
+                componentTypeCache[index++] = minimalComponentType;
+                ++addedComponentTypes;
+                entityTypeChanged = true;
             }
 
             // If entity type not changed => return
@@ -396,14 +492,14 @@ namespace Automa.Entities
             }
         }
 
-//        private void OnEntityTypeRemove(ref EntityTypeData data)
-//        {
-//            for (var index = 0; index < groups.Count; index++)
-//            {
-//                var group = groups[index];
-//                group.Group.OnEntityTypeRemoved(data);
-//            }
-//        }
+        //        private void OnEntityTypeRemove(ref EntityTypeData data)
+        //        {
+        //            for (var index = 0; index < groups.Count; index++)
+        //            {
+        //                var group = groups[index];
+        //                group.Group.OnEntityTypeRemoved(data);
+        //            }
+        //        }
 
         private struct EntityLink
         {
