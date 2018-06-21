@@ -350,9 +350,8 @@ namespace Automa.Entities
                     }
                 }
                 componentTypeCache[index++] = entityTypeType;
-                previousTypeId = entityTypeType.TypeId;
                 continueNextType:
-                ;
+                previousTypeId = entityTypeType.TypeId;
             }
             while (addedComponentTypes < addComponents.Length)
             {
