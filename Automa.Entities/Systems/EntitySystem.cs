@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Automa.Entities.Attributes;
 using Automa.Entities.Events;
 using Automa.Entities.Systems.Internal;
 

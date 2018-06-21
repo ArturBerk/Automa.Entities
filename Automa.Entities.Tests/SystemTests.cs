@@ -1,5 +1,4 @@
-﻿using Automa.Entities.Attributes;
-using Automa.Entities.Collections;
+﻿using Automa.Entities.Collections;
 using Automa.Entities.Systems;
 using Automa.Entities.Tests.Model;
 using NUnit.Framework;

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Automa.Entities.Attributes;
 using Automa.Entities.Collections;
 using Automa.Entities.Tests.Model;
 using NUnit.Framework;

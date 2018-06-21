@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Automa.Entities.Attributes
+namespace Automa.Entities
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public sealed class ExcludeComponentAttribute : Attribute

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Automa.Entities.Attributes
+namespace Automa.Entities.Systems
 {
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class OrderAttribute : Attribute

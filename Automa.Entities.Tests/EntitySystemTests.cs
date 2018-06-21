@@ -1,5 +1,4 @@
-﻿using Automa.Entities.Attributes;
-using Automa.Entities.Collections;
+﻿using Automa.Entities.Collections;
 using Automa.Entities.Commands;
 using Automa.Entities.Events;
 using Automa.Entities.Systems;
@@ -119,7 +118,7 @@ namespace Automa.Entities.Tests
 
             internal EntityCommandBuffer<TestCommand> TestCommands2;
 
-            public override void OnSystemUpdate()
+            protected override void OnSystemUpdate()
             {
                 TestCommands.Add(new TestCommand(this));
                 EventManager.Raise(Entity.Null, new Struct2Component());

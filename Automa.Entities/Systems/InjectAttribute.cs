@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Automa.Entities.Attributes
+namespace Automa.Entities.Systems
 {
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class InjectAttribute : Attribute

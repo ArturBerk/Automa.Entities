@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using Automa.Entities.Attributes;
 using Automa.Entities.Internal;
 using Automa.Entities.Systems.Debugging;
 
@@ -202,7 +201,7 @@ namespace Automa.Entities.Systems
             }
             return false;
         }
-
+        
         #region Debugging
 
         private readonly bool debug;

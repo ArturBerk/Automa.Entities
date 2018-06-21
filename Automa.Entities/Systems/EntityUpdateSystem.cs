@@ -48,7 +48,7 @@ namespace Automa.Entities.Systems
             }
         }
 
-        public abstract void OnSystemUpdate();
+        protected abstract void OnSystemUpdate();
 
         protected void OnAfterUpdate()
         {

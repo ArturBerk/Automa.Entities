@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Automa.Entities.Attributes;
 using Automa.Entities.Collections;
 using Automa.Entities.Debugging;
 using Automa.Entities.Internal;

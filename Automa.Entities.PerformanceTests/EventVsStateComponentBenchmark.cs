@@ -1,6 +1,5 @@
 ﻿using System;
 using Automa.Benchmarks;
-using Automa.Entities.Attributes;
 using Automa.Entities.Collections;
 using Automa.Entities.Commands;
 using Automa.Entities.Events;
@@ -68,7 +67,7 @@ namespace Automa.Entities.PerformanceTests
 
             public int updatedSystems = 0;
 
-            public override void OnSystemUpdate()
+            protected override void OnSystemUpdate()
             {
                 for (int i = 0; i < @group.Count; i++)
                 {
@@ -139,7 +138,7 @@ namespace Automa.Entities.PerformanceTests
 
             public int updatedSystems = 0;
 
-            public override void OnSystemUpdate()
+            protected override void OnSystemUpdate()
             {
                 for (int i = 0; i < @group.Count; i++)
                 {

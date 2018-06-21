@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using Automa.Entities.Attributes;
 using Automa.Entities.Systems;
 using Automa.Entities.Internal;
 
