@@ -67,7 +67,6 @@ namespace Automa.Entities
                 Count = 0;
                 return;
             }
-            Count = componentCollections[0].CalculatedCount;
             componentCollections[0].GetArrayLengths(ref componentArrayLengths, out Count);
         }
 
