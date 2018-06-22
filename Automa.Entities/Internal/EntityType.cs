@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Linq;
-using Automa.Entities.Internal;
 
-namespace Automa.Entities
+namespace Automa.Entities.Internal
 {
     internal struct EntityType
     {

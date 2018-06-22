@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Automa.Entities.Collections;
+using Automa.Entities.Internal;
 using Automa.Entities.Tests.Model;
 using NUnit.Framework;
 

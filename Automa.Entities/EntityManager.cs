@@ -10,22 +10,10 @@ namespace Automa.Entities
     public sealed class EntityManager : ManagerBase, IEnumerable<Entity>
     {
         internal readonly Queue<int> availableIndices = new Queue<int>();
-
-        internal ArrayList<EntityLink> entityLinks = new ArrayList<EntityLink>(4);
         private readonly Dictionary<uint, EntityTypeData> entityTypeDatas = new Dictionary<uint, EntityTypeData>();
-
-        private ArrayList<GroupSlot> groups = new ArrayList<GroupSlot>(4);
-
         private ComponentType[] componentTypeCache = new ComponentType[10];
-
-        public IEnumerable<EntityReference> EntityReferences => new ReferenceEnumerable(this);
-
-        #region Debugging
-
-        private readonly bool debug;
-        public EntityManagerDebugInfo DebugInfo { get; private set; }
-
-        #endregion
+        internal ArrayList<EntityLink> entityLinks = new ArrayList<EntityLink>(4);
+        private ArrayList<GroupSlot> groups = new ArrayList<GroupSlot>(4);
 
         public EntityManager() : this(false)
         {
@@ -40,9 +28,21 @@ namespace Automa.Entities
             }
         }
 
+        public IEnumerable<EntityReference> EntityReferences => new ReferenceEnumerable(this);
+
         internal IEnumerable<EntityTypeData> Datas => entityTypeDatas.Values;
 
         public int EntityCount => entityLinks.Count - availableIndices.Count;
+
+        public IEnumerator<Entity> GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
 
         public EntityReference CreateEntityReferenced(params ComponentType[] types)
         {
@@ -170,7 +170,7 @@ namespace Automa.Entities
             return data;
         }
 
-        public void AddComponents(Entity entity, ComponentType[] addComponents)
+        public void AddComponents(Entity entity, params ComponentType[] addComponents)
         {
             var entityLink = entityLinks[entity.Id];
             if (entityLink.Entity != entity)
@@ -186,10 +186,10 @@ namespace Automa.Entities
             var previousTypeId = -1;
             var entityTypeChanged = false;
             var addedComponentTypes = 0;
-            for (int i = 0; i < entityType.Types.Length; i++)
+            for (var i = 0; i < entityType.Types.Length; i++)
             {
                 var entityTypeType = entityType.Types[i];
-                for (int j = 0; j < addComponents.Length; j++)
+                for (var j = 0; j < addComponents.Length; j++)
                 {
                     var componentTypeToAdd = addComponents[j];
                     if (componentTypeToAdd.TypeId > previousTypeId
@@ -211,7 +211,7 @@ namespace Automa.Entities
             {
                 var minimalId = int.MaxValue;
                 var minimalComponentType = new ComponentType();
-                for (int j = 0; j < addComponents.Length; j++)
+                for (var j = 0; j < addComponents.Length; j++)
                 {
                     var componentTypeToAdd = addComponents[j];
                     if (componentTypeToAdd.TypeId > previousTypeId
@@ -235,7 +235,7 @@ namespace Automa.Entities
             MoveEntity(entityLink, data, entityType.Types, entityType.Types.Length);
         }
 
-        public void RemoveComponents(Entity entity, ComponentType[] removeComponents)
+        public void RemoveComponents(Entity entity, params ComponentType[] removeComponents)
         {
             var entityLink = entityLinks[entity.Id];
             if (entityLink.Entity != entity)
@@ -249,10 +249,10 @@ namespace Automa.Entities
 
             var index = 0;
             var entityTypeChanged = false;
-            for (int i = 0; i < entityType.Types.Length; i++)
+            for (var i = 0; i < entityType.Types.Length; i++)
             {
                 var entityTypeType = entityType.Types[i];
-                for (int j = 0; j < removeComponents.Length; j++)
+                for (var j = 0; j < removeComponents.Length; j++)
                 {
                     if (removeComponents[j] == entityTypeType)
                     {
@@ -292,11 +292,11 @@ namespace Automa.Entities
             var previousTypeId = -1;
             var entityTypeChanged = false;
             var addedComponentTypes = 0;
-            for (int i = 0; i < entityType.Types.Length; i++)
+            for (var i = 0; i < entityType.Types.Length; i++)
             {
                 var entityTypeType = entityType.Types[i];
 
-                for (int j = 0; j < addComponents.Length; j++)
+                for (var j = 0; j < addComponents.Length; j++)
                 {
                     var componentTypeToAdd = addComponents[j];
                     if (componentTypeToAdd.TypeId > previousTypeId
@@ -311,7 +311,7 @@ namespace Automa.Entities
                         ++addedComponentTypes;
                     }
                 }
-                for (int j = 0; j < removeComponents.Length; j++)
+                for (var j = 0; j < removeComponents.Length; j++)
                 {
                     if (removeComponents[j] == entityTypeType)
                     {
@@ -327,7 +327,7 @@ namespace Automa.Entities
             {
                 var minimalId = int.MaxValue;
                 var minimalComponentType = new ComponentType();
-                for (int j = 0; j < addComponents.Length; j++)
+                for (var j = 0; j < addComponents.Length; j++)
                 {
                     var componentTypeToAdd = addComponents[j];
                     if (componentTypeToAdd.TypeId > previousTypeId
@@ -363,7 +363,7 @@ namespace Automa.Entities
             {
                 Array.Resize(ref componentTypeCache, entityType.Types.Length - 1);
             }
-            ComponentType newComponentType = ComponentType.Create<T>();
+            var newComponentType = ComponentType.Create<T>();
             var index = 0;
             var removed = false;
             for (var i = 0; i < entityType.Types.Length; i++)
@@ -386,7 +386,8 @@ namespace Automa.Entities
             MoveEntity(entityLink, data, newEntityType.Types, newEntityType.Types.Length);
         }
 
-        private void MoveEntity(EntityLink entityLink, EntityTypeData data, ComponentType[] copyTypesBasedOn, int typeCount)
+        private void MoveEntity(EntityLink entityLink, EntityTypeData data, ComponentType[] copyTypesBasedOn,
+            int typeCount)
         {
             // Add new entity to new entity type data
             var newEntityIndexInData = data.AddEntity(entityLink.Entity);
@@ -418,7 +419,7 @@ namespace Automa.Entities
 
         public T RegisterGroup<T>(T group) where T : Group
         {
-            RegisterGroup((Group)group);
+            RegisterGroup((Group) group);
             return group;
         }
 
@@ -436,7 +437,7 @@ namespace Automa.Entities
 
         public void UnregisterGroup(Group group)
         {
-            for (int i = 0; i < groups.Count; i++)
+            for (var i = 0; i < groups.Count; i++)
             {
                 if (Equals(groups[i].Group, group))
                 {
@@ -470,8 +471,8 @@ namespace Automa.Entities
 
         internal class EntityLink
         {
-            public Entity Entity;
             public EntityTypeData Data;
+            public Entity Entity;
             public int IndexInData;
 
             public override string ToString()
@@ -485,21 +486,11 @@ namespace Automa.Entities
             public readonly Group Group;
             public readonly GroupDebugInfo DebugInfo;
 
-            public GroupSlot(Group @group) : this()
+            public GroupSlot(Group group) : this()
             {
-                Group = @group;
+                Group = group;
                 DebugInfo = new GroupDebugInfo(group);
             }
-        }
-
-        public IEnumerator<Entity> GetEnumerator()
-        {
-            return new Enumerator(this);
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return new Enumerator(this);
         }
 
         private struct Enumerator : IEnumerator<Entity>
@@ -598,5 +589,12 @@ namespace Automa.Entities
                 Reset();
             }
         }
+
+        #region Debugging
+
+        private readonly bool debug;
+        public EntityManagerDebugInfo DebugInfo { get; private set; }
+
+        #endregion
     }
 }

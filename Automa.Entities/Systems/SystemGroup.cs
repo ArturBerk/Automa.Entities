@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Reflection;
-using Automa.Entities.Systems;
 using Automa.Entities.Internal;
 
-namespace Automa.Entities
+namespace Automa.Entities.Systems
 {
     public sealed class SystemGroup : ISystem, IUpdateSystem
     {
