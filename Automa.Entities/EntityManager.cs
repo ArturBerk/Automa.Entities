@@ -6,7 +6,7 @@ using Automa.Entities.Internal;
 
 namespace Automa.Entities
 {
-    public sealed class EntityManager : IManager
+    public sealed class EntityManager : ManagerBase
     {
         internal readonly Queue<int> availableIndices = new Queue<int>();
 
@@ -54,25 +54,6 @@ namespace Automa.Entities
         internal IEnumerable<EntityTypeData> Datas => entityTypeDatas.Values;
 
         public int EntityCount => entityLinks.Count - availableIndices.Count;
-
-        public void OnAttachToContext(IContext context)
-        {
-            //
-        }
-
-        public void OnDetachFromContext(IContext context)
-        {
-            //
-        }
-
-        public void OnUpdate()
-        {
-            // Need manual update groups in systems
-            //            foreach (var group in groups)
-            //            {
-            //                group.Group.Update();
-            //            }
-        }
 
         public EntityReference CreateEntityReferenced(params ComponentType[] types)
         {

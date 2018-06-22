@@ -2,7 +2,7 @@
 
 namespace Automa.Entities.Events
 {
-    public class EventManager<TSource> : IManager
+    public class EventManager<TSource> : ManagerBase
     {
         private IEventHandler[] eventHandlers = new IEventHandler[0];
 
@@ -21,15 +21,7 @@ namespace Automa.Entities.Events
             GetEventHandler<TEvent>().UnregisterListener(listener);
         }
 
-        public void OnAttachToContext(IContext context)
-        {
-        }
-
-        public void OnDetachFromContext(IContext context)
-        {
-        }
-
-        public void OnUpdate()
+        public override void OnUpdate()
         {
             for (int i = 0; i < eventHandlers.Length; i++)
             {

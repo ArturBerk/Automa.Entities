@@ -7,14 +7,12 @@ using Automa.Entities.Systems.Debugging;
 
 namespace Automa.Entities.Systems
 {
-    public sealed class SystemManager : IManager
+    public sealed class SystemManager : ManagerBase
     {
         internal static int DefaultOrder = 0;
 
         internal ArrayList<SystemSlot> systems = new ArrayList<SystemSlot>(4);
         internal ArrayList<SystemSlot> updateSystems = new ArrayList<SystemSlot>(4);
-
-        private IContext context;
 
         public SystemManager() : this(false)
         {
@@ -33,7 +31,7 @@ namespace Automa.Entities.Systems
             }
         }
 
-        public void OnUpdate()
+        public override void OnUpdate()
         {
             if (debug)
             {
@@ -55,9 +53,9 @@ namespace Automa.Entities.Systems
             }
         }
 
-        public void OnAttachToContext(IContext context)
+        public override void OnAttachToContext(IContext context)
         {
-            this.context = context;
+            base.OnAttachToContext(context);
             foreach (var systemSlot in systems)
             {
                 systemSlot.System.OnAttachToContext(context);
@@ -71,9 +69,9 @@ namespace Automa.Entities.Systems
             }
         }
 
-        public void OnDetachFromContext(IContext context)
+        public override void OnDetachFromContext(IContext context)
         {
-            this.context = null;
+            base.OnDetachFromContext(context);
             foreach (var systemSlot in systems)
             {
                 systemSlot.System.OnDetachFromContext(context);
@@ -92,9 +90,9 @@ namespace Automa.Entities.Systems
             var orderAttribute = system.GetType().GetCustomAttribute<OrderAttribute>();
             var newSlot = new SystemSlot(orderAttribute?.Order ?? DefaultOrder, system);
             AddSystemToGroup(ref systems, ref newSlot);
-            if (context != null)
+            if (Context != null)
             {
-                newSlot.System.OnAttachToContext(context);
+                newSlot.System.OnAttachToContext(Context);
             }
 
             if (newSlot.System.IsEnabled && newSlot.UpdateSystem != null)
@@ -106,11 +104,11 @@ namespace Automa.Entities.Systems
             if (debug)
             {
                 debugInfo = new SystemManagerDebugInfo(systems.Select(slot => slot.DebugInfo).ToArray());
-                if (context != null)
+                if (Context != null)
                 {
                     foreach (var debugInfoSystem in DebugInfo.Systems)
                     {
-                        debugInfoSystem.OnAttachToContext(context);
+                        debugInfoSystem.OnAttachToContext(Context);
                     }
                 }
             }
@@ -172,20 +170,20 @@ namespace Automa.Entities.Systems
         {
             if (RemoveSystemFromGroup(ref systems, system))
             {
-                if (context != null)
+                if (Context != null)
                 {
-                    system.OnDetachFromContext(context);
+                    system.OnDetachFromContext(Context);
                 }
                 RemoveSystemFromGroup(ref updateSystems, system);
             }
             if (debug)
             {
                 debugInfo = new SystemManagerDebugInfo(systems.Select(slot => slot.DebugInfo).ToArray());
-                if (context != null)
+                if (Context != null)
                 {
                     foreach (var debugInfoSystem in DebugInfo.Systems)
                     {
-                        debugInfoSystem.OnDetachFromContext(context);
+                        debugInfoSystem.OnDetachFromContext(Context);
                     }
                 }
             }

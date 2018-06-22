@@ -109,11 +109,4 @@ namespace Automa.Entities
         ContextDebugInfo DebugInfo { get; }
 
     }
-
-    public interface IManager
-    {
-        void OnAttachToContext(IContext context);
-        void OnDetachFromContext(IContext context);
-        void OnUpdate();
-    }
 }
