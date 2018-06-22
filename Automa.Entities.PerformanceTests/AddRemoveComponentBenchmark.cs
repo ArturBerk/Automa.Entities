@@ -1,6 +1,4 @@
 ﻿using Automa.Benchmarks;
-using Automa.Entities.Collections;
-using Automa.Entities.Internal;
 using Automa.Entities.PerformanceTests.Model;
 
 namespace Automa.Entities.PerformanceTests
@@ -28,33 +26,31 @@ namespace Automa.Entities.PerformanceTests
         [Case("Add/Remove separated")]
         private void TestIndex()
         {
-            var entities = entityManager.Entities.ToArray();
-            for (int i = 0; i < entities.Length; i++)
+            foreach (var entity in entityManager)
             {
-                entityManager.RemoveComponent<Struct2Component>(entities[i]);
-                entityManager.AddComponent(entities[i], new Struct3Component());
+                entityManager.RemoveComponent<Struct2Component>(entity);
+                entityManager.AddComponent(entity, new Struct3Component());
             }
-            for (int i = 0; i < entities.Length; i++)
+            foreach (var entity in entityManager)
             {
-                entityManager.RemoveComponent<Struct3Component>(entities[i]);
-                entityManager.AddComponent(entities[i], new Struct2Component());
+                entityManager.RemoveComponent<Struct3Component>(entity);
+                entityManager.AddComponent(entity, new Struct2Component());
             }
         }
 
         [Case("Add/Remove united")]
         private void TestUnited()
         {
-            var entities = entityManager.Entities.ToArray();
             var remove = new [] { ComponentType.Create<Struct2Component>() };
             var add = new [] { ComponentType.Create<Struct3Component>() };
-            for (int i = 0; i < entities.Length; i++)
+            foreach (var entity in entityManager)
             {
-                entityManager.ChangeComponents(entities[i], add, remove);
-                entityManager.SetComponent(entities[i], new Struct3Component());
+                entityManager.ChangeComponents(entity, add, remove);
+                entityManager.SetComponent(entity, new Struct3Component());
             }
-            for (int i = 0; i < entities.Length; i++)
+            foreach (var entity in entityManager)
             {
-                entityManager.ChangeComponents(entities[i], remove, add);
+                entityManager.ChangeComponents(entity, remove, add);
             }
         }
 

@@ -84,22 +84,22 @@ namespace Automa.Entities.Tests
             Assert.AreEqual(20, s2.Value);
         }
 
-        [Test]
-        public void CollectionToArrayTest()
-        {
-            EntityManager entityManager = new EntityManager();
-            var entities = new Entity[10];
-            for (int i = 0; i < 10; i++)
-            {
-                entities[i] = entityManager.CreateEntity(ComponentType.Create<StructComponent>());
-            }
-            var entitiesArray = entityManager.Entities.ToArray();
-            Assert.AreEqual(10, entitiesArray.Length);
-            for (int i = 0; i < 10; i++)
-            {
-                Assert.AreEqual(entities[i], entitiesArray[i]);
-            }
-        }
+//        [Test]
+//        public void CollectionToArrayTest()
+//        {
+//            EntityManager entityManager = new EntityManager();
+//            var entities = new Entity[10];
+//            for (int i = 0; i < 10; i++)
+//            {
+//                entities[i] = entityManager.CreateEntity(ComponentType.Create<StructComponent>());
+//            }
+//            var entitiesArray = entityManager.Entities.ToArray();
+//            Assert.AreEqual(10, entitiesArray.Length);
+//            for (int i = 0; i < 10; i++)
+//            {
+//                Assert.AreEqual(entities[i], entitiesArray[i]);
+//            }
+//        }
 
         [Test]
         public void HasComponentTest()
@@ -136,8 +136,7 @@ namespace Automa.Entities.Tests
                 entityManager.SetComponent(e, new ClassComponent(40 + e.Id));
                 entityManager.SetComponent(e, new Struct3Component(30 + e.Id));
             }
-            var entities = entityManager.Entities.ToArray();
-            foreach (var entity in entities)
+            foreach (var entity in entityManager)
             {
                 if (!entityManager.HasComponent<Struct3Component>(entity))
                 {
@@ -145,7 +144,7 @@ namespace Automa.Entities.Tests
                 }
             }
 
-            foreach (var entity in entities)
+            foreach (var entity in entityManager)
             {
                 Assert.AreEqual(10 + entity.Id, entityManager.GetComponent<StructComponent>(entity).Value);
                 Assert.AreEqual(20 + entity.Id, entityManager.GetComponent<Struct2Component>(entity).Value);
@@ -165,13 +164,12 @@ namespace Automa.Entities.Tests
                 entityManager.SetComponent(e, new Struct2Component(20 + e.Id));
                 entityManager.SetComponent(e, new ClassComponent(40 + e.Id));
             }
-            var entities = entityManager.Entities.ToArray();
-            foreach (var entity in entities)
+            foreach (var entity in entityManager)
             {
                 entityManager.RemoveComponent<Struct2Component>(entity);
             }
 
-            foreach (var entity in entities)
+            foreach (var entity in entityManager)
             {
                 Assert.AreEqual(10 + entity.Id, entityManager.GetComponent<StructComponent>(entity).Value);
                 Assert.AreEqual(40 + entity.Id, entityManager.GetComponent<ClassComponent>(entity).Value);

@@ -11,7 +11,7 @@ namespace Automa.Entities.PerformanceTests
 
         protected override void Prepare()
         {
-            IterationCount = 1000;
+            IterationCount = 200;
             EntityManager entityManager = new EntityManager();
             var v1 = new ComponentType[]
             {

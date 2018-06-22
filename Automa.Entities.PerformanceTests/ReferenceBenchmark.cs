@@ -26,10 +26,8 @@ namespace Automa.Entities.PerformanceTests
         [Case("Direct")]
         private void Direct()
         {
-            var entities = entityManager.Entities.ToArray();
-            for (int i = 0; i < entities.Length; i++)
+            foreach (var entity in entityManager)
             {
-                var entity = entities[i];
                 entityManager.SetComponent(entity, new Struct2Component());
                 entityManager.SetComponent(entity, new StructComponent());
                 entityManager.SetComponent(entity, new Struct2Component());
@@ -42,10 +40,8 @@ namespace Automa.Entities.PerformanceTests
         [Case("Referenced")]
         private void Inlining()
         {
-            var entities = entityManager.Entities.ToArray();
-            for (int i = 0; i < entities.Length; i++)
+            foreach (var reference in entityManager.EntityReferences)
             {
-                var reference = entityManager.GetReference(entities[i]);
                 reference.SetComponent(new Struct2Component());
                 reference.SetComponent(new StructComponent());
                 reference.SetComponent(new Struct2Component());
