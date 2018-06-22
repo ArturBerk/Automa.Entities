@@ -22,6 +22,16 @@ namespace Automa.Entities
             }
         }
 
+        public bool HasManager<T>() where T : IManager
+        {
+            return managers.ContainsKey(typeof(T));
+        }
+
+        public bool HasManager(Type type)
+        {
+            return managers.ContainsKey(type);
+        }
+
         public T GetManager<T>() where T : IManager
         {
             if (!managers.TryGetValue(typeof(T), out var manager))
@@ -29,6 +39,15 @@ namespace Automa.Entities
                 throw new ApplicationException($"Manager of type {typeof(T)} not found");
             }
             return (T) manager;
+        }
+
+        public IManager GetManager(Type type)
+        {
+            if (!managers.TryGetValue(type, out var manager))
+            {
+                throw new ApplicationException($"Manager of type {type} not found");
+            }
+            return manager;
         }
 
         public T SetManager<T>(T manager) where T : IManager
@@ -98,7 +117,10 @@ namespace Automa.Entities
 
     public interface IContext : IDisposable
     {
+        bool HasManager<T>() where T : IManager;
+        bool HasManager(Type type);
         T GetManager<T>() where T : IManager;
+        IManager GetManager(Type type);
         T SetManager<T>(T manager) where T : IManager;
         void RemoveManager<T>() where T : IManager;
         void Update();

@@ -22,6 +22,19 @@ namespace Automa.Entities.Systems
             EventManager = context.GetManager<EntityEventManager>();
             RegisterGroups();
             RegisterEvents();
+            InjectManagers(context);
+        }
+
+        private void InjectManagers(IContext context)
+        {
+            foreach (var injectableField in GetInjectableFields()
+                .Where(info => typeof(IManager).IsAssignableFrom(info.FieldType)))
+            {
+                if (context.HasManager(injectableField.FieldType))
+                {
+                    injectableField.SetValue(this, context.GetManager(injectableField.FieldType));
+                }
+            }
         }
 
         public virtual void OnDetachFromContext(IContext context)
@@ -95,7 +108,7 @@ namespace Automa.Entities.Systems
         protected IEnumerable<FieldInfo> GetInjectableFields()
         {
             return GetType()
-                .GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                .GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy)
                 .Where(info => info.GetCustomAttribute<InjectAttribute>() != null);
         }
 
