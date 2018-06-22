@@ -516,13 +516,13 @@ namespace Automa.Entities
 
             public bool MoveNext()
             {
-                while (++index < entityManager.entityLinks.Count)
+                while (true)
                 {
+                    if (++index >= entityManager.entityLinks.Count) return false;
                     var link = entityManager.entityLinks[index];
-                    if (link.Entity != Entity.Null) return true;
                     currentEntity = link.Entity;
+                    if (link.Entity != Entity.Null) return true;
                 }
-                return false;
             }
 
             public void Reset()
@@ -574,11 +574,12 @@ namespace Automa.Entities
 
             public bool MoveNext()
             {
-                while (++index < entityManager.entityLinks.Count)
+                while (true)
                 {
+                    if (++index >= entityManager.entityLinks.Count) return false;
                     var link = entityManager.entityLinks[index];
-                    if (link.Entity != Entity.Null) return true;
                     currentEntityLink = link;
+                    if (link.Entity != Entity.Null) return true;
                 }
                 return false;
             }
