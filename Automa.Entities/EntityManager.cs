@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Automa.Entities.Debugging;
@@ -6,17 +7,18 @@ using Automa.Entities.Internal;
 
 namespace Automa.Entities
 {
-    public sealed class EntityManager : ManagerBase
+    public sealed class EntityManager : ManagerBase, IEnumerable<Entity>
     {
         internal readonly Queue<int> availableIndices = new Queue<int>();
 
-        private readonly AllEntities allEntities;
         internal ArrayList<EntityLink> entityLinks = new ArrayList<EntityLink>(4);
         private readonly Dictionary<uint, EntityTypeData> entityTypeDatas = new Dictionary<uint, EntityTypeData>();
 
         private ArrayList<GroupSlot> groups = new ArrayList<GroupSlot>(4);
 
         private ComponentType[] componentTypeCache = new ComponentType[10];
+
+        public IEnumerable<EntityReference> EntityReferences => new ReferenceEnumerable(this);
 
         #region Debugging
 
@@ -31,23 +33,10 @@ namespace Automa.Entities
 
         public EntityManager(bool debug)
         {
-            allEntities = RegisterGroup(new AllEntities());
             this.debug = debug;
             if (debug)
             {
                 DebugInfo = new EntityManagerDebugInfo(groups.Select(slot => slot.DebugInfo).ToArray());
-            }
-        }
-        /// <summary>
-        /// 27716
-        /// </summary>
-
-        public Collections.EntityCollection Entities
-        {
-            get
-            {
-                allEntities.Update();
-                return allEntities.Entities;
             }
         }
 
@@ -491,11 +480,6 @@ namespace Automa.Entities
             }
         }
 
-        private class AllEntities : Group
-        {
-            public Collections.EntityCollection Entities;
-        }
-
         private struct GroupSlot
         {
             public readonly Group Group;
@@ -505,6 +489,112 @@ namespace Automa.Entities
             {
                 Group = @group;
                 DebugInfo = new GroupDebugInfo(group);
+            }
+        }
+
+        public IEnumerator<Entity> GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
+
+        private struct Enumerator : IEnumerator<Entity>
+        {
+            private readonly EntityManager entityManager;
+            private int index;
+            private Entity currentEntity;
+
+            public Enumerator(EntityManager entityManager) : this()
+            {
+                this.entityManager = entityManager;
+                index = -1;
+            }
+
+            public bool MoveNext()
+            {
+                while (++index < entityManager.entityLinks.Count)
+                {
+                    var link = entityManager.entityLinks[index];
+                    if (link.Entity != Entity.Null) return true;
+                    currentEntity = link.Entity;
+                }
+                return false;
+            }
+
+            public void Reset()
+            {
+                index = -1;
+            }
+
+            public Entity Current => currentEntity;
+
+            object IEnumerator.Current => currentEntity;
+
+            public void Dispose()
+            {
+                Reset();
+            }
+        }
+
+        private struct ReferenceEnumerable : IEnumerable<EntityReference>
+        {
+            private readonly EntityManager entityManager;
+
+            public ReferenceEnumerable(EntityManager entityManager)
+            {
+                this.entityManager = entityManager;
+            }
+
+            public IEnumerator<EntityReference> GetEnumerator()
+            {
+                return new ReferenceEnumerator(entityManager);
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return new ReferenceEnumerator(entityManager);
+            }
+        }
+
+        private struct ReferenceEnumerator : IEnumerator<EntityReference>
+        {
+            private readonly EntityManager entityManager;
+            private int index;
+            private EntityLink currentEntityLink;
+
+            public ReferenceEnumerator(EntityManager entityManager) : this()
+            {
+                this.entityManager = entityManager;
+                index = -1;
+            }
+
+            public bool MoveNext()
+            {
+                while (++index < entityManager.entityLinks.Count)
+                {
+                    var link = entityManager.entityLinks[index];
+                    if (link.Entity != Entity.Null) return true;
+                    currentEntityLink = link;
+                }
+                return false;
+            }
+
+            public void Reset()
+            {
+                index = -1;
+            }
+
+            public EntityReference Current => new EntityReference(currentEntityLink, entityManager);
+
+            object IEnumerator.Current => new EntityReference(currentEntityLink, entityManager);
+
+            public void Dispose()
+            {
+                Reset();
             }
         }
     }

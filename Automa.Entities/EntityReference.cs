@@ -7,6 +7,8 @@ namespace Automa.Entities
         private readonly EntityManager.EntityLink entityLink;
         private readonly EntityManager entityManager;
 
+        public Entity Entity => entityLink.Entity;
+
         internal EntityReference(EntityManager.EntityLink entityLink, EntityManager entityManager)
         {
             this.entityLink = entityLink;
