@@ -2,6 +2,11 @@
 
 namespace Automa.Entities.Events
 {
+    internal interface IEventHandler
+    {
+        void Dispatch();
+    }
+
     internal sealed class EventHandler<TSource, TEvent> : IEventHandler where TEvent : struct
     {
         private ArrayList<(TSource Source, TEvent Event)> events = new ArrayList<(TSource, TEvent)>(4);
@@ -14,15 +19,21 @@ namespace Automa.Entities.Events
 
         public void Dispatch()
         {
-            for (int i = 0; i < events.Count; i++)
+            try
             {
-                var e = events[i];
-                for (int j = 0; j < listeners.Count; j++)
+                for (int i = 0; i < events.Count; i++)
                 {
-                    listeners[j].OnEvent(e.Source, e.Event);
+                    var e = events[i];
+                    for (int j = 0; j < listeners.Count; j++)
+                    {
+                        listeners[j].OnEvent(e.Source, e.Event);
+                    }
                 }
             }
-            events.FastClear();
+            finally
+            {
+                events.FastClear();
+            }
         }
 
         public void RegisterListener(IEventListener<TSource, TEvent> listener)
