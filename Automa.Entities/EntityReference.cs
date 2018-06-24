@@ -48,6 +48,18 @@ namespace Automa.Entities
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void AddComponents(params ComponentType[] componentTypes)
+        {
+            entityManager.AddComponents(entityLink.Entity, componentTypes);
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void RemoveComponents(params ComponentType[] componentTypes)
+        {
+            entityManager.RemoveComponents(entityLink.Entity, componentTypes);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ChangeComponents(
             ComponentType[] addComponents,
             ComponentType[] removeComponents)
