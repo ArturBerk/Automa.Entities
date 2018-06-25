@@ -9,8 +9,19 @@ namespace Automa.Entities.Systems
         private ArrayList<SystemSlot> systems = new ArrayList<SystemSlot>(4);
 
         private IContext context;
+        private bool isEnabled;
 
-        public bool IsEnabled { get; set; }
+        public bool IsEnabled
+        {
+            get => isEnabled;
+            set
+            {
+                if (isEnabled == value) return;
+                isEnabled = value;
+                EnabledChanged?.Invoke(this, isEnabled);
+            }
+        }
+
         public event Action<ISystem, bool> EnabledChanged;
 
         public void OnAttachToContext(IContext context)

@@ -43,4 +43,14 @@
         }
 
     }
+
+    public struct EntityLinkComponent
+    {
+        public Entity Entity;
+
+        public EntityLinkComponent(Entity entity)
+        {
+            this.Entity = entity;
+        }
+    }
 }

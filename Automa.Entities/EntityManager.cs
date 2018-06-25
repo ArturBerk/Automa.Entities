@@ -57,6 +57,12 @@ namespace Automa.Entities
             return new EntityReference(entityLink, this);
         }
 
+        public bool IsExists(Entity entity)
+        {
+            var entityLink = entityLinks[entity.Id];
+            return entityLink.Entity == entity;
+        }
+
         public Entity CreateEntity(params ComponentType[] types)
         {
             var entityType = new EntityType(types);
@@ -572,7 +578,6 @@ namespace Automa.Entities
                     currentEntityLink = link;
                     if (link.Entity != Entity.Null) return true;
                 }
-                return false;
             }
 
             public void Reset()

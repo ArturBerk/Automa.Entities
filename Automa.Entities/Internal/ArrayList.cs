@@ -173,9 +173,9 @@ namespace Automa.Entities.Internal
             Count = 0;
         }
 
-        public ArrayListEnumerator<T> GetEnumerator()
+        public ArrayEnumerator<T> GetEnumerator()
         {
-            return new ArrayListEnumerator<T>(Buffer, Count);
+            return new ArrayEnumerator<T>(Buffer, Count);
         }
 
         public void Release()
@@ -251,11 +251,11 @@ namespace Automa.Entities.Internal
         }
     }
 
-    public struct ArrayListEnumerator<T> : IEnumerator<T>
+    public struct ArrayEnumerator<T> : IEnumerator<T>
     {
         public T Current { get; private set; }
 
-        public ArrayListEnumerator(T[] buffer, int size)
+        public ArrayEnumerator(T[] buffer, int size)
         {
             this.size = size;
             counter = 0;

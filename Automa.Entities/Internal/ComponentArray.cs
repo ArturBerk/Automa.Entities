@@ -181,9 +181,9 @@ namespace Automa.Entities.Internal
             Count = 0;
         }
 
-        public ArrayListEnumerator<T> GetEnumerator()
+        public ArrayEnumerator<T> GetEnumerator()
         {
-            return new ArrayListEnumerator<T>(Buffer, Count);
+            return new ArrayEnumerator<T>(Buffer, Count);
         }
 
         public void Release()
