@@ -66,7 +66,8 @@ namespace Automa.Entities.Builders
             Entities = entities;
         }
 
-        public void Create(EntityManager entityManager, ref TParameter parameter)
+        public void Build(EntityManager entityManager, ref TParameter parameter,
+            Action<ReadOnlyArray<EntityReference>> doOnEntities = null)
         {
             for (var index = 0; index < Entities.Length; index++)
             {
@@ -85,6 +86,9 @@ namespace Automa.Entities.Builders
                 entityTemplate.BuildComponents(ref BuilderHelper.CreatedEntities[index],
                     ref parameter, BuilderHelper.CreatedEntitiesByName);
             }
+            doOnEntities?.Invoke(new ReadOnlyArray<EntityReference>(
+                BuilderHelper.CreatedEntities.Buffer,
+                BuilderHelper.CreatedEntities.Count));
             BuilderHelper.CreatedEntities.Clear();
             BuilderHelper.CreatedEntitiesByName.Clear();
         }
