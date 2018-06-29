@@ -1,15 +1,21 @@
 ﻿using System;
-using System.Reflection;
+using System.Collections.Generic;
+using System.Linq;
 using Automa.Entities.Internal;
+using Automa.Entities.Systems.Debugging;
 
 namespace Automa.Entities.Systems
 {
-    public sealed class SystemGroup : ISystem, IUpdateSystem
+    public abstract class SystemGroup : ISystem, IUpdateSystem
     {
         private ArrayList<SystemSlot> systems = new ArrayList<SystemSlot>(4);
 
+        public IEnumerable<ISystem> Systems => systems.Select(slot => slot.System);
+
         private IContext context;
-        private bool isEnabled;
+        private bool isEnabled = true;
+
+        internal SystemGroupDebugInfo debug;
 
         public bool IsEnabled
         {
@@ -31,10 +37,12 @@ namespace Automa.Entities.Systems
             {
                 system.System.OnAttachToContext(context);
             }
+            debug?.OnAttachToContext(context);
         }
 
         public void OnDetachFromContext(IContext context)
         {
+            debug?.OnDetachFromContext(context);
             foreach (var system in systems)
             {
                 system.System.OnDetachFromContext(context);
@@ -44,20 +52,39 @@ namespace Automa.Entities.Systems
 
         public void OnUpdate()
         {
-            for (var i = 0; i < systems.Count; i++)
+            if (debug == null)
             {
-                ref var systemSlot = ref systems[i];
-                if (systemSlot.UpdateSystem != null && systemSlot.System.IsEnabled)
+                for (var i = 0; i < systems.Count; i++)
                 {
-                    systemSlot.UpdateSystem.OnUpdate();
+                    ref var systemSlot = ref systems[i];
+                    if (systemSlot.UpdateSystem != null && systemSlot.System.IsEnabled)
+                    {
+                        systemSlot.UpdateSystem.OnUpdate();
+                    }
+                }
+            }
+            else
+            {
+                var groupTime = new TimeSpan();
+                for (var i = 0; i < debug.Systems.Length; i++)
+                {
+                    ref var systemSlot = ref debug.Systems[i];
+                    if (systemSlot.System is IUpdateSystem updateSystem && systemSlot.System.IsEnabled)
+                    {
+                        debug.Stopwatch.Restart();
+                        updateSystem.OnUpdate();
+                        debug.Stopwatch.Stop();
+                        systemSlot.UpdateTime = debug.Stopwatch.Elapsed;
+                        groupTime = groupTime.Add(debug.Stopwatch.Elapsed);
+                    }
+                    debug.UpdateTime = groupTime;
                 }
             }
         }
 
-        public void AddSystem(ISystem system)
+        public void AddSystem(ISystem system, int orderIndex = SystemManager.DefaultOrder)
         {
-            var orderAttribute = system.GetType().GetCustomAttribute<OrderAttribute>();
-            var newSlot = new SystemSlot(orderAttribute?.Order ?? SystemManager.DefaultOrder, system);
+            var newSlot = new SystemSlot(orderIndex, system);
             var inserted = false;
             for (var i = 0; i < systems.Count; i++)
             {
@@ -75,6 +102,7 @@ namespace Automa.Entities.Systems
             if (context != null)
             {
                 newSlot.System.OnAttachToContext(context);
+                debug?.OnAttachToContext(context);
             }
         }
 
@@ -92,6 +120,10 @@ namespace Automa.Entities.Systems
                     systems.RemoveAt(i);
                     break;
                 }
+            }
+            if (context != null)
+            {
+                debug?.OnDetachFromContext(context);
             }
         }
     }

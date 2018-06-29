@@ -9,7 +9,7 @@ namespace Automa.Entities.Systems
 {
     public sealed class SystemManager : ManagerBase
     {
-        internal static int DefaultOrder = 0;
+        public const int DefaultOrder = 0;
 
         internal ArrayList<SystemSlot> systems = new ArrayList<SystemSlot>(4);
         internal ArrayList<SystemSlot> updateSystems = new ArrayList<SystemSlot>(4);
@@ -23,7 +23,6 @@ namespace Automa.Entities.Systems
             this.debug = debug;
             if (debug)
             {
-                stopwatch = new Stopwatch();
                 if (debug)
                 {
                     debugInfo = new SystemManagerDebugInfo();
@@ -38,10 +37,10 @@ namespace Automa.Entities.Systems
                 for (var i = 0; i < updateSystems.Count; i++)
                 {
                     var systemSlot = updateSystems[i];
-                    stopwatch.Restart();
+                    debugInfo.Stopwatch.Restart();
                     systemSlot.UpdateSystem.OnUpdate();
-                    stopwatch.Stop();
-                    systemSlot.DebugInfo.UpdateTime = stopwatch.Elapsed;
+                    debugInfo.Stopwatch.Stop();
+                    systemSlot.DebugInfo.UpdateTime = debugInfo.Stopwatch.Elapsed;
                 }
             }
             else
@@ -85,10 +84,9 @@ namespace Automa.Entities.Systems
             }
         }
 
-        public void AddSystem(ISystem system)
+        public void AddSystem(ISystem system, int orderIndex = DefaultOrder)
         {
-            var orderAttribute = system.GetType().GetCustomAttribute<OrderAttribute>();
-            var newSlot = new SystemSlot(orderAttribute?.Order ?? DefaultOrder, system);
+            var newSlot = new SystemSlot(orderIndex, system);
             AddSystemToGroup(ref systems, ref newSlot);
             if (Context != null)
             {
@@ -103,13 +101,13 @@ namespace Automa.Entities.Systems
 
             if (debug)
             {
-                debugInfo = new SystemManagerDebugInfo(systems.Select(slot => slot.DebugInfo).ToArray());
-                if (Context != null)
+                debugInfo = new SystemManagerDebugInfo(systems.Select(systemSlot => systemSlot.System is SystemGroup systemGroup
+                    ? new SystemGroupDebugInfo(systemGroup)
+                    : new SystemDebugInfo(systemSlot.System)).ToArray());
+                if (Context == null) return;
+                foreach (var debugInfoSystem in DebugInfo.Systems)
                 {
-                    foreach (var debugInfoSystem in DebugInfo.Systems)
-                    {
-                        debugInfoSystem.OnAttachToContext(Context);
-                    }
+                    debugInfoSystem.OnAttachToContext(Context);
                 }
             }
         }
@@ -178,13 +176,13 @@ namespace Automa.Entities.Systems
             }
             if (debug)
             {
-                debugInfo = new SystemManagerDebugInfo(systems.Select(slot => slot.DebugInfo).ToArray());
-                if (Context != null)
+                debugInfo = new SystemManagerDebugInfo(systems.Select(systemSlot => systemSlot.System is SystemGroup systemGroup
+                    ? new SystemGroupDebugInfo(systemGroup)
+                    : new SystemDebugInfo(systemSlot.System)).ToArray());
+                if (Context == null) return;
+                foreach (var debugInfoSystem in DebugInfo.Systems)
                 {
-                    foreach (var debugInfoSystem in DebugInfo.Systems)
-                    {
-                        debugInfoSystem.OnDetachFromContext(Context);
-                    }
+                    debugInfoSystem.OnDetachFromContext(Context);
                 }
             }
         }
@@ -203,7 +201,6 @@ namespace Automa.Entities.Systems
         #region Debugging
 
         private readonly bool debug;
-        private readonly Stopwatch stopwatch;
         private SystemManagerDebugInfo debugInfo;
         public SystemManagerDebugInfo DebugInfo => debugInfo;
 

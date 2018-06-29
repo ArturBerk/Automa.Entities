@@ -15,7 +15,7 @@ namespace Automa.Entities.Systems.Debugging
             this.System = system;
         }
 
-        internal void OnAttachToContext(IContext context)
+        internal virtual void OnAttachToContext(IContext context)
         {
             if (System is EntitySystem entitySystem)
             {
@@ -23,7 +23,7 @@ namespace Automa.Entities.Systems.Debugging
             }
         }
 
-        internal void OnDetachFromContext(IContext context)
+        internal virtual void OnDetachFromContext(IContext context)
         {
         }
     }
