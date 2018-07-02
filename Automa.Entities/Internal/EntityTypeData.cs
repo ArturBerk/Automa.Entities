@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace Automa.Entities.Internal
 {
@@ -67,12 +68,14 @@ namespace Automa.Entities.Internal
             }
             return (index != count ? entityArray[index].Id : -1, index);
         }
-        
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetComponent<T>(int index, T component)
         {
             GetComponentArray<T>().SetAt(index, component);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool HasComponent<T>()
         {
             var typeId = ComponentTypeManager.GetTypeIndex<T>();
