@@ -12,14 +12,14 @@ namespace Automa.Entities.Systems
         internal Group[] groups;
         private bool isEnabled = true;
         public EntityManager EntityManager;
-        public EntityEventManager EventManager;
+        public EventManager EventManager;
 
         public event Action<ISystem, bool> EnabledChanged;
 
         public virtual void OnAttachToContext(IContext context)
         {
             EntityManager = context.GetManager<EntityManager>();
-            EventManager = context.GetManager<EntityEventManager>();
+            EventManager = context.GetManager<EventManager>();
             RegisterGroups();
             RegisterEvents();
             InjectManagers(context);
@@ -85,7 +85,7 @@ namespace Automa.Entities.Systems
             if (EventManager == null) return;
             foreach (var @interface in GetType().GetInterfaces())
             {
-                if (@interface.IsGenericType && typeof(IEntityEventListener<>) == @interface.GetGenericTypeDefinition())
+                if (@interface.IsGenericType && typeof(IEventListener<>) == @interface.GetGenericTypeDefinition())
                 {
                     GetRegistrator(@interface.GetGenericArguments()[0]).Register(EventManager, this);
                 }
@@ -98,7 +98,7 @@ namespace Automa.Entities.Systems
             if (EventManager == null) return;
             foreach (var @interface in GetType().GetInterfaces())
             {
-                if (@interface.IsGenericType && typeof(IEntityEventListener<>) == @interface.GetGenericTypeDefinition())
+                if (@interface.IsGenericType && typeof(IEventListener<>) == @interface.GetGenericTypeDefinition())
                 {
                     GetRegistrator(@interface.GetGenericArguments()[0]).Unregister(EventManager, this);
                 }

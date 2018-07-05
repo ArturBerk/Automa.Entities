@@ -12,7 +12,7 @@ namespace Automa.Entities
             context.SetManager(new EntityManager(debug));
             context.SetManager(new SystemManager(debug));
             context.SetManager(new TaskManager());
-            context.SetManager(new EntityEventManager());
+            context.SetManager(new EventManager());
             return context;
         }
     }

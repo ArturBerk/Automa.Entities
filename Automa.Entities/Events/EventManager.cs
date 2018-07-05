@@ -2,21 +2,21 @@
 
 namespace Automa.Entities.Events
 {
-    public class EventManager<TSource> : ManagerBase
+    public class EventManager : ManagerBase
     {
         private IEventHandler[] eventHandlers = new IEventHandler[0];
 
-        public void Raise<TEvent>(TSource source, TEvent eventInstance) where TEvent : struct
+        public void Raise<TEvent>(TEvent eventInstance) where TEvent : struct
         {
-            GetEventHandler<TEvent>().Raise(source, eventInstance);
+            GetEventHandler<TEvent>().Raise(eventInstance);
         }
 
-        public void RegisterListener<TEvent>(IEventListener<TSource, TEvent> listener) where TEvent : struct
+        public void RegisterListener<TEvent>(IEventListener<TEvent> listener) where TEvent : struct
         {
             GetEventHandler<TEvent>().RegisterListener(listener);
         }
 
-        public void UnregisterListener<TEvent>(IEventListener<TSource, TEvent> listener) where TEvent : struct
+        public void UnregisterListener<TEvent>(IEventListener<TEvent> listener) where TEvent : struct
         {
             GetEventHandler<TEvent>().UnregisterListener(listener);
         }
@@ -29,14 +29,14 @@ namespace Automa.Entities.Events
             }
         }
 
-        private EventHandler<TSource, TEvent> GetEventHandler<TEvent>() where TEvent : struct
+        private EventHandler<TEvent> GetEventHandler<TEvent>() where TEvent : struct
         {
             var eventType = EventType.Create<TEvent>();
             if (eventType.TypeId >= eventHandlers.Length)
             {
                 Expand(eventType.TypeId + 1);
             }
-            return (EventHandler<TSource, TEvent>)eventHandlers[eventType.TypeId];
+            return (EventHandler<TEvent>)eventHandlers[eventType.TypeId];
         }
 
         private void Expand(int newSize)
@@ -45,12 +45,11 @@ namespace Automa.Entities.Events
             Array.Resize(ref eventHandlers, newSize);
             for (int i = wasLength; i < eventHandlers.Length; i++)
             {
-                var genericType = typeof(EventHandler<,>);
-                var arrayType = genericType.MakeGenericType(typeof(TSource), EventTypeManager.GetTypeFromIndex((ushort)i));
+                var genericType = typeof(EventHandler<>);
+                var arrayType = genericType.MakeGenericType(EventTypeManager.GetTypeFromIndex((ushort)i));
                 eventHandlers[i] = (IEventHandler)Activator.CreateInstance(arrayType);
             }
         }
     }
-
-    public class EntityEventManager : EventManager<Entity> { }
+    
 }

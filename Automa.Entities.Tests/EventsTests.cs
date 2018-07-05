@@ -11,12 +11,12 @@ namespace Automa.Entities.Tests
         [Test]
         public void RaiseTest()
         {
-            EventManager<Entity> eventManager = new EventManager<Entity>();
+            EventManager eventManager = new EventManager();
             EventListener listener = new EventListener();
             eventManager.RegisterListener<Event1>(listener);
 
             Assert.AreEqual(0, listener.ValueSum);
-            eventManager.Raise(new Entity(0,0), new Event1(10));
+            eventManager.Raise(new Event1(new Entity(0, 0), 10));
             eventManager.OnUpdate();
 
             Assert.AreEqual(10, listener.ValueSum);
@@ -25,12 +25,12 @@ namespace Automa.Entities.Tests
         [Test]
         public void RaiseMultipleEventsTest()
         {
-            EventManager<Entity> eventManager = new EventManager<Entity>();
+            EventManager eventManager = new EventManager();
             EventListener listener = new EventListener();
             eventManager.RegisterListener<Event1>(listener);
 
-            eventManager.Raise(new Entity(0, 0), new Event1(10));
-            eventManager.Raise(new Entity(0, 0), new Event1(20));
+            eventManager.Raise(new Event1(new Entity(0, 0), 10));
+            eventManager.Raise(new Event1(new Entity(0, 0), 20));
             eventManager.OnUpdate();
 
             Assert.AreEqual(30, listener.ValueSum);
@@ -39,14 +39,14 @@ namespace Automa.Entities.Tests
         [Test]
         public void RaiseDifferentEventsTest()
         {
-            EventManager<Entity> eventManager = new EventManager<Entity>();
+            EventManager eventManager = new EventManager();
             EventListener listener = new EventListener();
             eventManager.RegisterListener<Event1>(listener);
             eventManager.RegisterListener<Event2>(listener);
 
-            eventManager.Raise(new Entity(0, 0), new Event1(10));
-            eventManager.Raise(new Entity(0, 0), new Event2(20));
-            eventManager.Raise(new Entity(0, 0), new Event3(30));
+            eventManager.Raise(new Event1(new Entity(0, 0),10));
+            eventManager.Raise(new Event2(new Entity(0, 0), 20));
+            eventManager.Raise(new Event3(new Entity(0, 0), 30));
             eventManager.OnUpdate();
 
             Assert.AreEqual(30, listener.ValueSum);
@@ -55,11 +55,11 @@ namespace Automa.Entities.Tests
         [Test]
         public void ClearEventsTest()
         {
-            EventManager<Entity> eventManager = new EventManager<Entity>();
+            EventManager eventManager = new EventManager();
             EventListener listener = new EventListener();
             eventManager.RegisterListener<Event1>(listener);
 
-            eventManager.Raise(new Entity(0, 0), new Event1(10));
+            eventManager.Raise(new Event1(new Entity(0, 0), 10));
             eventManager.OnUpdate();
 
             Assert.AreEqual(10, listener.ValueSum);
@@ -67,16 +67,16 @@ namespace Automa.Entities.Tests
             Assert.AreEqual(10, listener.ValueSum);
         }
 
-        private class EventListener : IEventListener<Entity, Event1>, IEventListener<Entity, Event2>
+        private class EventListener : IEventListener<Event1>, IEventListener<Event2>
         {
             public int ValueSum;
             
-            public void OnEvent(Entity source, Event1 eventInstance)
+            public void OnEvent(Event1 eventInstance)
             {
                 ValueSum += eventInstance.Value;
             }
 
-            public void OnEvent(Entity source, Event2 eventInstance)
+            public void OnEvent(Event2 eventInstance)
             {
                 ValueSum += eventInstance.Value;
             }
@@ -84,30 +84,36 @@ namespace Automa.Entities.Tests
 
         public struct Event1
         {
+            public Entity Source;
             public int Value;
 
-            public Event1(int value)
+            public Event1(Entity source, int value)
             {
+                Source = source;
                 Value = value;
             }
         }
 
         public struct Event2
         {
+            public Entity Source;
             public int Value;
 
-            public Event2(int value)
+            public Event2(Entity source, int value)
             {
+                Source = source;
                 Value = value;
             }
         }
 
         public struct Event3
         {
+            public Entity Source;
             public int Value;
 
-            public Event3(int value)
+            public Event3(Entity source, int value)
             {
+                Source = source;
                 Value = value;
             }
         }

@@ -4,7 +4,7 @@ namespace Automa.Entities.Systems.Internal
 {
     internal interface IEventListenerRegistrator
     {
-        void Register(EntityEventManager eventManager, object listener);
-        void Unregister(EntityEventManager eventManager, object listener);
+        void Register(EventManager eventManager, object listener);
+        void Unregister(EventManager eventManager, object listener);
     }
 }

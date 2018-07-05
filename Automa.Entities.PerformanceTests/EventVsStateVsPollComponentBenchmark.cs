@@ -249,7 +249,7 @@ namespace Automa.Entities.PerformanceTests
                     if (progress.Value >= 1.0f)
                     {
                         progress.Value = 0.0f;
-                        EventManager.Raise(@group.Entities[i], new ProgressCompleted());
+                        EventManager.Raise(new ProgressCompleted(@group.Entities[i]));
                     }
                 }
             }
@@ -261,16 +261,16 @@ namespace Automa.Entities.PerformanceTests
             }
         }
 
-        private class EventTestSystem : EntitySystem, IEntityEventListener<ProgressCompleted>
+        private class EventTestSystem : EntitySystem, IEventListener<ProgressCompleted>
         {
             public int updatedSystems = 0;
 
-            public void OnEvent(Entity source, ProgressCompleted eventInstance)
+            public void OnEvent(ProgressCompleted eventInstance)
             {
-                if (EntityManager.HasComponent<Progress>(source))
+                if (EntityManager.HasComponent<Progress>(eventInstance.Source))
                 {
                     DoAction();
-                    EntityManager.SetComponent(source, new Progress(1.0f));
+                    EntityManager.SetComponent(eventInstance.Source, new Progress(1.0f));
                     ++updatedSystems;
                 }
             }
@@ -327,7 +327,12 @@ namespace Automa.Entities.PerformanceTests
 
         private struct ProgressCompleted
         {
+            public Entity Source;
 
+            public ProgressCompleted(Entity source)
+            {
+                Source = source;
+            }
         }
 
         private struct Progress

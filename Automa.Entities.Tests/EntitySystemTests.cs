@@ -83,7 +83,7 @@ namespace Automa.Entities.Tests
             Assert.IsTrue(system.EventRecieved);
         }
 
-        private class TestSystem : EntityUpdateSystem, IEntityEventListener<Struct2Component>
+        private class TestSystem : EntityUpdateSystem, IEventListener<Struct2Component>
         {
             public class StructGroup : Group
             {
@@ -121,10 +121,10 @@ namespace Automa.Entities.Tests
             protected override void OnSystemUpdate()
             {
                 TestCommands.Add(new TestCommand(this));
-                EventManager.Raise(Entity.Null, new Struct2Component());
+                EventManager.Raise( new Struct2Component());
             }
 
-            public void OnEvent(Entity source, Struct2Component eventInstance)
+            public void OnEvent(Struct2Component eventInstance)
             {
                 EventRecieved = true;
             }

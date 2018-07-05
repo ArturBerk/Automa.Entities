@@ -6,6 +6,8 @@ namespace Automa.Entities.Events
 {
     internal struct EventType
     {
+        public readonly ushort TypeId;
+
         public bool Equals(EventType other)
         {
             return TypeId == other.TypeId;
@@ -13,16 +15,14 @@ namespace Automa.Entities.Events
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            return obj is EventType && Equals((EventType) obj);
+            if (obj is null) return false;
+            return obj is EventType type && Equals(type);
         }
 
         public override int GetHashCode()
         {
             return TypeId.GetHashCode();
         }
-
-        public ushort TypeId;
 
         private EventType(Type type)
         {

@@ -4,14 +4,14 @@ namespace Automa.Entities.Systems.Internal
 {
     internal class EventListenerRegistrator<TEvent> : IEventListenerRegistrator where TEvent : struct
     {
-        public void Register(EntityEventManager eventManager, object listener)
+        public void Register(EventManager eventManager, object listener)
         {
-            eventManager.RegisterListener((IEventListener<Entity, TEvent>)listener);
+            eventManager.RegisterListener((IEventListener<TEvent>)listener);
         }
 
-        public void Unregister(EntityEventManager eventManager, object listener)
+        public void Unregister(EventManager eventManager, object listener)
         {
-            eventManager.UnregisterListener((IEventListener<Entity, TEvent>)listener);
+            eventManager.UnregisterListener((IEventListener<TEvent>)listener);
         }
     }
 }
