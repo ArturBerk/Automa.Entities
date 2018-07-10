@@ -466,14 +466,14 @@ namespace Automa.Entities
             }
         }
 
-        //        private void OnEntityTypeRemove(ref EntityTypeData data)
-        //        {
-        //            for (var index = 0; index < groups.Count; index++)
-        //            {
-        //                var group = groups[index];
-        //                group.Group.OnEntityTypeRemoved(data);
-        //            }
-        //        }
+        public override void OnUpdate()
+        {
+            // Apply group additions
+            for (int i = 0; i < groups.Count; ++i)
+            {
+                groups[i].Group.HandleModifications();
+            }
+        }
 
         internal class EntityLink
         {

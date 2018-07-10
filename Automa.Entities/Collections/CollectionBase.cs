@@ -7,7 +7,6 @@ namespace Automa.Entities.Collections
     {
         public abstract int CalculatedCount { get; }
         internal abstract void AddArray(EntityTypeData data);
-        internal abstract void RemoveArray(EntityTypeData data);
         internal abstract void GetArrayLengths(ref ArrayList<int> componentArrayLengths, out int count);
     }
 
@@ -69,11 +68,6 @@ namespace Automa.Entities.Collections
                 return;
             }
             arrays.Add(componentArray);
-        }
-
-        internal override void RemoveArray(EntityTypeData data)
-        {
-            arrays.Remove(data.GetComponentArray<T>());
         }
 
         public T[] ToArray(T[] destination = null)

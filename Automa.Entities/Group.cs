@@ -2,21 +2,47 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Automa.Entities.Collections;
-using Automa.Entities.Debugging;
 using Automa.Entities.Internal;
 
 namespace Automa.Entities
 {
-
     public class Group
     {
         internal ArrayList<int> componentArrayLengths = new ArrayList<int>(4);
+        internal ArrayList<EntityDataLink> entityTypeDatas = new ArrayList<EntityDataLink>(4);
         internal CollectionBase[] componentCollections;
         internal ComponentType[] excludedTypes;
         internal ComponentType[] includedTypes;
 
         public EntityManager EntityManager { get; private set; }
         public int Count;
+
+        internal class EntityDataLink : Internal.IEntityAddedListener, Internal.IEntityRemovingListener
+        {
+            internal IEntityAddedListener addedListener;
+            internal IEntityRemovingListener removingListener;
+            public readonly int Index;
+            public readonly EntityTypeData Data;
+            // For delayed listener call
+            public ArrayList<EntityIndex> AddedEntities;
+
+            public EntityDataLink(int index, EntityTypeData data)
+            {
+                Index = index;
+                Data = data;
+                AddedEntities = new ArrayList<EntityIndex>(4);
+            }
+
+            public void OnEntityAdded(int entityIndexInDataType)
+            {
+                AddedEntities.Add(new EntityIndex(Index, entityIndexInDataType));
+            }
+
+            public void OnEntityRemoving(int entityIndexInDataType)
+            {
+                removingListener.OnEntityRemoving(new EntityIndex(Index, entityIndexInDataType));
+            }
+        }
         
         public Group()
         {
@@ -82,16 +108,9 @@ namespace Automa.Entities
         internal void Register(EntityManager entityManager)
         {
             EntityManager = entityManager;
-            foreach (var entityManagerChunk in entityManager.Datas)
+            foreach (var entityTypeData in entityManager.Datas)
             {
-                var entityType = entityManagerChunk.EntityType;
-                if (IsEntityTypeMatching(ref entityType))
-                {
-                    foreach (var componentArray in componentCollections)
-                    {
-                        componentArray.AddArray(entityManagerChunk);
-                    }
-                }
+                OnEntityTypeAdd(entityTypeData);
             }
         }
 
@@ -100,21 +119,26 @@ namespace Automa.Entities
             var entityType = data.EntityType;
             if (IsEntityTypeMatching(ref entityType))
             {
+                EntityDataLink link = new EntityDataLink(entityTypeDatas.Count, data);
+                if (this is IEntityAddedListener addedListener)
+                {
+                    link.addedListener = addedListener;
+                    data.addedListeners.Add(link);
+                }
+                if (this is IEntityRemovingListener removingListener)
+                {
+                    link.removingListener = removingListener;
+                    data.removingListeners.Add(link);
+                }
+                // Call added listener for all existing entities
+                for (int i = 0; i < data.count; i++)
+                {
+                    link.OnEntityAdded(i);
+                }
+                entityTypeDatas.Add(link);
                 foreach (var componentArray in componentCollections)
                 {
                     componentArray.AddArray(data);
-                }
-            }
-        }
-
-        internal void OnEntityTypeRemoved(EntityTypeData data)
-        {
-            var entityType = data.EntityType;
-            if (IsEntityTypeMatching(ref entityType))
-            {
-                foreach (var componentArray in componentCollections)
-                {
-                    componentArray.RemoveArray(data);
                 }
             }
         }
@@ -133,6 +157,17 @@ namespace Automa.Entities
                     {
                         fieldInfo.SetValue(this, null);
                     }
+                }
+            }
+            foreach (var entityTypeData in entityTypeDatas)
+            {
+                if (entityTypeData.addedListener != null)
+                {
+                    entityTypeData.Data.addedListeners.Remove(entityTypeData);
+                }
+                if (entityTypeData.removingListener != null)
+                {
+                    entityTypeData.Data.removingListeners.Remove(entityTypeData);
                 }
             }
         }
@@ -240,6 +275,22 @@ namespace Automa.Entities
             }
         }
 
+        public void HandleModifications()
+        {
+            for (int i = 0; i < entityTypeDatas.Count; i++)
+            {
+                ref var entityDataLink = ref entityTypeDatas[i];
+                if (entityDataLink.addedListener != null)
+                {
+                    for (int j = 0; j < entityDataLink.AddedEntities.Count; j++)
+                    {
+                        entityDataLink.addedListener.OnEntityAdded(entityDataLink.AddedEntities[j]);
+                    }
+                    entityDataLink.AddedEntities.FastClear();
+                }
+            }
+        }
+
         public struct EntityIndex
         {
             internal int ArrayIndex;
@@ -251,6 +302,16 @@ namespace Automa.Entities
                 this.Index = index;
             }
         }
+    }
+
+    public interface IEntityAddedListener
+    {
+        void OnEntityAdded(Group.EntityIndex index);
+    }
+
+    public interface IEntityRemovingListener
+    {
+        void OnEntityRemoving(Group.EntityIndex index);
     }
 
 }

@@ -163,6 +163,50 @@ namespace Automa.Entities.Tests
             Assert.AreEqual(0, group.Count);
         }
 
+        [Test]
+        public void ReactiveAddTest()
+        {
+            EntityManager entityManager = new EntityManager();
+            var group = entityManager.RegisterGroup(new ReactiveAddGroup());
+            var e = entityManager.CreateEntityReferenced(
+                ComponentType.Create<ClassComponent>(), 
+                ComponentType.Create<StructComponent>());
+            e.SetComponent(new ClassComponent(10));
+            e.SetComponent(new StructComponent(20));
+            entityManager.OnUpdate();
+            Assert.IsTrue(group.additionRegistred);
+        }
+
+        [Test]
+        public void ReactiveAddBeforeRegisterTest()
+        {
+            EntityManager entityManager = new EntityManager();
+            var e = entityManager.CreateEntityReferenced(
+                ComponentType.Create<ClassComponent>(),
+                ComponentType.Create<StructComponent>());
+            e.SetComponent(new ClassComponent(10));
+            e.SetComponent(new StructComponent(20));
+            var group = entityManager.RegisterGroup(new ReactiveAddGroup());
+            entityManager.OnUpdate();
+            Assert.IsTrue(group.additionRegistred);
+        }
+
+        [Test]
+        public void ReactiveRemoveTest()
+        {
+            EntityManager entityManager = new EntityManager();
+            var group = entityManager.RegisterGroup(new ReactiveRemoveGroup());
+            var e = entityManager.CreateEntityReferenced(
+                ComponentType.Create<ClassComponent>(),
+                ComponentType.Create<StructComponent>());
+            e.SetComponent(new ClassComponent(10));
+            e.SetComponent(new StructComponent(20));
+
+            e.Remove();
+
+            Assert.IsTrue(group.removed);
+        }
+
         [ExcludeComponent(typeof(ClassComponent))]
         private class ExcludeGroup : Group
         {
@@ -175,6 +219,38 @@ namespace Automa.Entities.Tests
             public Collections.EntityCollection Entities;
             public ComponentCollection<ClassComponent> Classes;
             public ComponentCollection<StructComponent> Structures;
+        }
+
+        private class ReactiveAddGroup : Group, IEntityAddedListener
+        {
+            public Collections.EntityCollection Entities;
+            public ComponentCollection<ClassComponent> Classes;
+            public ComponentCollection<StructComponent> Structures;
+
+            public bool additionRegistred = false;
+
+            public void OnEntityAdded(Group.EntityIndex index)
+            {
+                Assert.AreEqual(10, Classes[index].Value);
+                Assert.AreEqual(20, Structures[index].Value);
+                additionRegistred = true;
+            }
+        }
+
+        private class ReactiveRemoveGroup : Group, IEntityRemovingListener
+        {
+            public Collections.EntityCollection Entities;
+            public ComponentCollection<ClassComponent> Classes;
+            public ComponentCollection<StructComponent> Structures;
+
+            public bool removed = false;
+
+            public void OnEntityRemoving(EntityIndex index)
+            {
+                Assert.AreEqual(10, Classes[index].Value);
+                Assert.AreEqual(20, Structures[index].Value);
+                removed = true;
+            }
         }
     }
 }

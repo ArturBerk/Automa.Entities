@@ -63,8 +63,12 @@ namespace Automa.Entities.Systems
                 .Where(fi => typeof(Group).IsAssignableFrom(fi.FieldType)))
             {
                 // Create group, register in entity manager
-                var instance = (Group)Activator.CreateInstance(fieldInfo.FieldType);
-                fieldInfo.SetValue(this, instance);
+                var instance = (Group)fieldInfo.GetValue(this);
+                if (instance == null)
+                {
+                    instance = (Group) Activator.CreateInstance(fieldInfo.FieldType);
+                    fieldInfo.SetValue(this, instance);
+                }
                 EntityManager.RegisterGroup(instance);
                 groups.Add(instance);
             }

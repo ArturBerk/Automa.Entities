@@ -8,7 +8,10 @@ namespace Automa.Entities.Internal
         public readonly EntityType EntityType;
         private IComponentArray[] componentArrays;
         private int[] componentTypeIndices;
-        private int count;
+        internal int count;
+
+        internal ArrayList<IEntityAddedListener> addedListeners = new ArrayList<IEntityAddedListener>(1);
+        internal ArrayList<IEntityRemovingListener> removingListeners = new ArrayList<IEntityRemovingListener>(1);
 
         private ComponentArray<Entity> entityArray;
 
@@ -55,12 +58,41 @@ namespace Automa.Entities.Internal
                 componentArrays[componentTypeIndices[i]].SetDefault(index);
             }
             count += 1;
+
+            if (addedListeners.Count > 0)
+            {
+                try
+                {
+                    for (int i = 0; i < addedListeners.Count; i++)
+                    {
+                        addedListeners[i].OnEntityAdded(index);
+                    }
+                }
+                catch
+                {
+                    //
+                }
+            }
             return index;
         }
 
         public (int entityId, int newIndexInChunk) RemoveEntity(int index)
         {
             --count;
+            if (removingListeners.Count > 0)
+            {
+                try
+                {
+                    for (int i = 0; i < removingListeners.Count; i++)
+                    {
+                        removingListeners[i].OnEntityRemoving(index);
+                    }
+                }
+                catch
+                {
+                    //
+                }
+            }
             entityArray.UnorderedRemoveAt(index);
             for (var i = 0; i < componentTypeIndices.Length; i++)
             {
@@ -87,4 +119,15 @@ namespace Automa.Entities.Internal
             return $"{nameof(EntityType)}: {EntityType}";
         }
     }
+
+    internal interface IEntityAddedListener
+    {
+        void OnEntityAdded(int entityIndexInDataType);
+    }
+
+    internal interface IEntityRemovingListener
+    {
+        void OnEntityRemoving(int entityIndexInDataType);
+    }
+
 }
