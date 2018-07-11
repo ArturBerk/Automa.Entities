@@ -25,17 +25,17 @@ namespace Automa.Entities
             public readonly int Index;
             public readonly EntityTypeData Data;
             // For delayed listener call
-            public ArrayList<EntityIndex> AddedEntities;
+            public ArrayList<Entity> AddedEntities;
 
             public EntityDataLink(Group @group, int index, EntityTypeData data)
             {
                 Index = index;
                 Data = data;
                 this.@group = @group;
-                AddedEntities = new ArrayList<EntityIndex>(4);
+                AddedEntities = new ArrayList<Entity>(4);
             }
 
-            public void OnEntityAdded(int entityIndexInDataType, EntityTypeData movedFrom)
+            public void OnEntityAdded(Entity entity, EntityTypeData movedFrom)
             {
                 if (movedFrom != null)
                 {
@@ -48,10 +48,10 @@ namespace Automa.Entities
                         }
                     }
                 }
-                AddedEntities.Add(new EntityIndex(Index, entityIndexInDataType));
+                AddedEntities.Add(entity);
             }
 
-            public void OnEntityRemoving(int entityIndexInDataType, EntityTypeData movingTo)
+            public void OnEntityRemoving(Entity entity, EntityTypeData movingTo)
             {
                 if (movingTo != null)
                 {
@@ -64,7 +64,7 @@ namespace Automa.Entities
                         }
                     }
                 }
-                removingListener.OnEntityRemoving(new EntityIndex(Index, entityIndexInDataType));
+                removingListener.OnEntityRemoving(entity);
             }
         }
         
@@ -157,7 +157,7 @@ namespace Automa.Entities
                 // Call added listener for all existing entities
                 for (int i = 0; i < data.count; i++)
                 {
-                    link.OnEntityAdded(i, null);
+                    link.OnEntityAdded(data.entityArray[i], null);
                 }
                 entityTypeDatas.Add(link);
                 foreach (var componentArray in componentCollections)
@@ -330,12 +330,12 @@ namespace Automa.Entities
 
     public interface IEntityAddedListener
     {
-        void OnEntityAdded(Group.EntityIndex index);
+        void OnEntityAdded(Entity index);
     }
 
     public interface IEntityRemovingListener
     {
-        void OnEntityRemoving(Group.EntityIndex index);
+        void OnEntityRemoving(Entity index);
     }
 
 }

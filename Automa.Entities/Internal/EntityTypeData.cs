@@ -13,7 +13,7 @@ namespace Automa.Entities.Internal
         internal ArrayList<IEntityAddedListener> addedListeners = new ArrayList<IEntityAddedListener>(1);
         internal ArrayList<IEntityRemovingListener> removingListeners = new ArrayList<IEntityRemovingListener>(1);
 
-        private ComponentArray<Entity> entityArray;
+        internal ComponentArray<Entity> entityArray;
 
         public EntityTypeData(EntityType entityType)
         {
@@ -65,7 +65,7 @@ namespace Automa.Entities.Internal
                 {
                     for (int i = 0; i < addedListeners.Count; i++)
                     {
-                        addedListeners[i].OnEntityAdded(index, movedFrom);
+                        addedListeners[i].OnEntityAdded(entityArray[index], movedFrom);
                     }
                 }
                 catch
@@ -85,7 +85,7 @@ namespace Automa.Entities.Internal
                 {
                     for (int i = 0; i < removingListeners.Count; i++)
                     {
-                        removingListeners[i].OnEntityRemoving(index, movingTo);
+                        removingListeners[i].OnEntityRemoving(entityArray[index], movingTo);
                     }
                 }
                 catch
@@ -122,12 +122,12 @@ namespace Automa.Entities.Internal
 
     internal interface IEntityAddedListener
     {
-        void OnEntityAdded(int entityIndexInDataType, EntityTypeData movedFrom);
+        void OnEntityAdded(Entity entity, EntityTypeData movedFrom);
     }
 
     internal interface IEntityRemovingListener
     {
-        void OnEntityRemoving(int entityIndexInDataType, EntityTypeData movingTo);
+        void OnEntityRemoving(Entity entity, EntityTypeData movingTo);
     }
 
 }

@@ -298,10 +298,10 @@ namespace Automa.Entities.Tests
 
             public int added;
 
-            public void OnEntityAdded(Group.EntityIndex index)
+            public void OnEntityAdded(Entity index)
             {
-                Assert.AreEqual(10, Classes[index].Value);
-                Assert.AreEqual(20, Structures[index].Value);
+                Assert.AreEqual(10, EntityManager.GetComponent<ClassComponent>(index).Value);
+                Assert.AreEqual(20, EntityManager.GetComponent<StructComponent>(index).Value);
                 ++added;
             }
         }
@@ -314,10 +314,10 @@ namespace Automa.Entities.Tests
 
             public int removed;
 
-            public void OnEntityRemoving(EntityIndex index)
+            public void OnEntityRemoving(Entity index)
             {
-                Assert.AreEqual(10, Classes[index].Value);
-                Assert.AreEqual(20, Structures[index].Value);
+                Assert.AreEqual(10, EntityManager.GetComponent<ClassComponent>(index).Value);
+                Assert.AreEqual(20, EntityManager.GetComponent<StructComponent>(index).Value);
                 ++removed;
             }
         }

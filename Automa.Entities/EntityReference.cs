@@ -4,59 +4,55 @@ namespace Automa.Entities
 {
     public struct EntityReference
     {
-        private readonly EntityManager.EntityLink entityLink;
+        public readonly Entity Entity;
         private readonly EntityManager entityManager;
 
-        public Entity Entity => entityLink.Entity;
-
-        internal EntityReference(EntityManager.EntityLink entityLink, EntityManager entityManager)
+        internal EntityReference(Entity entityLink, EntityManager entityManager)
         {
-            this.entityLink = entityLink;
+            Entity = entityLink;
             this.entityManager = entityManager;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T GetComponent<T>()
         {
-            return ref entityLink.Data.GetComponentArray<T>()[entityLink.IndexInData];
+            return ref entityManager.GetComponent<T>(Entity);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetComponent<T>(T component)
         {
-            entityLink.Data.SetComponent(entityLink.IndexInData, component);
+            entityManager.SetComponent(Entity, component);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool HasComponent<T>()
         {
-            return entityLink.Data.HasComponent<T>();
+            return entityManager.HasComponent<T>(Entity);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Remove()
         {
-            entityManager.HandleEntityRemoving(entityLink.Data.RemoveEntity(entityLink.IndexInData, null));
-            entityLink.Entity = Entity.Null;
-            entityManager.availableIndices.Enqueue(entityLink.Entity.Id);
+            entityManager.RemoveEntity(Entity);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddComponent<T>(T component)
         {
-            entityManager.AddComponent(entityLink.Entity, component);
+            entityManager.AddComponent(Entity, component);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddComponents(params ComponentType[] componentTypes)
         {
-            entityManager.AddComponents(entityLink.Entity, componentTypes);
+            entityManager.AddComponents(Entity, componentTypes);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RemoveComponents(params ComponentType[] componentTypes)
         {
-            entityManager.RemoveComponents(entityLink.Entity, componentTypes);
+            entityManager.RemoveComponents(Entity, componentTypes);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -64,13 +60,13 @@ namespace Automa.Entities
             ComponentType[] addComponents,
             ComponentType[] removeComponents)
         {
-            entityManager.ChangeComponents(entityLink.Entity, addComponents, removeComponents);
+            entityManager.ChangeComponents(Entity, addComponents, removeComponents);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RemoveComponent<T>()
         {
-            entityManager.RemoveComponent<T>(entityLink.Entity);
+            entityManager.RemoveComponent<T>(Entity);
         }
     }
 }

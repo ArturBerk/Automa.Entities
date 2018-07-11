@@ -54,7 +54,7 @@ namespace Automa.Entities
             var entityLink = entityLinks[entity.Id];
             if (entityLink.Entity != entity)
                 throw new ArgumentException("Entity not found");
-            return new EntityReference(entityLink, this);
+            return new EntityReference(entity, this);
         }
 
         public bool IsExists(Entity entity)
@@ -586,9 +586,9 @@ namespace Automa.Entities
                 index = -1;
             }
 
-            public EntityReference Current => new EntityReference(currentEntityLink, entityManager);
+            public EntityReference Current => new EntityReference(currentEntityLink.Entity, entityManager);
 
-            object IEnumerator.Current => new EntityReference(currentEntityLink, entityManager);
+            object IEnumerator.Current => new EntityReference(currentEntityLink.Entity, entityManager);
 
             public void Dispose()
             {

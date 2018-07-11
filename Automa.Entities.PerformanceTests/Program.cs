@@ -7,9 +7,9 @@ namespace Automa.Entities.PerformanceTests
     {
         private static void Main()
         {
-            var b = new ReactivePerformanceBenchmark();
-            b.Execute().Print();
-            //            Benchmark.ExecuteAll();
+//            var b = new ReactivePerformanceBenchmark();
+//            b.Execute().Print();
+                        Benchmark.ExecuteAll();
             Console.ReadKey();
         }
     }

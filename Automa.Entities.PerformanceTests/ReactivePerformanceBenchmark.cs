@@ -11,7 +11,7 @@ namespace Automa.Entities.PerformanceTests
 
         protected override void Prepare()
         {
-            IterationCount = 100;
+            IterationCount = 50;
             entityManager = new EntityManager();
             var v1 = new ComponentType[]
             {
@@ -35,7 +35,7 @@ namespace Automa.Entities.PerformanceTests
             public ComponentCollection<StructComponent> Data1;
             public ComponentCollection<Struct2Component> Data2;
 
-            public void OnEntityAdded(EntityIndex index)
+            public void OnEntityAdded(Entity index)
             {
                 
             }
@@ -46,7 +46,7 @@ namespace Automa.Entities.PerformanceTests
             public ComponentCollection<StructComponent> Data1;
             public ComponentCollection<Struct2Component> Data2;
 
-            public void OnEntityRemoving(EntityIndex index)
+            public void OnEntityRemoving(Entity index)
             {
                 
             }
@@ -54,13 +54,13 @@ namespace Automa.Entities.PerformanceTests
 
         private void CommonTest()
         {
-            foreach (var entityReference in entityManager.EntityReferences)
+            foreach (var entityReference in entityManager)
             {
-                entityReference.RemoveComponent<Struct2Component>();
+                entityManager.RemoveComponent<Struct2Component>(entityReference);
             }
-            foreach (var entityReference in entityManager.EntityReferences)
+            foreach (var entityReference in entityManager)
             {
-                entityReference.AddComponent(new Struct2Component(1));
+                entityManager.AddComponent(entityReference, new Struct2Component(1));
             }
             entityManager.OnUpdate();
         }
