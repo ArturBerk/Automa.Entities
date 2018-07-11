@@ -19,6 +19,7 @@ namespace Automa.Entities
 
         internal class EntityDataLink : Internal.IEntityAddedListener, Internal.IEntityRemovingListener
         {
+            private Group group;
             internal IEntityAddedListener addedListener;
             internal IEntityRemovingListener removingListener;
             public readonly int Index;
@@ -26,20 +27,43 @@ namespace Automa.Entities
             // For delayed listener call
             public ArrayList<EntityIndex> AddedEntities;
 
-            public EntityDataLink(int index, EntityTypeData data)
+            public EntityDataLink(Group @group, int index, EntityTypeData data)
             {
                 Index = index;
                 Data = data;
+                this.@group = @group;
                 AddedEntities = new ArrayList<EntityIndex>(4);
             }
 
-            public void OnEntityAdded(int entityIndexInDataType)
+            public void OnEntityAdded(int entityIndexInDataType, EntityTypeData movedFrom)
             {
+                if (movedFrom != null)
+                {
+                    for (int i = 0; i < @group.entityTypeDatas.Count; i++)
+                    {
+                        var entityData = @group.entityTypeDatas[i];
+                        if (entityData.Data == movedFrom)
+                        {
+                            return;
+                        }
+                    }
+                }
                 AddedEntities.Add(new EntityIndex(Index, entityIndexInDataType));
             }
 
-            public void OnEntityRemoving(int entityIndexInDataType)
+            public void OnEntityRemoving(int entityIndexInDataType, EntityTypeData movingTo)
             {
+                if (movingTo != null)
+                {
+                    for (int i = 0; i < @group.entityTypeDatas.Count; i++)
+                    {
+                        var entityData = @group.entityTypeDatas[i];
+                        if (entityData.Data == movingTo)
+                        {
+                            return;
+                        }
+                    }
+                }
                 removingListener.OnEntityRemoving(new EntityIndex(Index, entityIndexInDataType));
             }
         }
@@ -119,7 +143,7 @@ namespace Automa.Entities
             var entityType = data.EntityType;
             if (IsEntityTypeMatching(ref entityType))
             {
-                EntityDataLink link = new EntityDataLink(entityTypeDatas.Count, data);
+                EntityDataLink link = new EntityDataLink(this, entityTypeDatas.Count, data);
                 if (this is IEntityAddedListener addedListener)
                 {
                     link.addedListener = addedListener;
@@ -133,7 +157,7 @@ namespace Automa.Entities
                 // Call added listener for all existing entities
                 for (int i = 0; i < data.count; i++)
                 {
-                    link.OnEntityAdded(i);
+                    link.OnEntityAdded(i, null);
                 }
                 entityTypeDatas.Add(link);
                 foreach (var componentArray in componentCollections)

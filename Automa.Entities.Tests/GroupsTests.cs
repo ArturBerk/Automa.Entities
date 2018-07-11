@@ -174,7 +174,7 @@ namespace Automa.Entities.Tests
             e.SetComponent(new ClassComponent(10));
             e.SetComponent(new StructComponent(20));
             entityManager.OnUpdate();
-            Assert.IsTrue(group.additionRegistred);
+            Assert.AreEqual(1, group.added);
         }
 
         [Test]
@@ -188,7 +188,7 @@ namespace Automa.Entities.Tests
             e.SetComponent(new StructComponent(20));
             var group = entityManager.RegisterGroup(new ReactiveAddGroup());
             entityManager.OnUpdate();
-            Assert.IsTrue(group.additionRegistred);
+            Assert.AreEqual(1, group.added);
         }
 
         [Test]
@@ -204,7 +204,76 @@ namespace Automa.Entities.Tests
 
             e.Remove();
 
-            Assert.IsTrue(group.removed);
+            Assert.AreEqual(1, group.removed);
+        }
+
+        [Test]
+        public void ReactiveSwitchDataTypeComponentTest()
+        {
+            EntityManager entityManager = new EntityManager();
+            var group = entityManager.RegisterGroup(new ReactiveRemoveGroup());
+            var e = entityManager.CreateEntityReferenced(
+                ComponentType.Create<ClassComponent>(),
+                ComponentType.Create<StructComponent>());
+            e.SetComponent(new ClassComponent(10));
+            e.SetComponent(new StructComponent(20));
+
+            e.RemoveComponent<StructComponent>();
+
+            Assert.AreEqual(1, group.removed);
+        }
+
+        [Test]
+        public void ReactiveSwitchDataTypeComponent2Test()
+        {
+            EntityManager entityManager = new EntityManager();
+            var group = entityManager.RegisterGroup(new ReactiveRemoveGroup());
+            var e = entityManager.CreateEntityReferenced(
+                ComponentType.Create<ClassComponent>(),
+                ComponentType.Create<StructComponent>(),
+                ComponentType.Create<Struct2Component>());
+            e.SetComponent(new ClassComponent(10));
+            e.SetComponent(new StructComponent(20));
+
+            e.RemoveComponent<Struct2Component>();
+
+            Assert.AreEqual(0, group.removed);
+        }
+
+        [Test]
+        public void ReactiveSwitchDataTypeAddComponentTest()
+        {
+            EntityManager entityManager = new EntityManager();
+            var addGroup = entityManager.RegisterGroup(new ReactiveAddGroup());
+            var removeGroup = entityManager.RegisterGroup(new ReactiveRemoveGroup());
+            var e = entityManager.CreateEntityReferenced(
+                ComponentType.Create<ClassComponent>(),
+                ComponentType.Create<StructComponent>());
+            e.SetComponent(new ClassComponent(10));
+            e.SetComponent(new StructComponent(20));
+
+            e.AddComponent(new Struct2Component(3));
+
+            Assert.AreEqual(0, addGroup.added);
+            Assert.AreEqual(0, removeGroup.removed);
+        }
+
+        [Test]
+        public void ReactiveSwitchDataTypeAddComponent2Test()
+        {
+            EntityManager entityManager = new EntityManager();
+            var addGroup = entityManager.RegisterGroup(new ReactiveAddGroup());
+            var removeGroup = entityManager.RegisterGroup(new ReactiveRemoveGroup());
+            var e = entityManager.CreateEntityReferenced(
+                ComponentType.Create<ClassComponent>());
+            e.SetComponent(new ClassComponent(10));
+            entityManager.OnUpdate();
+            Assert.AreEqual(0, addGroup.added);
+
+            e.AddComponent(new StructComponent(20));
+            entityManager.OnUpdate();
+
+            Assert.AreEqual(1, addGroup.added);
         }
 
         [ExcludeComponent(typeof(ClassComponent))]
@@ -227,13 +296,13 @@ namespace Automa.Entities.Tests
             public ComponentCollection<ClassComponent> Classes;
             public ComponentCollection<StructComponent> Structures;
 
-            public bool additionRegistred = false;
+            public int added;
 
             public void OnEntityAdded(Group.EntityIndex index)
             {
                 Assert.AreEqual(10, Classes[index].Value);
                 Assert.AreEqual(20, Structures[index].Value);
-                additionRegistred = true;
+                ++added;
             }
         }
 
@@ -243,13 +312,13 @@ namespace Automa.Entities.Tests
             public ComponentCollection<ClassComponent> Classes;
             public ComponentCollection<StructComponent> Structures;
 
-            public bool removed = false;
+            public int removed;
 
             public void OnEntityRemoving(EntityIndex index)
             {
                 Assert.AreEqual(10, Classes[index].Value);
                 Assert.AreEqual(20, Structures[index].Value);
-                removed = true;
+                ++removed;
             }
         }
     }

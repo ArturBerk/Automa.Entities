@@ -49,7 +49,7 @@ namespace Automa.Entities.Internal
             componentArrays[0] = entityArray;
         }
 
-        public int AddEntity(Entity entity)
+        public int AddEntity(Entity entity, EntityTypeData movedFrom)
         {
             var index = count;
             entityArray.SetAt(index, entity);
@@ -65,7 +65,7 @@ namespace Automa.Entities.Internal
                 {
                     for (int i = 0; i < addedListeners.Count; i++)
                     {
-                        addedListeners[i].OnEntityAdded(index);
+                        addedListeners[i].OnEntityAdded(index, movedFrom);
                     }
                 }
                 catch
@@ -76,7 +76,7 @@ namespace Automa.Entities.Internal
             return index;
         }
 
-        public (int entityId, int newIndexInChunk) RemoveEntity(int index)
+        public (int entityId, int newIndexInChunk) RemoveEntity(int index, EntityTypeData movingTo)
         {
             --count;
             if (removingListeners.Count > 0)
@@ -85,7 +85,7 @@ namespace Automa.Entities.Internal
                 {
                     for (int i = 0; i < removingListeners.Count; i++)
                     {
-                        removingListeners[i].OnEntityRemoving(index);
+                        removingListeners[i].OnEntityRemoving(index, movingTo);
                     }
                 }
                 catch
@@ -122,12 +122,12 @@ namespace Automa.Entities.Internal
 
     internal interface IEntityAddedListener
     {
-        void OnEntityAdded(int entityIndexInDataType);
+        void OnEntityAdded(int entityIndexInDataType, EntityTypeData movedFrom);
     }
 
     internal interface IEntityRemovingListener
     {
-        void OnEntityRemoving(int entityIndexInDataType);
+        void OnEntityRemoving(int entityIndexInDataType, EntityTypeData movingTo);
     }
 
 }

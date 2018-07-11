@@ -36,7 +36,7 @@ namespace Automa.Entities
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Remove()
         {
-            entityManager.HandleEntityRemoving(entityLink.Data.RemoveEntity(entityLink.IndexInData));
+            entityManager.HandleEntityRemoving(entityLink.Data.RemoveEntity(entityLink.IndexInData, null));
             entityLink.Entity = Entity.Null;
             entityManager.availableIndices.Enqueue(entityLink.Entity.Id);
         }

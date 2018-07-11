@@ -54,23 +54,26 @@ namespace Automa.Entities.PerformanceTests
             public EntityCollection Entities;
             public ComponentCollection<StructComponent> Data1;
             public ComponentCollection<Struct2Component> Data2;
+            public ComponentCollection<Struct3Component> Data3;
         }
 
         [Case("Group access")]
-        private void TestIndex()
+        private void TestGroup()
         {
             @group.Update();
             for (int i = 0; i < @group.Count; i++)
             {
                 ref var data1 = ref @group.Data1[i];
                 ref var data2 = ref @group.Data2[i];
+                ref var data3 = ref @group.Data3[i];
                 data1.Value += data1.Value;
                 data2.Value += data2.Value;
+                data3.Value += data2.Value;
             }
         }
 
         [Case("Direct access")]
-        private void TestIterator()
+        private void TestDirect()
         {
             @group.Update();
             for (int i = 0; i < @group.Count; ++i)
@@ -78,8 +81,10 @@ namespace Automa.Entities.PerformanceTests
                 var entity = @group.Entities[i];
                 ref var data1 = ref entityManager.GetComponent<StructComponent>(entity);
                 ref var data2 = ref entityManager.GetComponent<Struct2Component>(entity);
+                ref var data3 = ref entityManager.GetComponent<Struct3Component>(entity);
                 data1.Value += data1.Value;
                 data2.Value += data2.Value;
+                data3.Value += data3.Value;
             }
         }
     }

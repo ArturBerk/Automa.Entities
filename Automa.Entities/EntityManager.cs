@@ -81,7 +81,7 @@ namespace Automa.Entities
                 entityLinks.SetAt(entityId, link);
             }
             var entity = new Entity(entityId, version);
-            var dataIndex = data.AddEntity(entity);
+            var dataIndex = data.AddEntity(entity, null);
 
             link.Data = data;
             link.IndexInData = dataIndex;
@@ -111,7 +111,7 @@ namespace Automa.Entities
             var entityLink = entityLinks[entity.Id];
             if (entityLink.Entity != entity)
                 throw new ArgumentException("Entity not found");
-            HandleEntityRemoving(entityLink.Data.RemoveEntity(entityLink.IndexInData));
+            HandleEntityRemoving(entityLink.Data.RemoveEntity(entityLink.IndexInData, null));
             entityLink.Entity = Entity.Null;
             availableIndices.Enqueue(entity.Id);
         }
@@ -396,7 +396,7 @@ namespace Automa.Entities
             int typeCount)
         {
             // Add new entity to new entity type data
-            var newEntityIndexInData = data.AddEntity(entityLink.Entity);
+            var newEntityIndexInData = data.AddEntity(entityLink.Entity, entityLink.Data);
             // Copy component data from old to new entity type data
             for (var i = 0; i < typeCount; i++)
             {
@@ -409,7 +409,7 @@ namespace Automa.Entities
                 }
             }
             // Remove entity from old entity type data
-            HandleEntityRemoving(entityLink.Data.RemoveEntity(entityLink.IndexInData));
+            HandleEntityRemoving(entityLink.Data.RemoveEntity(entityLink.IndexInData, data));
             // Update new entity link
             entityLink.Data = data;
             entityLink.IndexInData = newEntityIndexInData;
@@ -448,6 +448,7 @@ namespace Automa.Entities
                 if (Equals(groups[i].Group, group))
                 {
                     groups.RemoveAt(i);
+                    group.Unregister(this);
                     if (debug)
                     {
                         DebugInfo = new EntityManagerDebugInfo(groups.Select(slot => slot.DebugInfo).ToArray());
