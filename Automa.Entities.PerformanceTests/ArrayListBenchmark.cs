@@ -1,4 +1,5 @@
 ﻿using Automa.Benchmarks;
+using Automa.Common;
 using Automa.Entities.Internal;
 using Automa.Entities.PerformanceTests.Model;
 

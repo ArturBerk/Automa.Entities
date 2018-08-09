@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Automa.Common;
 using Automa.Entities.Internal;
 
 namespace Automa.Entities.Builders

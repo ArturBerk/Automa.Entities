@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Automa.Entities.Internal;
 
-namespace Automa.Entities.Internal
+namespace Automa.Common
 {
     internal struct ArrayList<T> : IEnumerable<T>
     {
@@ -90,6 +91,17 @@ namespace Automa.Entities.Internal
                     return index;
 
             return -1;
+        }
+
+        public void UnorderedRemoveAll(Predicate<T> condition)
+        {
+            for (int i = 0; i < Count; i++)
+            {
+                if (condition(Buffer[i]))
+                {
+                    UnorderedRemoveAt(i);
+                }
+            }
         }
 
         public void Insert(int index, T item)
@@ -250,7 +262,10 @@ namespace Automa.Entities.Internal
                 Resize(Count);
         }
     }
+}
 
+namespace Automa.Entities.Internal
+{
     public struct ArrayEnumerator<T> : IEnumerator<T>
     {
         public T Current { get; private set; }

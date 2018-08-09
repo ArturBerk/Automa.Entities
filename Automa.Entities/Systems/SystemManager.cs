@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using Automa.Common;
 using Automa.Entities.Internal;
 using Automa.Entities.Systems.Debugging;
 

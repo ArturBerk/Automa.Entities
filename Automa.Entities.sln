@@ -11,6 +11,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Automa.Entities.Performance
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Automa.Benchmarks", "Automa.Benchmarks\Automa.Benchmarks.csproj", "{99AB5B71-0C33-47D5-AA2E-428715177B44}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Automa.Behaviours", "Automa.Behaviours\Automa.Behaviours.csproj", "{38B53A48-EEA5-4817-908B-C1E39D6DA087}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automa.Behaviours.Tests", "Automa.Behaviours.Tests\Automa.Behaviours.Tests.csproj", "{11A2F6FD-6AC3-40BB-B337-1C1F9FD1AD53}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{99AB5B71-0C33-47D5-AA2E-428715177B44}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99AB5B71-0C33-47D5-AA2E-428715177B44}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99AB5B71-0C33-47D5-AA2E-428715177B44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38B53A48-EEA5-4817-908B-C1E39D6DA087}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38B53A48-EEA5-4817-908B-C1E39D6DA087}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38B53A48-EEA5-4817-908B-C1E39D6DA087}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38B53A48-EEA5-4817-908B-C1E39D6DA087}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11A2F6FD-6AC3-40BB-B337-1C1F9FD1AD53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11A2F6FD-6AC3-40BB-B337-1C1F9FD1AD53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11A2F6FD-6AC3-40BB-B337-1C1F9FD1AD53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11A2F6FD-6AC3-40BB-B337-1C1F9FD1AD53}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

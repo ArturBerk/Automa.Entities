@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Automa.Common;
 
 namespace Automa.Entities.Internal
 {

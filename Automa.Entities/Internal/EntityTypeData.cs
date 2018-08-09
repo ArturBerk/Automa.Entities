@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using Automa.Common;
 
 namespace Automa.Entities.Internal
 {

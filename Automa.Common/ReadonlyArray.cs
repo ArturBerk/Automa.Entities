@@ -1,7 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Automa.Entities.Internal;
 
-namespace Automa.Entities.Internal
+namespace Automa.Common
 {
     public struct ReadOnlyArray<T> : IEnumerable<T>
     {

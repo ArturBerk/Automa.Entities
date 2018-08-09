@@ -2,24 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RunPostBuildEvent>Always</RunPostBuildEvent>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="..\Automa.Common\ArrayList.cs" Link="Common\ArrayList.cs" />
     <Compile Include="..\Automa.Common\ReadonlyArray.cs" Link="Common\ReadonlyArray.cs" />
+    <Compile Include="..\Automa.Common\TypeOf.cs" Link="Common\TypeOf.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Common\" />
   </ItemGroup>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="$(TargetDir)PostBuild.bat" />
-  </Target>
 
 </Project>

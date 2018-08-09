@@ -1,4 +1,5 @@
 using System;
+using Automa.Common;
 using Automa.Entities.Internal;
 
 namespace Automa.Entities.Collections

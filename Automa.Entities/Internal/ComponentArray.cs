@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Automa.Common;
 
 namespace Automa.Entities.Internal
 {

@@ -1,4 +1,6 @@
-﻿namespace Automa.Entities.Internal
+﻿using Automa.Entities;
+
+namespace Automa.Entities.Internal
 {
     internal static class HashUtility
     {
