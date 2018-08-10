@@ -79,6 +79,10 @@ namespace Automa.Behaviours
 
         public void Dispose()
         {
+            foreach (var entityLink in Entities)
+            {
+                entityLink.isDisposed = true;
+            }
             Entities.Clear();
         }
 

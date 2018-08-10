@@ -9,9 +9,12 @@ namespace Automa.Behaviours
         internal int Index;
         internal T Instance;
         private EntityList<T> list;
+        internal bool isDisposed = false;
 
         public void Dispose()
         {
+            if (isDisposed) return;
+            isDisposed = true;
             list.Remove(this);
             Release(this);
         }
