@@ -102,7 +102,7 @@ namespace Automa.Behaviours.Tests
             public IEntityLink Link { get; set; }
         }
 
-        private class Listener : IBehaviour<Entity>, IEntityAddedHandler<Entity>, IEntityRemovedHandler<Entity>
+        private class Listener : IBehaviour, IEntityAddedHandler<Entity>, IEntityRemovedHandler<Entity>
         {
             public int addedSum = 0;
             public int removedSum = 0;
@@ -117,7 +117,12 @@ namespace Automa.Behaviours.Tests
                 removedSum += entity.Value;
             }
 
-            public void Apply(EntityCollection<Entity> entities)
+            public void OnAttach(World world)
+            {
+                
+            }
+
+            public void Apply()
             {
                 
             }

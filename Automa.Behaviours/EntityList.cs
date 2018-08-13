@@ -6,13 +6,14 @@ namespace Automa.Behaviours
 {
     public interface IEntityList : IDisposable
     {
-        Type Type { get; }
         int Count { get; }
+        Type Type { get; }
         IEntityLink Add(object entity);
     }
 
     public interface IEntityList<T> : IEntityList
     {
+        ref T this[int index] { get; }
         T[] ToArray();
         IEntityLink<T> Add(T entity);
         void AddHandler(IEntityAddedHandler<T> handler);
@@ -26,6 +27,8 @@ namespace Automa.Behaviours
         private ArrayList<IEntityAddedHandler<T>> addedHandlers = new ArrayList<IEntityAddedHandler<T>>(4);
         internal ArrayList<EntityLink<T>> Entities = new ArrayList<EntityLink<T>>(4);
         private ArrayList<IEntityRemovedHandler<T>> removedHandlers = new ArrayList<IEntityRemovedHandler<T>>(4);
+
+        public ref T this[int index] => ref Entities.Buffer[index].Instance;
 
         public T[] ToArray()
         {
@@ -47,6 +50,11 @@ namespace Automa.Behaviours
                 addedHandlers[i].OnEntityAdded(entity);
             }
             return link;
+        }
+
+        public EntityCollection<T> GetEntitites()
+        {
+            return new EntityCollection<T>(this);
         }
 
         public void AddHandler(IEntityAddedHandler<T> handler)
@@ -79,6 +87,8 @@ namespace Automa.Behaviours
 
         public void Dispose()
         {
+            addedHandlers.Clear();
+            removedHandlers.Clear();
             foreach (var entityLink in Entities)
             {
                 entityLink.isDisposed = true;

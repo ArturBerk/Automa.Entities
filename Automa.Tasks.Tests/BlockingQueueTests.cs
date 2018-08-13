@@ -43,7 +43,7 @@ namespace Automa.Tasks.Tests
         public void ConcurrentTest()
         {
             BlockingQueue<int> queue = new BlockingQueue<int>();
-            var sumTask = Task.Run(() =>
+            var sumTask = System.Threading.Tasks.Task.Run(() =>
             {
                 var sum1 = 0;
                 for (int i = 0; i < 10; i++)
@@ -65,7 +65,7 @@ namespace Automa.Tasks.Tests
         public void ConcurrentTest2()
         {
             BlockingQueue<int> queue = new BlockingQueue<int>();
-            var sumTask = Task.Run(() =>
+            var sumTask = System.Threading.Tasks.Task.Run(() =>
             {
                 Thread.Sleep(100);
                 var sum1 = 0;

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Automa.Common;
 
 namespace Automa.Behaviours
@@ -7,30 +6,32 @@ namespace Automa.Behaviours
     public interface IBehaviourGroup
     {
         string Name { get; }
-        IBehaviourLink Add<T>(IBehaviour<T> slot);
+        IBehaviourLink Add(IBehaviour slot);
         IBehaviourGroup GetGroup(string name);
-        void Remove<T>(IBehaviour<T> slot);
+        void Remove(IBehaviour slot);
         void Apply();
     }
 
     public class BehaviourGroup : IBehaviourGroup
     {
-        private readonly EntityGroup entities;
-        private ArrayList<IBehaviourSlot> behaviourList = new ArrayList<IBehaviourSlot>(4);
         private readonly Dictionary<string, IBehaviourGroup> groups = new Dictionary<string, IBehaviourGroup>();
+        private readonly World world;
+        private ArrayList<IBehaviourSlot> behaviourList = new ArrayList<IBehaviourSlot>(4);
 
-        internal BehaviourGroup(EntityGroup entities, string name)
+        internal BehaviourGroup(World world, string name)
         {
-            this.entities = entities;
+            this.world = world;
             Name = name;
         }
 
         public string Name { get; }
 
-        public IBehaviourLink Add<T>(IBehaviour<T> behaviour)
+        public IBehaviourLink Add(IBehaviour behaviour)
         {
-            var behaviourSlot = new BehaviourSlot<T>(this, behaviour, (EntityList<T>) entities.GetEntityList<T>());
+            var behaviourSlot =
+                new BehaviourSlot(this, behaviour);
             behaviourList.Add(behaviourSlot);
+            behaviour.OnAttach(world);
             return behaviourSlot;
         }
 
@@ -38,29 +39,21 @@ namespace Automa.Behaviours
         {
             if (!groups.TryGetValue(name, out var group))
             {
-                group = new BehaviourGroup(entities, name);
+                group = new BehaviourGroup(world, name);
                 groups.Add(name, group);
             }
             return group;
         }
 
-        public void Remove<T>(IBehaviour<T> slot)
+        public void Remove(IBehaviour slot)
         {
-            for (int i = 0; i < behaviourList.Count; i++)
+            for (var i = 0; i < behaviourList.Count; i++)
             {
                 var behaviourSlot = behaviourList[i];
                 if (!ReferenceEquals(behaviourSlot.Behaviour, slot)) continue;
-                behaviourSlot.InternalDispose();
                 behaviourList.UnorderedRemoveAt(i);
                 return;
             }
-        }
-
-        internal void Remove(IBehaviourSlot slot)
-        {
-            var index = behaviourList.IndexOf(slot);
-            if (index <= 0) return;
-            behaviourList.UnorderedRemoveAt(index);
         }
 
         public void Apply()
@@ -71,58 +64,40 @@ namespace Automa.Behaviours
             }
         }
 
+        internal void Remove(IBehaviourSlot slot)
+        {
+            var index = behaviourList.IndexOf(slot);
+            if (index <= 0) return;
+            behaviourList.UnorderedRemoveAt(index);
+        }
+
         internal interface IBehaviourSlot : IBehaviourLink
         {
             object Behaviour { get; }
             void Apply();
-            void InternalDispose();
         }
 
-        internal class BehaviourSlot<T> : IBehaviourSlot
+        internal class BehaviourSlot : IBehaviourSlot
         {
-            private readonly IBehaviour<T> behaviour;
-            private readonly EntityList<T> entities;
-            private readonly BehaviourGroup @group;
+            private readonly IBehaviour behaviour;
+            private readonly BehaviourGroup group;
 
-            public BehaviourSlot(BehaviourGroup @group, IBehaviour<T> behaviour, EntityList<T> entities)
+            public BehaviourSlot(BehaviourGroup group, IBehaviour behaviour)
             {
-                this.@group = @group;
+                this.group = group;
                 this.behaviour = behaviour;
-                this.entities = entities;
-
-                if (behaviour is IEntityAddedHandler<T> addedHandler)
-                {
-                    entities.AddHandler(addedHandler);
-                }
-                if (behaviour is IEntityRemovedHandler<T> removedHandler)
-                {
-                    entities.AddHandler(removedHandler);
-                }
             }
 
             public object Behaviour => behaviour;
 
             public void Apply()
             {
-                behaviour.Apply(new EntityCollection<T>(entities));
-            }
-
-            public void InternalDispose()
-            {
-                if (behaviour is IEntityAddedHandler<T> addedHandler)
-                {
-                    entities.RemoveHandler(addedHandler);
-                }
-                if (behaviour is IEntityRemovedHandler<T> removedHandler)
-                {
-                    entities.RemoveHandler(removedHandler);
-                }
+                behaviour.Apply();
             }
 
             public void Dispose()
             {
-                InternalDispose();
-                @group.Remove(behaviour);
+                group.Remove(behaviour);
             }
         }
     }

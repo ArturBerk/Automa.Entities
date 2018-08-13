@@ -1,7 +1,8 @@
 ﻿namespace Automa.Behaviours
 {
-    public interface IBehaviour<T>
+    public interface IBehaviour
     {
-        void Apply(EntityCollection<T> entities);
+        void OnAttach(World world);
+        void Apply();
     }
 }

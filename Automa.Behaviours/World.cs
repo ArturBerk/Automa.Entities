@@ -10,7 +10,7 @@ namespace Automa.Behaviours
         public World()
         {
             Entities = new EntityGroup();
-            Behaviours = new BehaviourGroup(Entities, "Root");
+            Behaviours = new BehaviourGroup(this, "Root");
         }
 
         public void Dispose()
