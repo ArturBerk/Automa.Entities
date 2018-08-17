@@ -1,4 +1,4 @@
-﻿namespace Automa.Entities.Events
+﻿namespace Automa.Events
 {
     public interface IEventListener<in TEvent> where TEvent : struct
     {

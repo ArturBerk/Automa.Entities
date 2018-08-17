@@ -14,6 +14,7 @@ namespace Automa.Behaviours
     public interface IEntityList<T> : IEntityList
     {
         ref T this[int index] { get; }
+        ref T Single { get; }
         T[] ToArray();
         IEntityLink<T> Add(T entity);
         void AddHandler(IEntityAddedHandler<T> handler);
@@ -29,6 +30,8 @@ namespace Automa.Behaviours
         private ArrayList<IEntityRemovedHandler<T>> removedHandlers = new ArrayList<IEntityRemovedHandler<T>>(4);
 
         public ref T this[int index] => ref Entities.Buffer[index].Instance;
+
+        public ref T Single => ref Entities.Buffer[0].Instance;
 
         public T[] ToArray()
         {

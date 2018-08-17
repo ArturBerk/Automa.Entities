@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Automa.Common;
-using Automa.Entities.Internal;
 
-namespace Automa.Entities.Events
+namespace Automa.Events
 {
     internal struct EventType
     {

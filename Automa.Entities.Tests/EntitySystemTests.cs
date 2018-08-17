@@ -3,6 +3,7 @@ using Automa.Entities.Commands;
 using Automa.Entities.Events;
 using Automa.Entities.Systems;
 using Automa.Entities.Tests.Model;
+using Automa.Events;
 using NUnit.Framework;
 
 namespace Automa.Entities.Tests

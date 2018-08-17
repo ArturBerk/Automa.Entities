@@ -6,10 +6,11 @@ namespace Automa.Behaviours
     {
         private static ArrayList<EntityLink<T>> pool =
             new ArrayList<EntityLink<T>>(4);
+
         internal int Index;
         internal T Instance;
+        internal bool isDisposed;
         private EntityList<T> list;
-        internal bool isDisposed = false;
 
         public void Dispose()
         {

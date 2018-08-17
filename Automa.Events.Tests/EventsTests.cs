@@ -1,23 +1,21 @@
-﻿using Automa.Entities.Events;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
-namespace Automa.Entities.Tests
+namespace Automa.Events.Tests
 {
     [TestFixture]
     [Category("Events")]
     public class EventsTests
     {
-
         [Test]
         public void RaiseTest()
         {
-            EventManager eventManager = new EventManager();
+            EventDispatcher eventManager = new EventDispatcher();
             EventListener listener = new EventListener();
             eventManager.RegisterListener<Event1>(listener);
 
             Assert.AreEqual(0, listener.ValueSum);
             eventManager.Raise(new Event1(new Entity(0, 0), 10));
-            eventManager.OnUpdate();
+            eventManager.Dispatch();
 
             Assert.AreEqual(10, listener.ValueSum);
         }
@@ -25,13 +23,13 @@ namespace Automa.Entities.Tests
         [Test]
         public void RaiseMultipleEventsTest()
         {
-            EventManager eventManager = new EventManager();
+            EventDispatcher eventManager = new EventDispatcher();
             EventListener listener = new EventListener();
             eventManager.RegisterListener<Event1>(listener);
 
             eventManager.Raise(new Event1(new Entity(0, 0), 10));
             eventManager.Raise(new Event1(new Entity(0, 0), 20));
-            eventManager.OnUpdate();
+            eventManager.Dispatch();
 
             Assert.AreEqual(30, listener.ValueSum);
         }
@@ -39,7 +37,7 @@ namespace Automa.Entities.Tests
         [Test]
         public void RaiseDifferentEventsTest()
         {
-            EventManager eventManager = new EventManager();
+            EventDispatcher eventManager = new EventDispatcher();
             EventListener listener = new EventListener();
             eventManager.RegisterListener<Event1>(listener);
             eventManager.RegisterListener<Event2>(listener);
@@ -47,7 +45,7 @@ namespace Automa.Entities.Tests
             eventManager.Raise(new Event1(new Entity(0, 0),10));
             eventManager.Raise(new Event2(new Entity(0, 0), 20));
             eventManager.Raise(new Event3(new Entity(0, 0), 30));
-            eventManager.OnUpdate();
+            eventManager.Dispatch();
 
             Assert.AreEqual(30, listener.ValueSum);
         }
@@ -55,15 +53,15 @@ namespace Automa.Entities.Tests
         [Test]
         public void ClearEventsTest()
         {
-            EventManager eventManager = new EventManager();
+            EventDispatcher eventManager = new EventDispatcher();
             EventListener listener = new EventListener();
             eventManager.RegisterListener<Event1>(listener);
 
             eventManager.Raise(new Event1(new Entity(0, 0), 10));
-            eventManager.OnUpdate();
+            eventManager.Dispatch();
 
             Assert.AreEqual(10, listener.ValueSum);
-            eventManager.OnUpdate();
+            eventManager.Dispatch();
             Assert.AreEqual(10, listener.ValueSum);
         }
 
@@ -79,6 +77,18 @@ namespace Automa.Entities.Tests
             public void OnEvent(Event2 eventInstance)
             {
                 ValueSum += eventInstance.Value;
+            }
+        }
+
+        public struct Entity
+        {
+            public int Id;
+            public int Version;
+
+            public Entity(int id, int version)
+            {
+                Id = id;
+                Version = version;
             }
         }
 

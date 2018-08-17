@@ -1,9 +1,9 @@
-﻿using Automa.Common;
-using Automa.Entities.Internal;
+﻿using System;
+using Automa.Common;
 
-namespace Automa.Entities.Events
+namespace Automa.Events
 {
-    internal interface IEventHandler
+    internal interface IEventHandler : IDisposable
     {
         void Dispatch();
     }
@@ -16,6 +16,11 @@ namespace Automa.Entities.Events
         public void Raise(TEvent eventInstance)
         {
             events.Add(eventInstance);
+        }
+
+        public void Raise(ref TEvent eventInstance)
+        {
+            events.Add(ref eventInstance);
         }
 
         public void Dispatch()
@@ -45,6 +50,12 @@ namespace Automa.Entities.Events
         public void UnregisterListener(IEventListener<TEvent> listener)
         {
             listeners.Remove(listener);
+        }
+
+        public void Dispose()
+        {
+            events.Clear();
+            listeners.Clear();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Automa.Entities.Events;
+using Automa.Events;
 
 namespace Automa.Entities.Systems.Internal
 {

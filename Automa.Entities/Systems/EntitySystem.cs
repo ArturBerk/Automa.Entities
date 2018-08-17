@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Automa.Entities.Events;
 using Automa.Entities.Systems.Internal;
+using Automa.Events;
 
 namespace Automa.Entities.Systems
 {

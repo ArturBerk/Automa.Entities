@@ -63,6 +63,14 @@ namespace Automa.Common
             Buffer[Count++] = item;
         }
 
+        public void Add(ref T item)
+        {
+            if (Count == Buffer.Length)
+                AllocateMore();
+
+            Buffer[Count++] = item;
+        }
+
         public void Clear()
         {
             Array.Clear(Buffer, 0, Buffer.Length);
