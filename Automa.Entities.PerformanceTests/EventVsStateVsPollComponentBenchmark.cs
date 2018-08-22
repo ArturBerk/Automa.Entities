@@ -6,6 +6,7 @@ using Automa.Entities.Events;
 using Automa.Entities.Internal;
 using Automa.Entities.PerformanceTests.Model;
 using Automa.Entities.Systems;
+using Automa.Events;
 
 namespace Automa.Entities.PerformanceTests
 {

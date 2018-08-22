@@ -113,7 +113,7 @@ namespace Automa.Entities.PerformanceTests
 
             public void Apply()
             {
-                var entities = entityList.GetEntitites()
+                var entities = entityList;
                 for (int i = 0; i < entities.Count; i++)
                 {
                     entities[i].Value += 10;

@@ -7,7 +7,7 @@ namespace Automa.Entities.PerformanceTests
     {
         private static void Main()
         {
-            var b = new LockBenchmark();
+            var b = new ConcurrentQueueBenchmark();
             b.Execute().Print();
             //            Benchmark.ExecuteAll();
             Console.ReadKey();
