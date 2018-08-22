@@ -104,16 +104,16 @@ namespace Automa.Entities.PerformanceTests
 
         private class EntityBehaviour : IBehaviour
         {
-            private IEntityList<Entity> entityList;
+            private IEntityCollection<Entity> entityCollection;
 
             public void OnAttach(World world)
             {
-                entityList = world.Entities.GetEntityList<Entity>();
+                entityCollection = world.Entities.GetEntities<Entity>();
             }
 
             public void Apply()
             {
-                var entities = entityList;
+                var entities = entityCollection;
                 for (int i = 0; i < entities.Count; i++)
                 {
                     entities[i].Value += 10;

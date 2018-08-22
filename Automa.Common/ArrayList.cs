@@ -245,6 +245,16 @@ namespace Automa.Common
             return true;
         }
 
+        public void ExpandCount(int newCount)
+        {
+            if (newCount <= Count) return;
+            if (newCount > Buffer.Length)
+            {
+                AllocateMore(newCount);
+            }
+            Count = newCount;
+        }
+
         private void AllocateMore()
         {
             var newList = new T[Math.Max(Buffer.Length << 1, MinSize)];

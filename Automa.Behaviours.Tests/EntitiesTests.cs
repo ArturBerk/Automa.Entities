@@ -3,19 +3,17 @@
 namespace Automa.Behaviours.Tests
 {
     [TestFixture]
-    [Category("Entities")]
+    [Category("Behaviours.Entities")]
     public class EntitiesTests
     {
-        private class Entity1 : IEntity
+        private class Entity1
         {
             public int Value1;
-            public IEntityLink Link { get; set; }
         }
 
-        private class Entity2 : IEntity
+        private class Entity2
         {
             public int Value2;
-            public IEntityLink Link { get; set; }
         }
 
         [Test]
@@ -24,32 +22,32 @@ namespace Automa.Behaviours.Tests
             var group = new EntityGroup();
             for (var i = 0; i < 5; i++)
             {
-                var desc = (EntityLink<Entity1>) group.Add(new Entity1());
+                var desc = group.Add(new Entity1());
                 Assert.AreEqual(i, desc.Index);
             }
-            Assert.AreEqual(5, group.GetEntityList<Entity1>().Count);
+            Assert.AreEqual(5, group.GetEntities<Entity1>().Count);
             for (var i = 0; i < 5; i++)
             {
-                var desc = (EntityLink<Entity2>) group.Add(new Entity2());
+                var desc = group.Add(new Entity2());
                 Assert.AreEqual(i, desc.Index);
             }
-            Assert.AreEqual(5, group.GetEntityList<Entity2>().Count);
+            Assert.AreEqual(5, group.GetEntities<Entity2>().Count);
         }
 
         [Test]
         public void RemoveEntitiesTest()
         {
             var group = new EntityGroup();
-            var descs = new IEntityLink[5];
+            var descs = new EntityReference[5];
             for (var i = 0; i < 5; i++)
             {
-                descs[i] = (EntityLink<Entity1>) group.Add(new Entity1());
+                descs[i] = (EntityReference) group.Add(new Entity1());
             }
             for (var i = 0; i < 5; i++)
             {
-                descs[i].Dispose();
+                group.Remove(descs[i]);
             }
-            Assert.AreEqual(0, group.GetEntityList<Entity1>().Count);
+            Assert.AreEqual(0, group.GetEntities<Entity1>().Count);
         }
     }
 }

@@ -3,7 +3,7 @@
 namespace Automa.Behaviours.Tests
 {
     [TestFixture]
-    [Category("Reactive")]
+    [Category("Behaviours.Reactive")]
     public class ReactiveTests
     {
 
@@ -16,7 +16,7 @@ namespace Automa.Behaviours.Tests
                 world.Entities.Add(new Entity { Value = 1 });
             }
             var listener = new Listener();
-            world.Entities.GetEntityList<Entity>().AddHandler((IEntityAddedHandler<Entity>)listener);
+            world.Entities.GetEntities<Entity>().AddHandler((IEntityAddedHandler<Entity>)listener);
             Assert.AreEqual(10, listener.addedSum);
         }
 
@@ -25,7 +25,7 @@ namespace Automa.Behaviours.Tests
         {
             World world = new World();
             var listener = new Listener();
-            world.Entities.GetEntityList<Entity>().AddHandler((IEntityAddedHandler<Entity>)listener);
+            world.Entities.GetEntities<Entity>().AddHandler((IEntityAddedHandler<Entity>)listener);
             for (int i = 0; i < 10; i++)
             {
                 world.Entities.Add(new Entity { Value = 1 });
@@ -38,15 +38,17 @@ namespace Automa.Behaviours.Tests
         {
             World world = new World();
             var listener = new Listener();
-            world.Entities.GetEntityList<Entity>().AddHandler((IEntityRemovedHandler<Entity>)listener);
+            world.Entities.GetEntities<Entity>().AddHandler((IEntityRemovedHandler<Entity>)listener);
             for (int i = 0; i < 10; i++)
             {
-                world.Entities.Add(new Entity { Value = 1 });
+                var e = new Entity {Value = 1};
+                e.Reference = world.Entities.Add(e);
             }
-            var entities = world.Entities.GetEntityList<Entity>().ToArray();
+            var entityCollection = world.Entities.GetEntities<Entity>();
+            var entities = world.Entities.GetEntities<Entity>().ToArray();
             for (int i = 0; i < 10; i++)
             {
-                entities[i].Link.Dispose();
+                entityCollection.Remove(entities[i].Reference);
             }
             Assert.AreEqual(10, listener.removedSum);
         }
@@ -56,12 +58,12 @@ namespace Automa.Behaviours.Tests
         {
             World world = new World();
             var listener = new Listener();
-            world.Entities.GetEntityList<Entity>().AddHandler((IEntityRemovedHandler<Entity>)listener);
+            world.Entities.GetEntities<Entity>().AddHandler((IEntityRemovedHandler<Entity>)listener);
             for (int i = 0; i < 10; i++)
             {
                 world.Entities.Add(new Entity { Value = 1 });
             }
-            world.Entities.GetEntityList<Entity>().RemoveHandler((IEntityRemovedHandler<Entity>)listener);
+            world.Entities.GetEntities<Entity>().RemoveHandler((IEntityRemovedHandler<Entity>)listener);
             Assert.AreEqual(10, listener.removedSum);
         }
 
@@ -86,20 +88,22 @@ namespace Automa.Behaviours.Tests
             world.Behaviours.Add(behaviour);
             for (int i = 0; i < 10; i++)
             {
-                world.Entities.Add(new Entity { Value = 1 });
+                var e = new Entity { Value = 1 };
+                e.Reference = world.Entities.Add(e);
             }
-            var entities = world.Entities.GetEntityList<Entity>().ToArray();
+            var entityCollection = world.Entities.GetEntities<Entity>();
+            var entities = world.Entities.GetEntities<Entity>().ToArray();
             for (int i = 0; i < 10; i++)
             {
-                entities[i].Link.Dispose();
+                entityCollection.Remove(entities[i].Reference);
             }
             Assert.AreEqual(10, behaviour.removedSum);
         }
 
-        private class Entity : IEntity
+        private class Entity
         {
             public int Value;
-            public IEntityLink Link { get; set; }
+            public EntityReference Reference { get; set; }
         }
 
         private class Listener : IBehaviour, IEntityAddedHandler<Entity>, IEntityRemovedHandler<Entity>
@@ -107,24 +111,25 @@ namespace Automa.Behaviours.Tests
             public int addedSum = 0;
             public int removedSum = 0;
 
-            public void OnEntityAdded(Entity entity)
+            public void OnEntityAdded(ref Entity entity)
             {
                 addedSum += entity.Value;
             }
 
-            public void OnEntityRemoved(Entity entity)
+            public void OnEntityRemoved(ref Entity entity)
             {
                 removedSum += entity.Value;
             }
 
             public void OnAttach(World world)
             {
-                
+                world.Entities.GetEntities<Entity>().AddHandler((IEntityAddedHandler<Entity>)this);
+                world.Entities.GetEntities<Entity>().AddHandler((IEntityRemovedHandler<Entity>)this);
             }
 
             public void Apply()
             {
-                
+
             }
         }
     }

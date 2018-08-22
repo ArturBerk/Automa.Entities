@@ -1,49 +1,69 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Globalization;
+using System.Reflection;
 using Automa.Common;
 
 namespace Automa.Behaviours
 {
     public class EntityGroup : IDisposable
     {
-        private readonly Dictionary<Type, IEntityList> entityLists = new Dictionary<Type, IEntityList>();
+        private ArrayList<IEntityCollection> entityLists = new ArrayList<IEntityCollection>(4);
 
-        public IEntityLink<T> Add<T>(T entity)
+        public EntityReference Add<T>(T entity)
         {
-            return GetEntityList<T>().Add(entity);
+            return GetEntities<T>().Add(entity);
         }
 
-        public IEntityLink Add(Type type, object entity)
+        public EntityReference Add(Type type, object entity)
         {
-            return GetEntityList(type).Add(entity);
+            return GetEntities(type).Add(entity);
         }
 
-        public IEntityList<T> GetEntityList<T>()
+        public void Remove(EntityReference entityReference)
         {
-            if (!entityLists.TryGetValue(TypeOf<T>.Type, out var entityList))
+            entityLists[(int)entityReference.TypeIndex].Remove(entityReference);
+        }
+
+        public IEntityCollection<T> GetEntities<T>()
+        {
+            EntityCollection<T> entityCollection;
+            var entityType = EntityTypeManager.GetTypeIndex<T>();
+            if (entityLists.Count <= entityType)
             {
-                entityList = new EntityList<T>();
-                entityLists.Add(TypeOf<T>.Type, entityList);
+                entityCollection = new EntityCollection<T>(entityType);
+                entityLists.SetAt(entityType, entityCollection);
             }
-            return (IEntityList<T>)entityList;
+            else
+            {
+                entityCollection = (EntityCollection<T>)entityLists[entityType];
+            }
+            return entityCollection;
         }
 
-        public IEntityList GetEntityList(Type type)
+        public IEntityCollection GetEntities(Type type)
         {
-            if (!entityLists.TryGetValue(type, out var entityList))
+            IEntityCollection entityCollection;
+            var entityType = EntityTypeManager.GetTypeIndex(type);
+            if (entityLists.Count <= entityType)
             {
-                entityList = (IEntityList)Activator.CreateInstance(typeof(EntityList<>).MakeGenericType(type));
-                entityLists.Add(type, entityList);
+                entityCollection = (IEntityCollection)Activator.CreateInstance(typeof(EntityCollection<>).MakeGenericType(type),
+                    BindingFlags.Public | BindingFlags.Instance, null, new object[] { entityType }, CultureInfo.CurrentCulture, null);
+                entityLists.SetAt(entityType, entityCollection);
             }
-            return entityList;
+            else
+            {
+                entityCollection = entityLists[entityType];
+            }
+            return entityCollection;
         }
 
         public void Dispose()
         {
-            foreach (var updatablesValue in entityLists.Values)
+            foreach (var updatablesValue in entityLists)
             {
                 updatablesValue.Dispose();
             }
+            entityLists.Clear();
         }
     }
 }
