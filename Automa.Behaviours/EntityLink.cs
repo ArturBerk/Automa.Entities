@@ -22,7 +22,7 @@ namespace Automa.Behaviours
 
         object IEntityLink.Entity => Instance;
 
-        public T Entity => Instance;
+        public ref T Entity => ref Instance;
 
         internal static EntityLink<T> Take(T behaviour, EntityList<T> list, int index)
         {
@@ -36,6 +36,7 @@ namespace Automa.Behaviours
                 instance = pool.Buffer[--pool.Count];
                 pool.Buffer[pool.Count] = null;
             }
+            instance.isDisposed = false;
             instance.Index = index;
             instance.list = list;
             instance.Instance = behaviour;

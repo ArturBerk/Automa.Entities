@@ -7,8 +7,8 @@ namespace Automa.Behaviours
         object Entity { get; }
     }
 
-    public interface IEntityLink<out T> : IEntityLink
+    public interface IEntityLink<T> : IEntityLink
     {
-        new T Entity { get; }
+        new ref T Entity { get; }
     }
 }

@@ -35,7 +35,7 @@ namespace Automa.Behaviours
 
         public T[] ToArray()
         {
-            return Entities.Select(link => link.Entity).ToArray();
+            return Entities.Select(link => link.Instance).ToArray();
         }
 
         public IEntityLink<T> Add(T entity)
@@ -65,7 +65,7 @@ namespace Automa.Behaviours
             addedHandlers.Add(handler);
             for (var i = 0; i < Entities.Count; i++)
             {
-                handler.OnEntityAdded(Entities.Buffer[i].Entity);
+                handler.OnEntityAdded(Entities.Buffer[i].Instance);
             }
         }
 
@@ -84,7 +84,7 @@ namespace Automa.Behaviours
             removedHandlers.Remove(handler);
             for (var i = 0; i < Entities.Count; i++)
             {
-                handler.OnEntityRemoved(Entities.Buffer[i].Entity);
+                handler.OnEntityRemoved(Entities.Buffer[i].Instance);
             }
         }
 
@@ -118,7 +118,7 @@ namespace Automa.Behaviours
             if (removedHandlers.Count <= 0) return;
             for (var i = 0; i < removedHandlers.Count; i++)
             {
-                removedHandlers[i].OnEntityRemoved(entityLink.Entity);
+                removedHandlers[i].OnEntityRemoved(entityLink.Instance);
             }
         }
     }
