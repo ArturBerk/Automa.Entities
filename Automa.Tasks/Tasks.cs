@@ -76,7 +76,7 @@ namespace Automa.Tasks
             {
                 while (true)
                 {
-                    var task = Tasks.WaitDequeue();
+                    var task = Tasks.Dequeue();
                     task.Execute();
                     task.Completed.Set();
                     Interlocked.Decrement(ref tasksManager.activeTasks);

@@ -19,9 +19,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Automa.Tasks", "Automa.Task
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Automa.Tasks.Tests", "Automa.Tasks.Tests\Automa.Tasks.Tests.csproj", "{2892349D-68C7-4331-9899-8BF0C0AEC441}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automa.Events", "Automa.Events\Automa.Events.csproj", "{1B49175C-B83B-4D76-A918-DB74988992C8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Automa.Events", "Automa.Events\Automa.Events.csproj", "{1B49175C-B83B-4D76-A918-DB74988992C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automa.Events.Tests", "Automa.Events.Tests\Automa.Events.Tests.csproj", "{D8EA1898-C2D9-4B2B-A2AF-C4E72A8AE444}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Automa.Events.Tests", "Automa.Events.Tests\Automa.Events.Tests.csproj", "{D8EA1898-C2D9-4B2B-A2AF-C4E72A8AE444}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automa.Tasks.Benchmarks", "Automa.Tasks.Benchmarks\Automa.Tasks.Benchmarks.csproj", "{F7D48973-495E-405C-9812-6328804F7638}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automa.Behaviours.Benchmarks", "Automa.Behaviours.Benchmarks\Automa.Behaviours.Benchmarks.csproj", "{5FC95FBF-8001-4DDF-9C28-548FAFFDB996}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +73,14 @@ Global
 		{D8EA1898-C2D9-4B2B-A2AF-C4E72A8AE444}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8EA1898-C2D9-4B2B-A2AF-C4E72A8AE444}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8EA1898-C2D9-4B2B-A2AF-C4E72A8AE444}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7D48973-495E-405C-9812-6328804F7638}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7D48973-495E-405C-9812-6328804F7638}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7D48973-495E-405C-9812-6328804F7638}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7D48973-495E-405C-9812-6328804F7638}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FC95FBF-8001-4DDF-9C28-548FAFFDB996}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FC95FBF-8001-4DDF-9C28-548FAFFDB996}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FC95FBF-8001-4DDF-9C28-548FAFFDB996}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FC95FBF-8001-4DDF-9C28-548FAFFDB996}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

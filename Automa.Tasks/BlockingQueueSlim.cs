@@ -2,16 +2,16 @@
 
 namespace Automa.Tasks
 {
-    public class BlockingQueue<T>
+    public class BlockingQueueSlim<T>
     {
-        private readonly object sync = new object();
         internal T[] data;
         private int capacity;
         private int head = -1;
         internal int count;
+        private readonly SemaphoreSlim free = new SemaphoreSlim(1);
         private readonly ManualResetEventSlim enqueuedEvent = new ManualResetEventSlim(false);
 
-        public BlockingQueue(int initialCapacity = 10)
+        public BlockingQueueSlim(int initialCapacity = 10)
         {
             data = new T[initialCapacity];
             capacity = data.Length;
@@ -21,7 +21,7 @@ namespace Automa.Tasks
         {
             try
             {
-                Monitor.Enter(sync);
+                free.Wait();
                 count = count + 1;
                 if (count > capacity)
                 {
@@ -32,9 +32,9 @@ namespace Automa.Tasks
             }
             finally
             {
-                Monitor.Exit(sync);
+                free.Release();
+                enqueuedEvent.Set();
             }
-            enqueuedEvent.Set();
         }
 
         private void GrowCapacity()
@@ -50,7 +50,7 @@ namespace Automa.Tasks
         {
             try
             {
-                Monitor.Enter(sync);
+                free.Wait();
                 if (count > 0)
                 {
                     --count;
@@ -59,19 +59,19 @@ namespace Automa.Tasks
             }
             finally
             {
-                Monitor.Exit(sync);
+                free.Release();
             }
             enqueuedEvent.Wait();
             enqueuedEvent.Reset();
             try
             {
-                Monitor.Enter(sync);
+                free.Wait();
                 --count;
                 return data[(head - count + capacity) % capacity];
             }
             finally
             {
-                Monitor.Exit(sync);
+                free.Release();
             }
         }
 
