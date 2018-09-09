@@ -19,6 +19,19 @@ namespace Automa.Behaviours
             return GetEntities(type).Add(entity);
         }
 
+        public EntityReference AddConnected(Type type, object entity, EntityReference reference)
+        {
+            var targetCollection = GetEntities(type);
+            var targetReference = targetCollection.Add(entity);
+
+            var sourceCollection = (EntityCollection)entityLists[(int)reference.TypeIndex];
+            ref var currentIndex = ref sourceCollection.EntityIndices[reference.Index];
+            currentIndex.parentTypeCollection = (EntityCollection)targetCollection;
+            currentIndex.parentTypeEntityReference = targetReference;
+
+            return targetReference;
+        }
+
         public void Remove(EntityReference entityReference)
         {
             entityLists[(int)entityReference.TypeIndex].Remove(entityReference);
