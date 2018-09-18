@@ -9,6 +9,16 @@ namespace Automa.Behaviours
     {
         private ArrayList<IEntityCollection> entityLists = new ArrayList<IEntityCollection>(4);
 
+        public ref T GetEntityByRef<T>(ref EntityReference reference)
+        {
+            return ref GetEntities<T>().ByRef(ref reference);
+        }
+
+        public ref T GetEntity<T>(EntityReference reference)
+        {
+            return ref GetEntities<T>()[reference];
+        }
+
         public EntityReference Add<T>(T entity)
         {
             return GetEntities<T>().Add(entity);

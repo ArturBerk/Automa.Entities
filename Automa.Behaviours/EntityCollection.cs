@@ -15,6 +15,8 @@ namespace Automa.Behaviours
     public interface IEntityCollection<T> : IEntityCollection
     {
         ref T this[int index] { get; }
+        ref T this[EntityReference index] { get; }
+        ref T ByRef(ref EntityReference reference);
         T[] ToArray();
         EntityReference Add(T entity);
         void AddHandler(IEntityAddedHandler<T> handler);
@@ -71,21 +73,41 @@ namespace Automa.Behaviours
             }
         }
 
-        public EntityCollection(uint entityType)
+        public EntityCollection(ushort entityType)
         {
             this.entityType = entityType;
         }
 
-        private readonly uint entityType;
+        private readonly ushort entityType;
         private ArrayList<IEntityAddedHandler<T>> addedHandlers = new ArrayList<IEntityAddedHandler<T>>(4);
         private ArrayList<IEntityRemovedHandler<T>> removedHandlers = new ArrayList<IEntityRemovedHandler<T>>(4);
 
         internal ArrayList<EntitySlot> Entities = new ArrayList<EntitySlot>(4);
 
         public ref T this[int index] => ref Entities.Buffer[index].Value;
-
-        public ref T ByLink(ref EntityReference reference)
+        public ref T this[EntityReference reference]
         {
+            get
+            {
+                if (reference.TypeIndex != entityType)
+                {
+                    throw new ApplicationException("Invalid entity type");
+                }
+                ref var index = ref EntityIndices[reference.Index];
+                if (index.Version != reference.Version)
+                {
+                    throw new ApplicationException("Entity removed");
+                }
+                return ref Entities.Buffer[index.Index].Value;
+            }
+        }
+
+        public ref T ByRef(ref EntityReference reference)
+        {
+            if (reference.TypeIndex != entityType)
+            {
+                throw new ApplicationException("Invalid entity type");
+            }
             ref var index = ref EntityIndices[reference.Index];
             if (index.Version != reference.Version)
             {
