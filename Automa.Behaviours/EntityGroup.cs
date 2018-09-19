@@ -7,47 +7,121 @@ namespace Automa.Behaviours
 {
     public class EntityGroup : IDisposable
     {
-        private ArrayList<IEntityCollection> entityLists = new ArrayList<IEntityCollection>(4);
+        private ArrayList<IEntityCollectionInternal> entityLists = new ArrayList<IEntityCollectionInternal>(4);
 
-        public ref T GetEntityByRef<T>(ref EntityReference reference)
+        public ref T GetEntityByRef<T>(ref EntityReference reference) where T : IEntity
         {
-            return ref GetEntities<T>().ByRef(ref reference);
+            return ref GetEntitiesInternal<T>().ByRef(ref reference);
         }
 
-        public ref T GetEntity<T>(EntityReference reference)
+        public ref T GetEntity<T>(EntityReference reference) where T : IEntity
         {
-            return ref GetEntities<T>()[reference];
+            return ref GetEntitiesInternal<T>()[reference];
         }
 
-        public EntityReference Add<T>(T entity)
+        public T Add<T>(T entity, bool withSubTypes = false) where T : IEntity
         {
-            return GetEntities<T>().Add(entity);
+            if (withSubTypes)
+            {
+                var parentCollection = (EntityCollection)GetEntitiesInternal<T>();
+                var baseReference = parentCollection.Add(entity);
+
+                var parentReference = entity.Reference;
+                var currentType = TypeOf<T>.Type.BaseType;
+                while (currentType != null && !currentType.IsAbstract && currentType != typeof(object))
+                {
+                    var currentCollection = (EntityCollection)GetEntitiesInternal(currentType);
+                    parentReference = currentCollection.AddConnected(entity, parentCollection, ref parentReference);
+                    parentCollection = currentCollection;
+                    currentType = currentType.BaseType;
+                }
+                entity.Reference = baseReference;
+                return entity;
+            }
+            else
+            {
+                entity.Reference = GetEntitiesInternal<T>().Add(entity);
+                return entity;
+            }
         }
 
-        public EntityReference Add(Type type, object entity)
+        public IEntity Add(Type type, IEntity entity, bool withSubTypes = false)
         {
-            return GetEntities(type).Add(entity);
+            if (withSubTypes)
+            {
+                var parentCollection = (EntityCollection) GetEntitiesInternal(type);
+                var baseReference = parentCollection.Add(entity);
+
+                var parentReference = entity.Reference;
+                var currentType = type.BaseType;
+                while (currentType != null && currentType != typeof(object))
+                {
+                    var currentCollection = (EntityCollection) GetEntitiesInternal(currentType);
+                    parentReference = currentCollection.AddConnected(entity, parentCollection, ref parentReference);
+                    parentCollection = currentCollection;
+                    currentType = currentType.BaseType;
+                }
+                var interfaces = type.GetInterfaces();
+                for (int i = 0; i < interfaces.Length; i++)
+                {
+                    currentType = interfaces[i];
+                    if (currentType == TypeOf<IEntity>.Type || !TypeOf<IEntity>.Type.IsAssignableFrom(currentType)) continue;
+                    var currentCollection = (EntityCollection)GetEntitiesInternal(currentType);
+                    parentReference = currentCollection.AddConnected(entity, parentCollection, ref parentReference);
+                    parentCollection = currentCollection;
+                }
+                entity.Reference = baseReference;
+                return entity;
+            }
+            else
+            {
+                entity.Reference = GetEntitiesInternal(type).Add(entity);
+                return entity;
+            }
         }
 
-        public EntityReference AddConnected(Type type, object entity, EntityReference reference)
+        public void Remove(IEntity entity)
         {
-            var targetCollection = GetEntities(type);
-            var targetReference = targetCollection.Add(entity);
-
-            var sourceCollection = (EntityCollection)entityLists[(int)reference.TypeIndex];
-            ref var currentIndex = ref sourceCollection.EntityIndices[reference.Index];
-            currentIndex.parentTypeCollection = (EntityCollection)targetCollection;
-            currentIndex.parentTypeEntityReference = targetReference;
-
-            return targetReference;
-        }
-
-        public void Remove(EntityReference entityReference)
-        {
+            var entityReference = entity.Reference;
+            if (entityReference.IsNull) throw new ApplicationException("Entity is already added to group");
             entityLists[(int)entityReference.TypeIndex].Remove(entityReference);
+            entity.Reference = EntityReference.Null;
         }
 
-        public IEntityCollection<T> GetEntities<T>()
+        private IEntityCollectionInternal<T> GetEntitiesInternal<T>() where T : IEntity
+        {
+            EntityCollection<T> entityCollection;
+            var entityType = EntityTypeManager.GetTypeIndex<T>();
+            if (entityLists.Count <= entityType)
+            {
+                entityCollection = new EntityCollection<T>(entityType);
+                entityLists.SetAt(entityType, entityCollection);
+            }
+            else
+            {
+                entityCollection = (EntityCollection<T>)entityLists[entityType];
+            }
+            return entityCollection;
+        }
+
+        private IEntityCollectionInternal GetEntitiesInternal(Type type)
+        {
+            IEntityCollectionInternal entityCollection;
+            var entityType = EntityTypeManager.GetTypeIndex(type);
+            if (entityLists.Count <= entityType)
+            {
+                entityCollection = (IEntityCollectionInternal)Activator.CreateInstance(typeof(EntityCollection<>).MakeGenericType(type),
+                    BindingFlags.Public | BindingFlags.Instance, null, new object[] { entityType }, CultureInfo.CurrentCulture, null);
+                entityLists.SetAt(entityType, entityCollection);
+            }
+            else
+            {
+                entityCollection = entityLists[entityType];
+            }
+            return entityCollection;
+        }
+
+        public IEntityCollection<T> GetEntities<T>() where T : IEntity
         {
             EntityCollection<T> entityCollection;
             var entityType = EntityTypeManager.GetTypeIndex<T>();
@@ -65,11 +139,11 @@ namespace Automa.Behaviours
 
         public IEntityCollection GetEntities(Type type)
         {
-            IEntityCollection entityCollection;
+            IEntityCollectionInternal entityCollection;
             var entityType = EntityTypeManager.GetTypeIndex(type);
             if (entityLists.Count <= entityType)
             {
-                entityCollection = (IEntityCollection)Activator.CreateInstance(typeof(EntityCollection<>).MakeGenericType(type),
+                entityCollection = (IEntityCollectionInternal)Activator.CreateInstance(typeof(EntityCollection<>).MakeGenericType(type),
                     BindingFlags.Public | BindingFlags.Instance, null, new object[] { entityType }, CultureInfo.CurrentCulture, null);
                 entityLists.SetAt(entityType, entityCollection);
             }

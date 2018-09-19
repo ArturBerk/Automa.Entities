@@ -6,14 +6,16 @@ namespace Automa.Behaviours.Tests
     [Category("Behaviours.Entities")]
     public class EntitiesTests
     {
-        private class Entity1
+        private class Entity1 : IEntity
         {
             public int Value1;
+            public EntityReference Reference { get; set; }
         }
 
-        private class Entity2
+        private class Entity2 : IEntity
         {
             public int Value2;
+            public EntityReference Reference { get; set; }
         }
 
         [Test]
@@ -22,14 +24,14 @@ namespace Automa.Behaviours.Tests
             var group = new EntityGroup();
             for (var i = 0; i < 5; i++)
             {
-                var desc = group.Add(new Entity1());
-                Assert.AreEqual(i, desc.Index);
+                var entity = group.Add(new Entity1());
+                Assert.AreEqual(i, entity.Reference.Index);
             }
             Assert.AreEqual(5, group.GetEntities<Entity1>().Count);
             for (var i = 0; i < 5; i++)
             {
-                var desc = group.Add(new Entity2());
-                Assert.AreEqual(i, desc.Index);
+                var entity = group.Add(new Entity2());
+                Assert.AreEqual(i, entity.Reference.Index);
             }
             Assert.AreEqual(5, group.GetEntities<Entity2>().Count);
         }
@@ -38,10 +40,10 @@ namespace Automa.Behaviours.Tests
         public void RemoveEntitiesTest()
         {
             var group = new EntityGroup();
-            var descs = new EntityReference[5];
+            var descs = new Entity1[5];
             for (var i = 0; i < 5; i++)
             {
-                descs[i] = (EntityReference) group.Add(new Entity1());
+                descs[i] = group.Add(new Entity1());
             }
             for (var i = 0; i < 5; i++)
             {
@@ -56,15 +58,8 @@ namespace Automa.Behaviours.Tests
             var group = new EntityGroup();
             var e = new Entity4();
             var e2 = new Entity4();
-            var reference = group.Add(e);
-            var reference2 = group.Add(e2);
-            var type = e.GetType().BaseType;
-            var r = reference;
-            while (type != null && !type.IsAbstract && type != typeof(object))
-            {
-                r = group.AddConnected(type, e, r);
-                type = type.BaseType;
-            }
+            group.Add(e, true);
+            group.Add(e2);
             Assert.AreEqual(2, group.GetEntities<Entity4>().Count);
             Assert.AreEqual(1, group.GetEntities<Entity3>().Count);
             Assert.AreEqual(1, group.GetEntities<Entity1>().Count);
@@ -76,19 +71,19 @@ namespace Automa.Behaviours.Tests
             var group = new EntityGroup();
             var e = new Entity4();
             var e2 = new Entity4();
-            var reference = group.Add(e);
-            var reference2 = group.Add(e2);
-            var type = e.GetType().BaseType;
-            var r = reference2;
-            while (type != null && !type.IsAbstract && type != typeof(object))
-            {
-                r = group.AddConnected(type, e, r);
-                type = type.BaseType;
-            }
-            group.Remove(reference);
+            group.Add(e, true);
+            group.Add(e2);
+
+            group.Remove(e);
             Assert.AreEqual(1, group.GetEntities<Entity4>().Count);
-            Assert.AreEqual(1, group.GetEntities<Entity3>().Count);
-            Assert.AreEqual(1, group.GetEntities<Entity1>().Count);
+            Assert.AreEqual(0, group.GetEntities<Entity3>().Count);
+            Assert.AreEqual(0, group.GetEntities<Entity1>().Count);
+
+            group.Remove(e2);
+            Assert.AreEqual(0, group.GetEntities<Entity4>().Count);
+            Assert.AreEqual(0, group.GetEntities<Entity3>().Count);
+            Assert.AreEqual(0, group.GetEntities<Entity1>().Count);
+
         }
 
         private class Entity3 : Entity1

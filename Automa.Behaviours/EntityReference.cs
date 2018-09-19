@@ -1,5 +1,8 @@
+using System.Diagnostics;
+
 namespace Automa.Behaviours
 {
+    [DebuggerDisplay("Type: {" + nameof(TypeIndex) + "}, Index: {" + nameof(Index) + "}, Version: {" + nameof(Version) + "}")]
     public struct EntityReference
     {
         public static readonly EntityReference Null = new EntityReference(0, -1, 0);

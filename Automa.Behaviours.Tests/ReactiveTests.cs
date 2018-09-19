@@ -42,13 +42,12 @@ namespace Automa.Behaviours.Tests
             for (int i = 0; i < 10; i++)
             {
                 var e = new Entity {Value = 1};
-                e.Reference = world.Entities.Add(e);
+                world.Entities.Add(e);
             }
-            var entityCollection = world.Entities.GetEntities<Entity>();
             var entities = world.Entities.GetEntities<Entity>().ToArray();
             for (int i = 0; i < 10; i++)
             {
-                entityCollection.Remove(entities[i].Reference);
+                world.Entities.Remove(entities[i]);
             }
             Assert.AreEqual(10, listener.removedSum);
         }
@@ -89,18 +88,17 @@ namespace Automa.Behaviours.Tests
             for (int i = 0; i < 10; i++)
             {
                 var e = new Entity { Value = 1 };
-                e.Reference = world.Entities.Add(e);
+                world.Entities.Add(e);
             }
-            var entityCollection = world.Entities.GetEntities<Entity>();
             var entities = world.Entities.GetEntities<Entity>().ToArray();
             for (int i = 0; i < 10; i++)
             {
-                entityCollection.Remove(entities[i].Reference);
+                world.Entities.Remove(entities[i]);
             }
             Assert.AreEqual(10, behaviour.removedSum);
         }
 
-        private class Entity
+        private class Entity : IEntity
         {
             public int Value;
             public EntityReference Reference { get; set; }

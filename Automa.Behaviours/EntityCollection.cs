@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using Automa.Common;
 
@@ -8,38 +9,54 @@ namespace Automa.Behaviours
     {
         int Count { get; }
         Type Type { get; }
-        EntityReference Add(object entity);
-        void Remove(EntityReference entityReference);
+        IEntity[] ToArray();
+        IEntity this[int index] { get; }
+        IEntity this[EntityReference index] { get; }
     }
 
-    public interface IEntityCollection<T> : IEntityCollection
+    public interface IEntityCollection<T> : IEntityCollection where T : IEntity
     {
-        ref T this[int index] { get; }
-        ref T this[EntityReference index] { get; }
-        ref T ByRef(ref EntityReference reference);
-        T[] ToArray();
-        EntityReference Add(T entity);
+        new ref T this[int index] { get; }
+        new ref T this[EntityReference index] { get; }
+        new T[] ToArray();
         void AddHandler(IEntityAddedHandler<T> handler);
         void AddHandler(IEntityRemovedHandler<T> handler);
         void RemoveHandler(IEntityAddedHandler<T> handler);
         void RemoveHandler(IEntityRemovedHandler<T> handler);
     }
 
-    internal abstract class EntityCollection : IEntityCollection
+    internal interface IEntityCollectionInternal : IEntityCollection
+    {
+        EntityReference Add(IEntity entity);
+        void Remove(EntityReference entityReference);
+    }
+
+    internal interface IEntityCollectionInternal<T> : IEntityCollection<T> where T : IEntity
+    {
+        EntityReference Add(T entity);
+        ref T ByRef(ref EntityReference reference);
+    }
+
+    [DebuggerDisplay("EntityCollection {" + nameof(Type) + ".Name} ({"+nameof(Count)+"})")]
+    internal abstract class EntityCollection : IEntityCollectionInternal
     {
         internal ArrayList<EntityIndex> EntityIndices = new ArrayList<EntityIndex>(4);
         internal ArrayList<int> AvailableEntityIndices = new ArrayList<int>(4);
 
-        public void Connect(IEntityCollection collection, ref EntityReference reference)
-        {
-            
-        }
-
         public abstract void Dispose();
         public abstract int Count { get; }
         public abstract Type Type { get; }
-        public abstract EntityReference Add(object entity);
+
+        public abstract IEntity[] ToArray();
+
+        public abstract IEntity this[int index] { get; }
+        public abstract IEntity this[EntityReference index] { get; }
+
+        public abstract EntityReference Add(IEntity entity);
         public abstract void Remove(EntityReference entityReference);
+
+        public abstract EntityReference AddConnected(IEntity entity, EntityCollection sourceCollection,
+            ref EntityReference parentReference);
     }
 
     internal struct EntityIndex
@@ -59,7 +76,7 @@ namespace Automa.Behaviours
         }
     }
 
-    internal class EntityCollection<T> : EntityCollection, IEntityCollection<T>
+    internal class EntityCollection<T> : EntityCollection, IEntityCollectionInternal<T> where T: IEntity
     {
         internal struct EntitySlot
         {
@@ -84,8 +101,28 @@ namespace Automa.Behaviours
 
         internal ArrayList<EntitySlot> Entities = new ArrayList<EntitySlot>(4);
 
-        public ref T this[int index] => ref Entities.Buffer[index].Value;
-        public ref T this[EntityReference reference]
+        public override IEntity this[int index] => Entities.Buffer[index].Value;
+
+        public override IEntity this[EntityReference reference]
+        {
+            get
+            {
+                if (reference.TypeIndex != entityType)
+                {
+                    throw new ApplicationException("Invalid entity type");
+                }
+                ref var index = ref EntityIndices[reference.Index];
+                if (index.Version != reference.Version)
+                {
+                    throw new ApplicationException("Entity removed");
+                }
+                return Entities.Buffer[index.Index].Value;
+            }
+        }
+
+        ref T IEntityCollection<T>.this[int index] => ref Entities.Buffer[index].Value;
+
+        ref T IEntityCollection<T>.this[EntityReference reference]
         {
             get
             {
@@ -116,9 +153,24 @@ namespace Automa.Behaviours
             return ref Entities.Buffer[index.Index].Value;
         }
 
-        public T[] ToArray()
+        public override IEntity[] ToArray()
         {
-            return Entities.Select(slot => slot.Value).ToArray();
+            var t = new IEntity[Entities.Count];
+            for (int i = 0; i < Entities.Count; i++)
+            {
+                t[i] = Entities[i].Value;
+            }
+            return t;
+        }
+
+        T[] IEntityCollection<T>.ToArray()
+        {
+            var t = new T[Entities.Count];
+            for (int i = 0; i < Entities.Count; i++)
+            {
+                t[i] = Entities[i].Value;
+            }
+            return t;
         }
 
         public EntityReference Add(T entity)
@@ -135,39 +187,36 @@ namespace Automa.Behaviours
             Entities.Add(new EntitySlot(ref entity, indexPosition));
 
             // Added handlers
-            if (addedHandlers.Count <= 0) return new EntityReference(entityType, indexPosition, currentIndex.Version);
+            var reference = new EntityReference(entityType, indexPosition, currentIndex.Version);
+            if (addedHandlers.Count <= 0) return reference;
             ref var entityValue = ref Entities[entityPosition].Value;
             for (var i = 0; i < addedHandlers.Count; i++)
             {
                 addedHandlers[i].OnEntityAdded(ref entityValue);
             }
-            return new EntityReference(entityType, indexPosition, currentIndex.Version);
+            return reference;
         }
 
-        public override EntityReference Add(object entity)
+        public override EntityReference Add(IEntity entity)
         {
             return Add((T) entity);
         }
 
-        internal EntityReference AddConnected(T entity, EntityCollection sourceCollection, ref EntityReference reference)
+        public override EntityReference AddConnected(IEntity entity, 
+            EntityCollection sourceCollection, ref EntityReference parentReference)
         {
-            var targetReference = Add(entity);
+            var reference1 = Add(entity);
 
-            ref var currentIndex = ref sourceCollection.EntityIndices[reference.Index];
+            ref var currentIndex = ref sourceCollection.EntityIndices[parentReference.Index];
             while (currentIndex.parentTypeCollection != null)
             {
                 currentIndex =
                     currentIndex.parentTypeCollection.EntityIndices[currentIndex.parentTypeEntityReference.Index];
             }
             currentIndex.parentTypeCollection = this;
-            currentIndex.parentTypeEntityReference = targetReference;
+            currentIndex.parentTypeEntityReference = reference1;
 
-            return targetReference;
-        }
-
-        internal EntityReference AddConnected(object entity, EntityCollection sourceCollection, ref EntityReference reference)
-        {
-            return AddConnected((T) entity, sourceCollection, ref reference);
+            return reference1;
         }
 
         public void AddHandler(IEntityAddedHandler<T> handler)
