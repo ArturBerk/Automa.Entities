@@ -69,7 +69,7 @@ namespace Automa.Entities
             }
         }
         
-        public Group()
+        protected Group()
         {
             var includedTypesTmp = new List<ComponentType>();
             var excludedTypesTmp = new List<ComponentType>();

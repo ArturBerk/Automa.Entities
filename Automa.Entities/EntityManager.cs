@@ -424,15 +424,35 @@ namespace Automa.Entities
             return ref entityLink.Data.GetComponentArray<T>()[entityLink.IndexInData];
         }
 
-        public T RegisterGroup<T>(T group) where T : Group
+        public Group GetGroup(Type groupType)
         {
-            RegisterGroup((Group) group);
-            return group;
+            for (int i = 0; i < groups.Count; i++)
+            {
+                if (groups[i].Type == groupType)
+                {
+                    return groups[i].Group;
+                }
+            }
+            var groupSlot = RegisterGroup(groupType, (Group)Activator.CreateInstance(groupType));
+            return groupSlot.Group;
         }
 
-        internal void RegisterGroup(Group group)
+        public T GetGroup<T>() where T : Group, new()
         {
-            var newSlot = new GroupSlot(group);
+            for (int i = 0; i < groups.Count; i++)
+            {
+                if (groups[i].Type == TypeOf<T>.Type)
+                {
+                    return (T) groups[i].Group;
+                }
+            }
+            var groupSlot = RegisterGroup(TypeOf<T>.Type, new T());
+            return (T) groupSlot.Group;
+        }
+
+        private GroupSlot RegisterGroup(Type type, Group group)
+        {
+            var newSlot = new GroupSlot(type, group);
             groups.Add(newSlot);
             group.Register(this);
             group.Update();
@@ -440,23 +460,7 @@ namespace Automa.Entities
             {
                 DebugInfo = new EntityManagerDebugInfo(groups.Select(slot => slot.DebugInfo).ToArray());
             }
-        }
-
-        public void UnregisterGroup(Group group)
-        {
-            for (var i = 0; i < groups.Count; i++)
-            {
-                if (Equals(groups[i].Group, group))
-                {
-                    groups.RemoveAt(i);
-                    group.Unregister(this);
-                    if (debug)
-                    {
-                        DebugInfo = new EntityManagerDebugInfo(groups.Select(slot => slot.DebugInfo).ToArray());
-                    }
-                    return;
-                }
-            }
+            return newSlot;
         }
 
         private void OnEntityTypeAdd(ref EntityTypeData data)
@@ -473,7 +477,9 @@ namespace Automa.Entities
             // Apply group additions
             for (int i = 0; i < groups.Count; ++i)
             {
-                groups[i].Group.HandleModifications();
+                var group = groups[i].Group;
+                group.HandleModifications();
+                group.Update();
             }
         }
 
@@ -491,11 +497,13 @@ namespace Automa.Entities
 
         private struct GroupSlot
         {
+            public readonly Type Type;
             public readonly Group Group;
             public readonly GroupDebugInfo DebugInfo;
 
-            public GroupSlot(Group group) : this()
+            public GroupSlot(Type type, Group group) : this()
             {
+                Type = type;
                 Group = group;
                 DebugInfo = new GroupDebugInfo(group);
             }

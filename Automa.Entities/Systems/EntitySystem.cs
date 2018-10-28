@@ -40,7 +40,6 @@ namespace Automa.Entities.Systems
 
         public virtual void OnDetachFromContext(IContext context)
         {
-            UnregisterGroups();
             UnregisterEvents();
             EntityManager = null;
             EventManager = null;
@@ -67,22 +66,12 @@ namespace Automa.Entities.Systems
                 var instance = (Group)fieldInfo.GetValue(this);
                 if (instance == null)
                 {
-                    instance = (Group) Activator.CreateInstance(fieldInfo.FieldType);
+                    instance = EntityManager.GetGroup(fieldInfo.FieldType);
                     fieldInfo.SetValue(this, instance);
                 }
-                EntityManager.RegisterGroup(instance);
                 groups.Add(instance);
             }
             this.groups = groups.ToArray();
-        }
-
-        private void UnregisterGroups()
-        {
-            foreach (var fieldInfo in GetInjectableFields()
-                .Where(fi => typeof(Group).IsAssignableFrom(fi.FieldType)))
-            {
-                EntityManager.UnregisterGroup((Group)fieldInfo.GetValue(this));
-            }
         }
 
         private void RegisterEvents()
@@ -96,7 +85,6 @@ namespace Automa.Entities.Systems
                 }
             }
         }
-
 
         private void UnregisterEvents()
         {
